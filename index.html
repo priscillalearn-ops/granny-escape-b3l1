@@ -124,6 +124,23 @@ canvas{display:block; image-rendering:pixelated; touch-action:none; background:#
 .wq{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--red);
   border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:13px;line-height:1.7}
 .wq .ans{color:var(--green)}
+/* ---------- 選擇範圍 ---------- */
+#unitList{display:flex;flex-direction:column;gap:8px;width:100%;max-width:560px;margin-bottom:12px}
+.unit{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);
+  border-radius:12px;padding:11px 13px;cursor:pointer;text-align:left;font-family:inherit;color:var(--ink);
+  font-size:14.5px;line-height:1.5;width:100%}
+.unit:hover{background:#1b1523}
+.unit.on{border-color:var(--amber);background:#2a1e0c;box-shadow:0 0 12px rgba(255,181,71,.2)}
+.unit .box{flex:none;width:22px;height:22px;border-radius:6px;border:2px solid var(--line);
+  display:grid;place-items:center;font-size:14px;color:#0d0a11;font-weight:900}
+.unit.on .box{background:var(--amber);border-color:var(--amber)}
+.unit .meta{flex:1}
+.unit .cnt{display:block;font-size:11.5px;color:var(--dim);margin-top:2px}
+#presetRow{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:14px}
+.preset{background:#1d1724;border:1px solid var(--line);color:#cbb8d6;border-radius:999px;
+  padding:7px 14px;font-size:13px;cursor:pointer;font-family:inherit}
+.preset:hover{border-color:var(--amber);color:var(--amber)}
+#pickInfo{font-size:13px;color:var(--dim);margin-bottom:12px;min-height:20px}
 @media (max-width:560px){ #hud{font-size:11.5px;gap:6px;padding:6px} .slot{width:26px;height:26px;font-size:14px} }
 </style>
 </head>
@@ -131,6 +148,7 @@ canvas{display:block; image-rendering:pixelated; touch-action:none; background:#
 <div id="app">
   <div id="hud">
     <span class="pill" id="lvpill">第 1 關・阿嬤的家</span>
+    <span class="pill" id="scopepill" title="這局的題庫範圍">📚 B3 L1</span>
     <span class="pill">第 <b id="day">1</b>/<b id="daymax">5</b> 天</span>
     <span class="pill">❤️ <b id="lives">5</b></span>
     <div id="items">
@@ -166,6 +184,7 @@ canvas{display:block; image-rendering:pixelated; touch-action:none; background:#
       你的手機被恐怖阿嬤沒收了，還被鎖進她那棟老房子。她手裡永遠握著那把黑雨傘 ——
       <i>“You <b>had better not</b> break my rules.”</i> —— 被打到一下就結束了。<br><br>
       <b>【兩關】</b>第 1 關「阿嬤的家」逃出大門後，還有第 2 關「阿嬤的醫院」在等你。<br><br>
+      <b>【選範圍】</b>按「開始逃脫」後可以挑這次要考哪幾課，複選就會混著出題（段考複習用）。<br><br>
       <b>【目標】</b>找齊三樣道具，走到出口，通過最後三道英文考驗就能過關。<br><br>
       <b>【玩法】</b>走到家具前按 <b>E</b>（手機按「搜查」）翻找，翻找時要答一題英文。<br>
       答錯 → <b style="color:#e0344a">巨大聲響！阿嬤立刻朝你衝過來</b>。<br>
@@ -193,6 +212,20 @@ canvas{display:block; image-rendering:pixelated; touch-action:none; background:#
     <h2 id="caughtTitle">被雨傘打中了！</h2>
     <div class="sub" id="caughtMsg"></div>
     <button class="btn" id="btnNextDay">醒來，繼續逃</button>
+  </div>
+
+  <!-- 選擇題庫範圍 -->
+  <div class="screen" id="scPick">
+    <div class="granny-art">📚</div>
+    <h2>這次要考哪個範圍？</h2>
+    <div class="sub">可以複選 —— 選越多課，題目就從那幾課一起出（適合段考複習）。</div>
+    <div id="presetRow"></div>
+    <div id="unitList"></div>
+    <div id="pickInfo"></div>
+    <div class="row">
+      <button class="btn" id="btnGo">開始逃脫</button>
+      <button class="btn ghost" id="btnPickBack">返回</button>
+    </div>
   </div>
 
   <!-- LEVEL CLEAR -->
@@ -233,7 +266,22 @@ canvas{display:block; image-rendering:pixelated; touch-action:none; background:#
 /* ============================================================
    題庫：全部取自 龍騰 B1 L2 講義（單字 v／文法 g／克漏字 c）
    ============================================================ */
-const BANK = {
+/* ============================================================
+   題庫：一課一包。要加新課，就在 UNITS 陣列裡再加一個 {...}
+   ------------------------------------------------------------
+   格式：
+   { id:"B3L2",                       // 代號，不能跟別課重複
+     name:"B3 L2 課名",               // 選單上顯示的全名
+     short:"B3 L2",                   // HUD 上顯示的短名
+     src:{ v:"...", g:"...", c:"..." },   // 答題時顯示的出處
+     v:[ [題幹,[四個選項],正解索引(0~3),解析], ... ],   // 單字片語
+     g:[ ... ],                                        // 文法
+     c:[ ... ] }                                       // 克漏字／文意選填
+   ============================================================ */
+const UNITS=[
+{
+ id:"B3L1", name:"B3 L1　The Day I Broke the Rules", short:"B3 L1",
+ src:{v:"B3 L1 單字・片語",g:"B3 L1 文法：不定詞 ＋ it 虛主詞／受詞",c:"B3 L1 克漏字・文意選填"},
 v:[
 ["「僱用」的英文是？",["employ","deserve","adapt","collaborate"],0,"employ (vt.) 僱用；be employed by 受僱於"],
 ["「雇主」的英文是？",["employee","employer","employment","circumstance"],1,"employer (n.)[C] 雇主；employee 才是員工"],
@@ -445,9 +493,183 @@ c:[
 ["【文意選填：Sam 的故事】Sam loved to bring ____ to the sick kids.",["laughter","germs","refusal","fright"],0,"bring laughter 帶來歡笑"],
 ["【文意選填：Sam 的故事】Billy ____ from a very serious disease.",["refused","suffered","hesitated","confined"],1,"suffer from 受…之苦"],
 ["【文意選填：Sam 的故事】____, there was a rule that Sam could not touch the patients.",["Therefore","However","For example","In fact"],1,"However 然而（語氣轉折）"]
-]};
+]
+},
+{
+ id:"B1L2", name:"B1 L2　Goodbye, John", short:"B1 L2",
+ src:{v:"B1 L2 單字・片語",g:"B1 L2 文法：it 與 there 的句型",c:"B1 L2 克漏字・文意選填"},
+v:[
+["「使某人初次體驗」的英文是？",["offer","introduce","receive","profit"],1,"introduce (vt.) 使某人初次體驗／介紹：introduce sb. to sth."],
+["「個人的」的英文是？",["personal","depressed","specific","embarrassed"],0,"personal (adj.) 個人的；personally (adv.) 針對某人地"],
+["「激發靈感」的英文是？",["skip","inspire","reward","symbolize"],1,"inspire (vt.) 激勵／激發靈感；inspiration (n.) 靈感"],
+["「滿意」（名詞）的英文是？",["amazement","alert","satisfaction","focus"],2,"satisfaction (n.)[U] 滿意；with satisfaction 滿意地"],
+["「使⋯⋯滿意」的英文是？",["awake","perform","upset","satisfy"],3,"satisfy (vt.) 使滿意；be satisfied with 對…滿意"],
+["「感到失望的」的英文是？",["embarrassed","upset","unfair","disappointed"],3,"disappointed (adj.) 感到失望的；be disappointed with sb."],
+["「浪漫愛情故事」的英文是？",["performance","crowd","romance","impression"],2,"romance (n.)[C] 浪漫愛情故事；romantic (adj.) 浪漫的"],
+["「關係」（relation 類）的英文是？",["reply","tourism","relation","variety"],2,"relation (n.) 關係；in relation to 關於"],
+["「連接」的英文是？",["connect","embarrass","realize","promote"],0,"connect (vt.) 連接：connect A to/with B"],
+["「戀愛關係」的英文是？",["location","tourist","criminal","relationship"],3,"be in a relationship 處於戀愛關係中"],
+["communicate 的中文是？",["溝通","消失","表達","提供"],0,"communicate (vi.) 溝通；communicate with sb."],
+["disappointment 的中文是？",["產品","失望","招呼；迎接","生存；倖存"],1,"disappointment (n.)[U] 失望；to one's disappointment"],
+["deny 的中文是？",["大喊；大吼","刷新","否認","溝通"],2,"deny (vt.) 否認 (denied—denied—denying)"],
+["focus 當名詞的意思是？",["關注的人或事物","回應","記憶力","對待；待遇"],0,"focus (n.) 關注的焦點；focus on 專注於"],
+["refresh 的意思之一是？",["使某人恢復精神","使⋯⋯失望","消失","催促"],0,"refresh (vt.) 刷新／使某人恢復精神"],
+["The reason why Daniel made such a big mistake is that he totally ____ his parents' advice.",["inspired","connected","ignored","refreshed"],2,"ignore (vt.) 忽略；ignorance (n.) 無知"],
+["Frank likes ____ himself with a cold shower in the morning.",["refreshing","communicating","responding","connecting"],0,"refresh oneself 讓自己恢復精神"],
+["William often ____ the screen of his smartphone for fear that he might miss something.",["introduces","connects","ignores","refreshes"],3,"refresh the screen 刷新畫面"],
+["Tina soon ____ with Jessica because both of them are very interested in dancing.",["focused","disappointed","ignored","connected"],3,"connect with sb. 與某人建立良好關係"],
+["According to the author, the ____ for his new novel came from a strange dream.",["connection","relationship","inspiration","introduction"],2,"draw / get inspiration from 從…獲得靈感"],
+["Taiwan is well-known ____ the world for the beauty of its natural scenery.",["throughout","outside","from","inside"],0,"throughout the world 遍及全世界"],
+["I didn't do well on the exam. Mom asked me to ____ more on my studies.",["inspire","connect","focus","ignore"],2,"focus on 專注於"],
+["The history teacher ____ the culture of ancient Egypt to her students.",["introduced","ignored","refreshed","denied"],0,"introduce A to B 把 A 介紹給 B"],
+["I particularly enjoy reading ____ novels, such as Me Before You.",["relationship","message","attention","romance"],3,"romance novels 愛情小說"],
+["In ____ to public pressure, the government announced stricter laws.",["romance","response","attention","inspiration"],1,"in response to 回應…"],
+["Though Simon keeps ____ cheating on the exam, none of his classmates believes him.",["relating","ignoring","satisfying","denying"],3,"deny + V-ing 否認做過某事"],
+["Rita sent a number of text ____ to her brother this morning.",["connections","romances","messages","introductions"],2,"text message 簡訊"],
+["Many parents often have a hard time ____ with their teenage children.",["communicating","disappointing","refreshing","introducing"],0,"have a hard time + V-ing；communicate with sb."],
+["He made a terrible mistake out of ____.",["introduction","relationship","ignorance","satisfaction"],2,"out of ignorance 出於無知"],
+["To his great ____, he failed to get into his dream university.",["ignorance","response","romance","disappointment"],3,"to one's great disappointment 令某人非常失望的是"],
+["The article draws our ____ to the importance of being good parents.",["attention","denial","focus","relation"],0,"draw one's attention to 引起某人注意"],
+["The students in the class made no ____ to the teacher's difficult question.",["message","response","inspiration","connection"],1,"make no response to 對…毫無回應"],
+["Each of the hikers brought an umbrella and a raincoat ____ it rained.",["in fact","in case","in addition","in relation"],1,"in case 以防萬一 —— 阿嬤的雨傘就是這樣來的！"],
+["Bill is ____ the list of winners to see if he is one of them.",["going through","hanging out","turning to","taking over"],0,"go through 徹底讀過／逐一檢視"],
+["Alice and her friends always ____ in a café after school on Fridays.",["hang out","turn to","go through","take up"],0,"hang out 一起出去、廝混"],
+["Tracy always ____ her older sister Ivy when she has a problem.",["turns to","hangs out","goes through","gives up"],0,"turn to sb. 求助於某人"],
+["Please don't ____ this ____, but I don't like your shirt.",["bring; up","take; personally","put; off","make; out"],1,"take… personally 認為是針對個人"],
+["December is not cold in Australia. ____, it's the middle of summer.",["In case","In fact","In addition","In relation"],1,"in fact 事實上（強調某事為真）"],
+["Please bring a snack. ____, you should bring a gift for the birthday boy.",["In fact","In case","In addition","As a result"],2,"in addition 除此之外"],
+["Today we'll discuss food waste, which bears some ____ (relate) to the movie we saw.",["relation","relating","related","relative"],0,"bear relation to 與…有關聯（名詞 relation）"],
+["Instagram has become a popular means of ____ (communicate) for teenagers.",["communicate","communicated","communication","communicative"],2,"means of communication 溝通方式"],
+["The two friends share a close ____ (connect) and each seems to know what the other is thinking.",["connect","connection","connected","connecting"],1,"connection (n.) 關聯、關係"],
+["Sheila was Elvis's ____ (inspire) for this song.",["inspire","inspired","inspiring","inspiration"],3,"inspiration (n.) 靈感（來源）"],
+["His grades have slipped a lot recently, which deeply ____ (disappoint) his parents.",["disappoint","disappoints","disappointing","disappointed"],1,"which 指前面整件事，視為單數 → disappoints"],
+["Since I got a pay raise, I have been living in a ____ (relation) comfortable life.",["relation","related","relatively","relative"],2,"relatively (adv.) 相對地，修飾形容詞 comfortable"]
+],
+g:[
+["____ his careless attitude that cost him the internship.",["That was","It was","There was","What was"],1,"分裂句（強調句）：It is / was + 強調部分 + that…"],
+["It was not until midnight ____ the search team found the missing hiker.",["when","which","that","since"],2,"not until 的強調句一定用 that"],
+["It was ____ she lost her wallet that she began to double-check everything.",["×","because","that","what"],1,"強調原因：It was because… that…"],
+["I take ____ that everyone in the group will do a fair share of the work.",["it for granting","for granted","it for granted","that for granted"],2,"take it for granted that… 虛受詞 it"],
+["The typhoon made ____ for the ferry to leave the harbor.",["impossible","it impossible","it impossibly","that impossible"],1,"make it + adj. + for sb. + to V（虛受詞）"],
+["We all found ____ to work with such a demanding client.",["that exhausting","it exhausting","exhausting","it exhausted"],1,"find it + adj. + to V"],
+["It ____ me that I had forgotten to reply to her email.",["occurred","happened","occurred to","struck to"],2,"It occurs to 人 that… 某人突然想到"],
+["It is ____ of you to give up your seat to that elderly woman.",["convenient","thoughtful","necessary","possible"],1,"個性形容詞用 of（可還原成 You are thoughtful.）"],
+["It is ____ blaming yourself for something beyond your control.",["not use","no used","no use","no using"],2,"It is no use + V-ing 做…是沒有用的"],
+["____ I admire most about her is her ability to stay calm under pressure.",["What","That","It","×"],0,"名詞子句當主詞用 What（= the thing that）"],
+["It was a broken pipe ____ caused the flooding in the basement.",["what","which","it","×"],1,"強調事物可用 that / which"],
+["It doesn't matter to me ____ we take the bus or the MRT.",["that","what","whether","how"],2,"虛主詞 it + whether 子句（是否）"],
+["It was ____ we were hiking in the mountains ____ the storm hit.",["that… when","while… that","×… and","when… and"],1,"強調副詞子句：It was while… that…"],
+["It is generous ____ your neighbor to lend you his car for the whole weekend.",["for","of","to","with"],1,"generous 屬個性形容詞 → of"],
+["It is not convenient ____ this weekend.",["to me to move","of me to move","for me to move","me moving"],2,"convenient 不可用人當主詞，用 for"],
+["It's pointless ____ with someone who refuses to listen.",["argue","to argue","argued","to arguing"],1,"虛主詞 it，真主詞為不定詞 to argue"],
+["The judges considered ____ to disqualify the whole team.",["it is unfair","it unfair","unfair","that unfair"],1,"consider it + adj. + to V"],
+["It is no use ____ about the weather; we had better change our plan.",["to complain","complaining","complain","complained"],1,"It is no use + V-ing"],
+["It was never made clear ____ the missing files had gone.",["that","how","whether","where"],3,"語意是「去了哪裡」→ where 引導名詞子句"],
+["It is advisable ____ before the online course starts.",["for you register","for you to register","to register for you","to you to register"],1,"It is + adj. + for 人 + to V"],
+["Everyone thought ____ that the star player was benched in the final.",["strange","it strange","it strangely","about strange"],1,"think it + adj. + that 子句（虛受詞）"],
+["The coach ____ that latecomers would not be allowed to play.",["made it clear","made clearly","made it clearly","made clear"],0,"make it clear that… 虛受詞 it"],
+["____ takes about twenty minutes to walk from the dorm to the library.",["There","That","It","What"],2,"It takes + 時間 + to V"],
+["There ____ neither a fire extinguisher nor smoke alarms on this floor.",["is","are","has","have"],0,"neither A nor B 依就近原則，靠近 a fire extinguisher（單數）"],
+["____ a problem with the air conditioner in Room 302.",["There seems to have","There seems to be","There has","It seems to be"],1,"There seems to be…（✗ There seems to have）"],
+["There ____ little snow in the mountains so far this winter.",["has had","have been","has been","is having"],2,"so far 用現在完成式；little snow 不可數 → has been"],
+["There was a strange noise ____ from under the hood.",["come","came","coming","to come"],2,"主動、進行 → 現在分詞 coming 修飾 noise"],
+["The professor doesn't want ____ any misunderstanding about the grading policy.",["there is","there being","there to be","it to be"],2,"want / expect / would like + there to be"],
+["There is no ____ what the committee will decide tomorrow.",["know","knowing","to know","known"],1,"There is no + V-ing = 無法…"],
+["____ no doubt that the new bridge has shortened the commute.",["It is","There is","There has","It has"],1,"There is no doubt that…（✗ It is no doubt that…）"],
+["Once there ____ a small bookstore at the corner of this street.",["stood","was stood","has stood","standing"],0,"there + 表存在的不及物動詞（stand / live / remain…）"],
+["There are still two reports ____ before Friday.",["finish","to finish","finishing","finished"],1,"尚未做、應該做 → 不定詞 to finish"],
+["We were annoyed at ____ no explanation for the two-hour delay.",["there is","there was","there being","it being"],2,"介系詞後用動名詞的 there being"],
+["There ____ to be a public swimming pool behind the school.",["used","use","was used","is used"],0,"There used to be… 以前有…"],
+["There ____ a serious accident at that intersection last night.",["happened","was happened","has happened to","happens"],0,"happen 為不及物動詞，不可用被動"],
+["There is no point ____ over a decision that has already been made.",["argue","to argue","in arguing","argued"],2,"There is no point (in) + V-ing"],
+["There ____ either a mistake in the data or two missing pages.",["is","are","has","have"],0,"either A or B 就近原則，靠近 a mistake（單數）"],
+["The door swung open, and there ____ .",["a stranger stood","stood a stranger","was a stranger stood","did a stranger stand"],1,"there + V + S 的倒裝句"],
+["I don't want ____ any confusion about the deadline.",["there is","there to be","there has","it to be"],1,"want there to be"],
+["There ____ little we can do until the technician arrives.",["is","are","has","have"],0,"little 為不可數 → 動詞用單數 is"],
+["____ , the concert was canceled at the last minute.",["It was a power failure","There was a power failure","As there was a power failure","There had a power failure"],2,"兩個子句需連接詞，用 As 引導原因子句"],
+["____ to leave the front door unlocked all night.",["It was careless for him","What careless of him","It was careless of him","That was careless of him"],2,"careless 屬個性形容詞 → of him"],
+["____ that the old temple was built more than two centuries ago.",["It says","It is said","It said","It is saying"],1,"It is said that… 據說…"],
+["My grandmother ____ to take a short walk after every meal.",["makes a rule","takes a rule","is in the habit","makes it a rule"],3,"make it a rule to V 習慣於…"],
+["It is a bad habit ____ him to check his phone every five minutes.",["for","with","to","of"],0,"a bad habit 非個性形容詞 → for"],
+["The new software ____ to process thousands of records in seconds.",["makes possible","makes it possible","make it possible for","makes possibly"],1,"make it possible to V"],
+["Advances in medicine have made possible ____ .",["that people live longer","the treatment of many rare diseases","to treat many rare diseases","it the treatment"],1,"受詞太長可後移；名詞片語不加 it"],
+["It was on a rainy afternoon ____ the two of them first met.",["until","and","which","that"],3,"強調介系詞片語只能用 that"],
+["The curtains parted and there ____ under the spotlight.",["a dancer appeared","appeared a dancer","was a dancer appeared","did a dancer appear"],1,"there + appear + S 的倒裝"],
+["There ____ no vacancies in the hotel, we had to sleep in the car.",["was","were","being","had been"],2,"There being + N 分詞構句（因為…）"],
+["There are several passengers ____ for the delayed train on the platform.",["wait","waited","to wait","waiting"],3,"主動、進行 → waiting 修飾 passengers"],
+["It is difficult for me ____ 100 math problems in one hour.",["solves","solving","to solve","have solved"],2,"It is + adj. + for sb. + to V"],
+["It is ____ to put personal information on social networking websites.",["danger","dangerous","risk","risked"],1,"be 動詞後接形容詞 dangerous"],
+["It is necessary ____ your seat belt while driving.",["fastening","for fastening","to fasten","fasten"],2,"真主詞用不定詞 to fasten"],
+["It is unwise ____ people to spend so much time on online games.",["of","for","with","as"],1,"依課本句型 It is + adj. + for 人 + to V"],
+["It is impossible ____ the little boy to lift such a heavy metal box.",["in","of","for","with"],2,"impossible 不可用人當主詞 → for"],
+["____ is never easy to break an old habit.",["It","That","This","What"],0,"虛主詞 It + 真主詞 to V"],
+["There is no ____ how the negotiation will end.",["tell","telling","to tell","told"],1,"There is no telling = 無法預料"]
+],
+c:[
+["Sally decided she needed a big change. It ____ her heart, but she knew she had to get rid of her smartphone.",["took","followed","broke","lost"],2,"break one's heart 使某人心碎"],
+["Her smartphone ____ answers to all kinds of questions.",["helped her find","helped her finding","made her to find","made her finding"],0,"help + O + (to) V"],
+["There were many bad things about always having her smartphone ____ her side.",["in","by","with","to"],1,"by one's side 在某人身邊"],
+["She was often so busy ____ her phone that she ignored the people around her.",["to check","to check with","checking","check"],2,"be busy + V-ing"],
+["Now she wanted to ____ more time ____ the people she loved.",["take; on","take; from","spend; for","spend; with"],3,"spend time with sb. 和某人共度時光"],
+["Many people enjoy video games. For most, ____ games is a relaxing and harmless pastime.",["play","plays","playing","played"],2,"動名詞當主詞"],
+["If you think ____ you or someone you care about has a video game addiction, here are some signs.",["what","which","who","that"],3,"think 後接 that 引導的名詞子句"],
+["This may cause them to stay up late ____ the night playing games.",["for","into","to","until"],1,"stay up late into the night 熬夜到深夜"],
+["Addicted gamers may have problems at school because they're so busy ____ games.",["playing","play","played","to play"],0,"be busy + V-ing"],
+["They might have difficulty concentrating, and their grades are likely to ____ worse.",["make","get","have","let"],1,"get + 形容詞比較級 變得…"],
+["Another way ____ addiction is to look for problems with the player's moods and health.",["for identifying","in identifying","at identifying","to identify"],3,"a way to V 做…的方法"],
+["They might lose their appetite or spend less time ____ with friends and family.",["interact","interacted","interacting","to interact"],2,"spend time + V-ing"],
+["If someone is addicted, it can be very hard for him to stop ____ video games.",["playing","to play","play","having played"],0,"stop + V-ing 停止做某事"],
+["If someone is ____ addicted to video games, he should see a mental health counselor.",["personally","truly","mostly","naturally"],1,"truly addicted 真的成癮了"],
+["Such a professional can help people ____ their behavior and restore a balance in life.",["changing","changed","change","having changed"],2,"help + O + (to) V"],
+["Being with you has ____ me to communicate and connect with others.",["disappointed","inspired","romantic","introduced"],1,"inspire sb. to V 激勵某人去…"],
+["Whenever you are not ____ my side, I'm constantly checking my messages.",["on","in","by","to"],2,"by my side 在我身邊"],
+["This is making it difficult to focus ____ my schoolwork!",["in","at","on","to"],2,"focus on 專注於"],
+["My parents are so ____ with me.",["disappointed","disappointing","disappoint","disappointment"],0,"be disappointed with sb. 對某人失望"],
+["Although this all sounds ____ , it is hurting my relationships with my friends and family.",["romance","romantic","romantically","romances"],1,"感官動詞 sound + 形容詞"],
+["In the beginning, I wanted my first boyfriend to pay ____ to me all the time.",["attention","response","focus","message"],0,"pay attention to 注意"],
+["____ to making calls, people also use smartphones for almost everything else!",["In fact","In addition","In case","Throughout"],1,"in addition to + N / V-ing 除了…之外"],
+["With my smartphone, I ____ myself to new clients on Facebook.",["introduce","ignore","deny","refresh"],0,"introduce oneself to sb. 自我介紹"],
+["____ the past ten years, I've used my smartphone for many other things.",["In case","Throughout","In fact","In addition"],1,"throughout + 時間 自始至終、整段期間"],
+["I did not pay attention in school. I also had little ____ with my family.",["attention","connection","introduction","response"],1,"have little connection with 與…幾乎沒有交流"],
+["Our relationship has been mostly ____ , but I'm afraid it's over.",["satisfy","satisfaction","satisfying","satisfied"],2,"satisfying (adj.) 令人滿意的，修飾事物"],
+["You ____ me to connect with others and to communicate better.",["inspire","introduce","ignore","deny"],0,"課文原句：You inspire me to connect with others."],
+["I check my LINE app again and again ____ the day.",["in case","throughout","in fact","in addition"],1,"throughout the day 一整天"],
+["When it doesn't show any new messages, I still refresh the screen, just ____ I miss something.",["in case","in fact","in addition","in relation"],0,"in case 以防萬一"],
+["When my friends and I hang out, I ____ you for Instagram updates and ignore everyone else.",["turn to","go through","take on","give up"],0,"turn to 轉向／求助於"],
+["I can't ____ that you are always by my side.",["deny","refresh","ignore","introduce"],0,"can't deny that… 不可否認…"],
+["When I wake up, you are there to ____ my friends' updates on Facebook with me.",["go through","hang out","take over","turn down"],0,"go through 逐一瀏覽"]
+]
+}];
+
+/* 段考範圍等組合包：ids 填上面的 id。
+   規則：裡面的課「全部都存在」時才會出現在選單上。
+   所以可以先把段考範圍寫好放著，等 B3L2、B3L3 的題庫加進 UNITS 之後，
+   「第一次段考範圍」那顆按鈕就會自動冒出來，不用再改程式。 */
+const PRESETS=[
+ {name:"全部課程混合", ids:["B3L1","B1L2"]},
+ {name:"第一次段考範圍", ids:["B3L1","B3L2","B3L3"]},
+ {name:"第二次段考範圍", ids:["B3L4","B3L5","B3L6"]}
+];
+
 const TAGNAME={v:"單字",g:"文法",c:"克漏字"};
-const SRCNAME={v:"B3 L1 單字・片語",g:"B3 L1 文法：不定詞 ＋ it 虛主詞／受詞",c:"B3 L1 克漏字・文意選填"};
+
+/* 被選中的課（buildBank 會把它們合併成 BANK） */
+let SELECTED=["B3L1"], BANK={v:[],g:[],c:[]};
+function buildBank(ids){
+  const valid=UNITS.filter(u=>ids.includes(u.id)).map(u=>u.id);
+  SELECTED=valid.length?valid:[UNITS[0].id];
+  BANK={v:[],g:[],c:[]};
+  UNITS.filter(u=>SELECTED.includes(u.id)).forEach(u=>{
+    ["v","g","c"].forEach(t=>(u[t]||[]).forEach(q=>BANK[t].push({q,src:u.src[t]})));
+  });
+}
+function scopeLabel(){
+  if(SELECTED.length===1){ const u=UNITS.find(x=>x.id===SELECTED[0]); return u?u.short:SELECTED[0]; }
+  const hit=PRESETS.find(p=>{ const ids=p.ids.filter(i=>UNITS.some(u=>u.id===i));
+    return ids.length===SELECTED.length && ids.every(i=>SELECTED.includes(i)); });
+  return hit?hit.name:(SELECTED.length+" 課混合");
+}
+function bankTotal(){ return BANK.v.length+BANK.g.length+BANK.c.length; }
 
 /* ============================================================
    關卡（兩關：阿嬤的家 → 阿嬤的醫院）
@@ -576,6 +798,7 @@ function loadLevel(i){
 }
 function applyLevelChrome(){
   $("lvpill").textContent="第 "+LVDEF.id+" 關・"+LVDEF.name;
+  $("scopepill").textContent="📚 "+scopeLabel();
   ["hammer","key","code","phone","nose"].forEach(k=>{
     const el=$("s_"+k), d=LVDEF.items[k];
     el.querySelector(".ic").textContent=d[0]; el.title=d[1];
@@ -626,7 +849,7 @@ function newGame(lv,carry){
 const SAVE_KEY="granny_b3l1_save_v1";
 function saveGame(){
   try{ if(!G||G.over) return;
-    localStorage.setItem(SAVE_KEY,JSON.stringify({v:1,easy,g:G}));
+    localStorage.setItem(SAVE_KEY,JSON.stringify({v:1,easy,units:SELECTED,g:G}));
   }catch(e){}
 }
 function readSave(){
@@ -642,7 +865,8 @@ function refreshContinue(){
   const b=$("btnCont"), w=$("btnWipe");
   if(d){
     const L=LEVELS[d.g.lv];
-    b.textContent="繼續遊戲（第 "+L.id+" 關・第 "+d.g.day+" 天）";
+    const uu=(d.units||[]).map(id=>{const u=UNITS.find(x=>x.id===id);return u?u.short:id;}).join("、");
+    b.textContent="繼續遊戲（"+(uu||"B3 L1")+"・第 "+L.id+" 關・第 "+d.g.day+" 天）";
     b.style.display="block"; w.style.display="block";
   }else{ b.style.display="none"; w.style.display="none"; }
 }
@@ -651,6 +875,7 @@ function resumeGame(){
   clearInterval(qInt); quizOpen=false; qAfter=null; finalStep=0;
   $("quiz").classList.remove("on");
   easy=!!d.easy; G=d.g;
+  buildBank(d.units&&d.units.length?d.units:["B3L1"]);
   loadLevel(G.lv);
   G.over=false; G.inv=0; G.grace=2.2; G.saveT=4;
   G.p.hiding=false; G.g.stun=0; G.g.path=[]; G.g.target=null; G.g.state="patrol";
@@ -662,7 +887,7 @@ function resumeGame(){
   if(!raf){ last=performance.now(); raf=requestAnimationFrame(step); }
 }
 function hideScreens(){
-  ["scTitle","scEnd","scCaught","scLevel"].forEach(id=>$(id).classList.remove("on"));
+  ["scTitle","scEnd","scCaught","scLevel","scPick"].forEach(id=>$(id).classList.remove("on"));
 }
 function syncSlots(){
   LOOTKEYS.forEach(k=>$("s_"+k).classList.toggle("on",!!G.items[k]));
@@ -686,12 +911,17 @@ function activateNose(){
 
 /* ---------- 出題（同類不重覆，用完才重來） ---------- */
 function pick(type){
+  // 選到的課若剛好沒有這個題型，就換一個有題目的題型
+  if(!BANK[type]||!BANK[type].length){
+    type=["v","g","c"].find(t=>BANK[t]&&BANK[t].length)||"v";
+  }
   const pool=BANK[type];
+  if(!G.asked[type]) G.asked[type]=[];
   if(G.asked[type].length>=pool.length) G.asked[type]=[];
   let i; do{ i=Math.floor(Math.random()*pool.length); }while(G.asked[type].includes(i));
   G.asked[type].push(i);
-  const q=pool[i];
-  return {type, text:q[0], opts:q[1], ans:q[2], exp:q[3]};
+  const e=pool[i], q=e.q;
+  return {type, text:q[0], opts:q[1], ans:q[2], exp:q[3], src:e.src};
 }
 
 /* ============================================================
@@ -858,7 +1088,7 @@ function openQuiz(f,after,forced){
   quizOpen=true; qAfter=after||null;
   qData=forced||pick(f?f.t:"v");
   $("qtag").textContent=TAGNAME[qData.type];
-  $("qsrc").textContent=(f?("🔍 你正在翻找「"+f.n+"」　|　"):"🚪 最終考驗　|　")+SRCNAME[qData.type];
+  $("qsrc").textContent=(f?("🔍 你正在翻找「"+f.n+"」　|　"):"🚪 最終考驗　|　")+(qData.src||TAGNAME[qData.type]);
   $("qtext").textContent=qData.text;
   $("exp").classList.remove("on"); $("btnNext").style.display="none";
   const box=$("opts"); box.innerHTML="";
@@ -1354,6 +1584,47 @@ function moveP(dx,dy){
 /* ============================================================
    啟動
    ============================================================ */
+/* ============================================================
+   選擇題庫範圍
+   ============================================================ */
+let pickSet=new Set(["B3L1"]), pickEasy=false;
+function renderPick(){
+  const list=$("unitList"); list.innerHTML="";
+  UNITS.forEach(u=>{
+    const n=(u.v||[]).length+(u.g||[]).length+(u.c||[]).length;
+    const b=document.createElement("button");
+    b.className="unit"+(pickSet.has(u.id)?" on":"");
+    b.innerHTML='<span class="box">'+(pickSet.has(u.id)?"✓":"")+'</span>'+
+      '<span class="meta">'+u.name+'<span class="cnt">單字 '+(u.v||[]).length+
+      ' ・文法 '+(u.g||[]).length+' ・克漏字 '+(u.c||[]).length+'　共 '+n+' 題</span></span>';
+    b.onclick=()=>{
+      if(pickSet.has(u.id)) pickSet.delete(u.id); else pickSet.add(u.id);
+      if(!pickSet.size) pickSet.add(u.id);   // 至少要留一課
+      renderPick(); sfx(420,.06,"triangle",.05);
+    };
+    list.appendChild(b);
+  });
+  const row=$("presetRow"); row.innerHTML="";
+  PRESETS.forEach(p=>{
+    const ids=p.ids.filter(i=>UNITS.some(u=>u.id===i));
+    if(ids.length!==p.ids.length) return;   // 課還沒加齊就先不顯示
+    const b=document.createElement("button");
+    b.className="preset"; b.textContent=p.name+"（"+ids.length+" 課）";
+    b.onclick=()=>{ pickSet=new Set(ids); renderPick(); sfx(520,.08,"triangle",.05); };
+    row.appendChild(b);
+  });
+  let tot=0;
+  UNITS.filter(u=>pickSet.has(u.id)).forEach(u=>tot+=(u.v||[]).length+(u.g||[]).length+(u.c||[]).length);
+  $("pickInfo").innerHTML="已選 <b style='color:#ffb547'>"+pickSet.size+"</b> 課，題庫共 <b style='color:#ffb547'>"+tot+"</b> 題";
+}
+function openPick(isEasy){
+  pickEasy=isEasy;
+  pickSet=new Set(SELECTED.length?SELECTED:[UNITS[0].id]);
+  renderPick();
+  $("scTitle").classList.remove("on");
+  $("scPick").classList.add("on");
+}
+
 function audioInit(){ try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();}catch(e){} }
 function startLevel(lv,carry){
   clearInterval(qInt); quizOpen=false; qAfter=null; finalStep=0;
@@ -1365,13 +1636,16 @@ function startLevel(lv,carry){
   if(!raf){ last=performance.now(); raf=requestAnimationFrame(step); }
 }
 function start(isEasy){ easy=isEasy; clearSave(); startLevel(0,null); }
-$("btnStart").onclick=()=>start(false);
-$("btnEasy").onclick=()=>start(true);
+$("btnStart").onclick=()=>openPick(false);
+$("btnEasy").onclick=()=>openPick(true);
+$("btnPickBack").onclick=()=>{ $("scPick").classList.remove("on"); $("scTitle").classList.add("on"); };
+$("btnGo").onclick=()=>{ buildBank([...pickSet]); $("scPick").classList.remove("on"); start(pickEasy); };
 $("btnCont").onclick=()=>resumeGame();
 $("btnWipe").onclick=()=>{ clearSave(); refreshContinue(); toast("存檔已清除。",1800); };
 $("btnAgain").onclick=()=>{ $("scEnd").classList.remove("on"); $("scTitle").classList.add("on"); refreshContinue(); };
 addEventListener("beforeunload",()=>{ try{ saveGame(); }catch(e){} });
 document.addEventListener("visibilitychange",()=>{ if(document.hidden) saveGame(); });
+buildBank(SELECTED);
 refreshContinue();
 fitCanvas();
 raf=requestAnimationFrame(step);
