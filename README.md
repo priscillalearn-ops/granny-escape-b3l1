@@ -11,8 +11,9 @@
 | `B1L1` | B1 L1　Firsts in Life | 名詞子句 | 76 | 91 | 98 | 265 |
 | `B1L2` | B1 L2　Goodbye, John | it 與 there 的句型 | 45 | 58 | 32 | 135 |
 | `B3L1` | B3 L1　The Day I Broke the Rules | 不定詞 ＋ it 虛主詞／受詞 | 65 | 94 | 47 | 206 |
+| `B3L2` | B3 L2　The Marshmallow Challenge | 形容詞子句（關係代名詞） | 80 | 90 | 51 | 221 |
 
-目前共 **606 題**。
+目前共 **827 題**。
 
 按「開始逃脫」後會先出現**選擇範圍**畫面，可以單選一課，也可以複選好幾課混著出題。
 
@@ -65,9 +66,9 @@
 
 ```js
 const PRESETS=[
- {name:"全部課程混合",   ids:["B1L1","B1L2","B3L1"]},
+ {name:"全部課程混合",   ids:["B1L1","B1L2","B3L1","B3L2"]},
  {name:"高一第一次段考", ids:["B1L1","B1L2"]},
- {name:"第一次段考範圍", ids:["B3L1","B3L2","B3L3"]},
+ {name:"高二第一次段考", ids:["B3L1","B3L2"]},
  {name:"第二次段考範圍", ids:["B3L4","B3L5","B3L6"]}
 ];
 ```
