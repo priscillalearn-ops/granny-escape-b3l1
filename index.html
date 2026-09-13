@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>恐怖阿嬤逃脫 B3L1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700;900&family=Special+Elite&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#07060a; --panel:#14101a; --panel2:#1d1724; --line:#3a2b3f;
+  --ink:#ede6f2; --dim:#a294ae; --red:#e0344a; --amber:#ffb547; --green:#4ad07a;
+  --blood:#7c1020;
+}
+html,body{height:100%}
+body{
+  background:var(--bg); color:var(--ink); overflow:hidden;
+  font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+  display:flex; align-items:center; justify-content:center;
+}
+#app{position:relative; width:100%; height:100%; max-width:1100px; display:flex; flex-direction:column}
+
+/* ---------- HUD ---------- */
+#hud{
+  position:relative; z-index:3; display:flex; gap:8px; align-items:center;
+  padding:8px 10px; background:linear-gradient(#17111d,#100c15); border-bottom:1px solid var(--line);
+  font-size:13px; flex-wrap:wrap;
+}
+.pill{background:var(--panel2); border:1px solid var(--line); border-radius:999px; padding:4px 10px; white-space:nowrap}
+.pill b{color:var(--amber)}
+#items{display:flex; gap:4px}
+.slot{position:relative;width:30px;height:30px;border-radius:8px;border:1px dashed var(--line);display:grid;place-items:center;font-size:16px;opacity:.3;background:#0d0a11}
+.slot.on{opacity:1;border:1px solid var(--amber);background:#2a1e0c;box-shadow:0 0 10px rgba(255,181,71,.35)}
+.slot i{position:absolute;right:-4px;bottom:-5px;font-style:normal;font-size:10px;font-weight:700;
+  background:#8c1c30;color:#ffe9ee;border-radius:999px;min-width:15px;line-height:15px;text-align:center;display:none}
+#noisewrap{flex:1; min-width:90px; height:10px; background:#241a29; border-radius:999px; overflow:hidden; border:1px solid var(--line)}
+#noise{height:100%;width:0;background:linear-gradient(90deg,#4ad07a,#ffb547,#e0344a);transition:width .2s}
+#state{font-weight:700}
+
+/* ---------- canvas ---------- */
+#stage{position:relative; flex:1; min-height:0; display:grid; place-items:center; background:#050409}
+canvas{display:block; image-rendering:pixelated; touch-action:none; background:#050409}
+#toast{
+  position:absolute; left:50%; bottom:16%; transform:translateX(-50%);
+  background:rgba(10,8,14,.92); border:1px solid var(--line); border-left:3px solid var(--amber);
+  padding:8px 14px; border-radius:10px; font-size:14px; max-width:88%; text-align:center;
+  opacity:0; transition:opacity .25s; pointer-events:none; z-index:4; line-height:1.5;
+}
+#toast.show{opacity:1}
+#flash{position:absolute;inset:0;background:var(--blood);opacity:0;pointer-events:none;z-index:5;transition:opacity .12s}
+
+/* ---------- touch controls：虛擬搖桿 ---------- */
+#touch{position:absolute; inset:0; z-index:4; pointer-events:none; display:none}
+#touch.on{display:block}
+/* 左下一大片都是搖桿區，手指按在哪裡搖桿就長在哪裡 */
+#stick{position:absolute; left:0; bottom:0; width:60%; height:78%; pointer-events:auto; touch-action:none}
+#stickBase{position:absolute; width:136px; height:136px; margin:-68px 0 0 -68px; border-radius:50%;
+  background:radial-gradient(circle,rgba(70,52,86,.45),rgba(30,22,38,.22)); border:2px solid rgba(150,118,170,.5);
+  opacity:0; transition:opacity .12s; display:grid; place-items:center}
+#stickBase.on{opacity:1}
+#stickKnob{width:60px;height:60px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#c79ada,#5c3a72);
+  border:2px solid #e3ccef; box-shadow:0 0 16px rgba(199,154,218,.55)}
+#stickHint{position:absolute; left:16px; bottom:12px; font-size:11px; color:#6d5c78; pointer-events:none; line-height:1.6}
+#act{position:absolute; right:14px; bottom:20px; width:108px; height:108px; border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#5c2b3a,#2a1420); border:2px solid #7c3247; color:#ffd9e0;
+  font-size:17px; font-weight:700; pointer-events:auto; display:grid; place-items:center; line-height:1.3}
+#act:active{transform:scale(.93)}
+#inv{position:absolute; right:26px; bottom:146px; width:82px;height:82px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#5a3a18,#28190a); border:2px solid #ffb547; color:#ffe2b0;
+  font-size:12.5px; font-weight:700; pointer-events:auto; display:none; place-items:center; line-height:1.3; text-align:center}
+#inv.on{display:grid}
+#inv.dim{opacity:.3}
+#inv:active{transform:scale(.93)}
+
+/* ---------- overlays ---------- */
+.screen{
+  position:absolute; inset:0; z-index:10; background:rgba(5,4,9,.96);
+  display:none; flex-direction:column; align-items:center; justify-content:center;
+  padding:22px; text-align:center; overflow-y:auto;
+}
+.screen.on{display:flex}
+.screen h1{font-family:"Noto Serif TC","Songti TC",serif; font-weight:900; font-size:clamp(26px,6vw,44px); letter-spacing:3px; margin-bottom:6px; text-wrap:balance;
+  background:linear-gradient(#fff,#e0344a); -webkit-background-clip:text; background-clip:text; color:transparent}
+.screen h2{font-family:"Noto Serif TC","Songti TC",serif; font-weight:700; font-size:clamp(20px,5vw,30px); margin-bottom:10px; text-wrap:balance}
+.sub{color:var(--dim); font-size:14px; margin-bottom:16px; line-height:1.7}
+.sub i,.card i{font-family:"Special Elite","Courier New",monospace; font-style:normal; color:#e8d7bd}
+.tag{font-family:"Special Elite","Courier New",monospace}
+.card{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px 16px;
+  max-width:560px; width:100%; text-align:left; font-size:13.5px; line-height:1.85; color:#d7cadd; margin-bottom:14px}
+.card b{color:var(--amber)}
+.btn{background:linear-gradient(#8c1c30,#5d0f20); color:#ffe9ee; border:1px solid #b7314a;
+  padding:13px 30px; border-radius:12px; font-size:17px; font-weight:700; cursor:pointer; font-family:inherit;
+  box-shadow:0 6px 18px rgba(140,28,48,.35)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:#1d1724;border:1px solid var(--line);color:#cbb8d6;box-shadow:none;font-size:14px;padding:10px 20px}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.granny-art{font-size:64px;line-height:1;margin-bottom:8px;filter:drop-shadow(0 0 18px rgba(224,52,74,.5))}
+
+/* ---------- quiz ---------- */
+#quiz{position:absolute; inset:0; z-index:12; background:rgba(4,3,7,.93); display:none;
+  align-items:center; justify-content:center; padding:14px}
+#quiz.on{display:flex}
+#qbox{background:linear-gradient(#181220,#120d19); border:1px solid #45304d; border-radius:16px;
+  width:100%; max-width:560px; padding:16px; box-shadow:0 0 40px rgba(0,0,0,.8), 0 0 0 1px rgba(224,52,74,.15)}
+#qtop{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:12px;color:var(--dim)}
+.tag{background:#2a1e33;border:1px solid var(--line);border-radius:6px;padding:2px 8px;color:var(--amber);font-weight:700}
+#tbarwrap{flex:1;height:6px;background:#241a29;border-radius:999px;overflow:hidden}
+#tbar{height:100%;width:100%;background:linear-gradient(90deg,#4ad07a,#ffb547,#e0344a)}
+#qsrc{font-size:12px;color:#7d6c88;margin-bottom:8px}
+#qtext{font-size:16px; line-height:1.75; margin-bottom:14px; white-space:pre-wrap}
+.opt{display:block;width:100%;text-align:left;background:#221a2b;border:1px solid var(--line);color:var(--ink);
+  padding:11px 13px;border-radius:10px;margin-bottom:8px;font-size:15px;cursor:pointer;font-family:inherit;line-height:1.5}
+.opt:hover{background:#2c2237}
+.opt.correct{background:#12351f;border-color:#3f8f5c;color:#c9f5d8}
+.opt.wrong{background:#3a1119;border-color:#8c2136;color:#ffc9d2}
+.opt:disabled{cursor:default}
+#exp{display:none;background:#100c16;border-left:3px solid var(--amber);padding:10px 12px;border-radius:8px;
+  font-size:13.5px;line-height:1.7;color:#d9cbe0;margin-bottom:10px}
+#exp.on{display:block}
+#qfoot{display:flex;justify-content:flex-end}
+#wrongList{max-height:34vh;overflow-y:auto;text-align:left;width:100%;max-width:560px}
+.wq{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--red);
+  border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:13px;line-height:1.7}
+.wq .ans{color:var(--green)}
+@media (max-width:560px){ #hud{font-size:11.5px;gap:6px;padding:6px} .slot{width:26px;height:26px;font-size:14px} }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="hud">
+    <span class="pill" id="lvpill">第 1 關・阿嬤的家</span>
+    <span class="pill">第 <b id="day">1</b>/<b id="daymax">5</b> 天</span>
+    <span class="pill">❤️ <b id="lives">5</b></span>
+    <div id="items">
+      <div class="slot" id="s_hammer" title="鐵鎚"><span class="ic">🔨</span></div>
+      <div class="slot" id="s_key" title="大門鑰匙"><span class="ic">🗝️</span></div>
+      <div class="slot" id="s_code" title="密碼紙條"><span class="ic">🔢</span></div>
+      <div class="slot" id="s_phone" title="你的手機"><span class="ic">📱</span></div>
+      <div class="slot" id="s_nose" title="小丑紅鼻子（無敵）"><span class="ic">🤡</span><i id="noseN">0</i></div>
+    </div>
+    <div id="noisewrap"><div id="noise"></div></div>
+    <span class="pill" id="state">😴 阿嬤在打盹</span>
+  </div>
+
+  <div id="stage">
+    <canvas id="cv"></canvas>
+    <div id="toast"></div>
+    <div id="flash"></div>
+    <div id="touch">
+      <div id="stick"><div id="stickBase"><div id="stickKnob"></div></div></div>
+      <div id="stickHint">左半邊任意處按住拖動＝移動<br>推到底＝跑步</div>
+      <div id="inv" title="紅鼻子無敵">🤡<br>無敵</div>
+      <div id="act">搜查</div>
+    </div>
+  </div>
+
+  <!-- TITLE -->
+  <div class="screen on" id="scTitle">
+    <div class="granny-art">👵🌂</div>
+    <h1>恐怖阿嬤的英文逃脫</h1>
+    <div class="sub">龍騰 B3 Lesson 1　<i>The Day I Broke the Rules</i>　單字 × 文法 × 克漏字</div>
+    <div class="card">
+      <b>【劇情】</b><br>
+      你的手機被恐怖阿嬤沒收了，還被鎖進她那棟老房子。她手裡永遠握著那把黑雨傘 ——
+      <i>“You <b>had better not</b> break my rules.”</i> —— 被打到一下就結束了。<br><br>
+      <b>【兩關】</b>第 1 關「阿嬤的家」逃出大門後，還有第 2 關「阿嬤的醫院」在等你。<br><br>
+      <b>【目標】</b>找齊三樣道具，走到出口，通過最後三道英文考驗就能過關。<br><br>
+      <b>【玩法】</b>走到家具前按 <b>E</b>（手機按「搜查」）翻找，翻找時要答一題英文。<br>
+      答錯 → <b style="color:#e0344a">巨大聲響！阿嬤立刻朝你衝過來</b>。<br>
+      被雨傘打到 → 昏過去，隔天醒來（少一天）。天數用完就被阿嬤「解決」。<br>
+      被追時可躲進 🛏️ 床底或 🧳 衣櫃（按 E）。<br><br>
+      <b>【🤡 無敵道具】</b>某個家具裡藏著<b>小丑紅鼻子</b>。戴上後 8 秒內阿嬤打不到你，
+      撞到她還能讓她愣住 4 秒。按 <b>Q</b>（手機按「無敵」）使用。<br>
+      每<b>答對 5 題</b>就會自動充能一次（最多存 3 次）—— 想無敵就好好背單字。<br><br>
+      <b>【存檔】</b>遊戲會自動存檔，關掉網頁下次回來可以按「繼續遊戲」接著玩。
+    </div>
+    <div class="row">
+      <button class="btn" id="btnStart">開始逃脫</button>
+      <button class="btn" id="btnCont" style="display:none">繼續遊戲</button>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn ghost" id="btnEasy">簡單模式（阿嬤慢一點）</button>
+      <button class="btn ghost" id="btnWipe" style="display:none">清除存檔</button>
+    </div>
+    <div class="sub" style="margin-top:14px;font-size:12px">鍵盤：WASD／方向鍵移動・Shift 跑・E 互動・Q 無敵<br>手機：左半邊按住拖動＝搖桿移動，推到底＝跑</div>
+  </div>
+
+  <!-- CAUGHT -->
+  <div class="screen" id="scCaught">
+    <div class="granny-art">🌂💥</div>
+    <h2 id="caughtTitle">被雨傘打中了！</h2>
+    <div class="sub" id="caughtMsg"></div>
+    <button class="btn" id="btnNextDay">醒來，繼續逃</button>
+  </div>
+
+  <!-- LEVEL CLEAR -->
+  <div class="screen" id="scLevel">
+    <div class="granny-art">🚪💨</div>
+    <h2 id="lvTitle">過關！</h2>
+    <div class="sub" id="lvMsg"></div>
+    <div class="card" id="lvCard"></div>
+    <button class="btn" id="btnLvGo">進入下一關</button>
+  </div>
+
+  <!-- WIN / OVER -->
+  <div class="screen" id="scEnd">
+    <div class="granny-art" id="endArt">🚪✨</div>
+    <h2 id="endTitle">你逃出來了！</h2>
+    <div class="sub" id="endMsg"></div>
+    <div class="card" style="margin-bottom:8px"><b>錯題複習</b>（下次別再錯了）</div>
+    <div id="wrongList"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn" id="btnAgain">再玩一次</button>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz">
+    <div id="qbox">
+      <div id="qtop"><span class="tag" id="qtag">單字</span><div id="tbarwrap"><div id="tbar"></div></div><span id="qtime">25</span></div>
+      <div id="qsrc"></div>
+      <div id="qtext"></div>
+      <div id="opts"></div>
+      <div id="exp"></div>
+      <div id="qfoot"><button class="btn ghost" id="btnNext" style="display:none">繼續</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   題庫：全部取自 龍騰 B1 L2 講義（單字 v／文法 g／克漏字 c）
+   ============================================================ */
+const BANK = {
+v:[
+["「僱用」的英文是？",["employ","deserve","adapt","collaborate"],0,"employ (vt.) 僱用；be employed by 受僱於"],
+["「雇主」的英文是？",["employee","employer","employment","circumstance"],1,"employer (n.)[C] 雇主；employee 才是員工"],
+["「員工；受僱者」的英文是？",["employer","entrance","employee","decade"],2,"employee (n.)[C] 員工；-ee 結尾表「被…的人」"],
+["「工作；受僱」（名詞）的英文是？",["glance","graduate","blossom","employment"],3,"employment (n.)[U] 工作；受僱；find employment 找到工作"],
+["「（大）公司；集團公司」的英文是？",["corporation","distribution","construction","operation"],0,"corporation (n.)[C] 大公司；global corporations 跨國企業"],
+["「（大）公司的」的英文是？",["economical","corporate","distinct","historical"],1,"corporate (adj.) 公司的；corporate planning 企業規劃"],
+["「受苦；受折磨」的英文是？",["suffer","refuse","stretch","confine"],0,"suffer (vi.) 受苦；suffer from + 疾病"],
+["「末期的」的英文是？",["cruel","terminal","capable","furious"],1,"terminal (adj.) 末期的；terminal cancer 癌症末期"],
+["「航廈；月臺」的英文是？",["terminal","tunnel","corporation","platform"],0,"terminal (n.)[C] 航廈；Terminal 1 第一航廈"],
+["「疾病；生病」的英文是？",["illness","generosity","architect","distinction"],0,"illness (n.)[C,U] 疾病；mental illness 精神疾病"],
+["「生病的」的英文是？",["ill","frail","drowsy","prompt"],0,"ill (adj.) 生病的；fall ill 生病"],
+["「相當大地」的英文是？",["relatively","tremendously","unconsciously","moreover"],1,"tremendously (adv.) 相當大地＝greatly, extremely"],
+["「相當大的」的英文是？",["historical","tremendous","sufficient","initial"],1,"tremendous (adj.) 相當大的；a tremendous amount of work"],
+["「笑；笑聲」的英文是？",["circumstance","refusal","laughter","herd"],2,"laughter (n.)[U] 笑聲；burst into laughter 突然大笑"],
+["「使驚嚇」的英文是？",["frighten","flatten","fasten","frame"],0,"frighten (vt.) 使驚嚇；frighten sb. to death"],
+["「驚嚇」（名詞）的英文是？",["corporation","collaboration","fright","literature"],2,"fright (n.)[U] 驚嚇；in fright 驚嚇地；give sb. a fright"],
+["「接觸；聯絡」的英文是？",["tame","collaborate","contact","tumble"],2,"contact (n./vt.) 接觸；聯絡；come into contact with"],
+["「細菌」的英文是？",["structure","coral reef","germ","sparkle"],2,"germ (n.)[C] 細菌（常用複數 germs）"],
+["「熱情；溫暖」的英文是？",["warmth","punishment","habitat","hesitation"],0,"warmth (n.)[U] 熱情；溫暖（warm 的名詞）"],
+["「虛弱的」的英文是？",["frail","beneficial","complicated","fellow"],0,"frail (adj.) 虛弱的＝very weak or very sick"],
+["「促使」的英文是？",["prompt","promote","propose","protect"],0,"prompt (vt.) 促使；prompt sb. to V 促使某人做…"],
+["「立即的」的英文是？",["prompt","drowsy","frail","terminal"],0,"prompt (adj.) 立即的；a prompt reply 立即的回覆"],
+["「使離不開（床、輪椅等）」的英文是？",["confirm","confine","conduct","confuse"],1,"confine (vt.)；be confined to bed 臥床不起"],
+["「神采；閃耀」的英文是？",["structure","sparkle","reunion","sorrow"],1,"sparkle (n./vi.) 神采；閃耀；a sparkle in one's eyes"],
+["「擁抱」的英文是？",["hug","hop","hum","hunt"],0,"hug (n./vt.) 擁抱；hug-hugged-hugged-hugging"],
+["「昏昏欲睡的」的英文是？",["drowsy","dusty","dizzy","dull"],0,"drowsy (adj.) 昏昏欲睡的＝feeling sleepy"],
+["「伸出（手臂或腿）」的英文是？",["torture","kneel","stare","stretch"],3,"stretch (vt.) 伸出；stretch out one's arms"],
+["「拒絕」（動詞）的英文是？",["refuse","flourish","operate","grasp"],0,"refuse (vi./vt.) 拒絕；refuse to V"],
+["「拒絕」（名詞）的英文是？",["refusal","approval","removal","arrival"],0,"refusal (n.)[U] 拒絕；be met with refusal 遭到拒絕"],
+["「猶豫」（動詞）的英文是？",["interpret","hesitate","torture","bruise"],1,"hesitate (vi.) 猶豫；don't hesitate to contact me"],
+["「猶豫」（名詞）的英文是？",["hesitation","capital","distribution","material"],0,"hesitation (n.)[U] 猶豫；without hesitation 毫不猶豫"],
+["stretch 的中文是？",["折磨","跪","凝視","伸出（手臂或腿）；伸長"],3,"stretch (vt.) 伸出；伸長；拉長"],
+["frail 的中文是？",["虛弱的","有幫助的","複雜的","同事的"],0,"frail (adj.) 虛弱的"],
+["terminal 的中文是？",["殘暴的","末期的","能夠…的","暴怒的"],1,"terminal (adj.) 末期的"],
+["sparkle 的中文是？",["僱用","閃耀","重聚","參加"],1,"sparkle (vi.) 閃耀"],
+["fright 的中文是？",["大公司","合作","驚嚇","文學"],2,"fright (n.) 驚嚇"],
+["germ 的中文是？",["建築物","珊瑚礁","細菌","神采"],2,"germ (n.) 細菌"],
+["Should a fire break out, it would be a great challenge to move all the ____ elderly patients.",["prompt","proud","cruel","frail"],3,"frail 虛弱的 —— 虛弱的年長病患"],
+["As the world's largest online retail company, Amazon has 235 ____ offices across 36 countries.",["confined","prompt","corporate","drowsy"],2,"corporate offices 公司辦公室"],
+["Because of COVID-19, many tourism workers lost their jobs and had to find ____ in other industries.",["illness","employment","hesitation","terminal"],1,"find employment 找到工作"],
+["It was a great relief to feel the ____ of the fireplace on such a freezing night.",["contact","refusal","laughter","warmth"],3,"warmth 溫暖"],
+["An employee has the right to be absent from work because of ____ or injury.",["warmth","fright","refusal","illness"],3,"illness or injury 疾病或受傷"],
+["Any ____ longer than five seconds before responding may cause the participant to be disqualified.",["corporation","hesitation","employment","collection"],1,"hesitation 猶豫"],
+["The boss was satisfied with the ____ boost in sales last month.",["tremendous","sparkling","terminal","drowsy"],0,"a tremendous boost 大幅提升"],
+["Joe kissed and ____ his wife before leaving for the office.",["hugged","stretched","refused","prompted"],0,"hug-hugged 擁抱"],
+["____ by the sound of the firecrackers, the puppy hid under the sofa.",["Refused","Confined","Employed","Frightened"],3,"Frightened by… 被…嚇到"],
+["The ____ of the stars in the night sky gave the evening a romantic atmosphere.",["illness","refusal","contact","sparkle"],3,"sparkle 閃耀"],
+["All the kindergartners screamed in ____ when they saw the witch in the movie.",["fright","germ","contact","laughter"],0,"in fright 驚嚇地"],
+["All the students burst into ____ when they heard the funny joke.",["warmth","laughter","terminal","illness"],1,"burst into laughter 突然大笑"],
+["Simon was absent from school because he had a fever and felt terribly ____.",["scary","prompt","ill","sparkling"],2,"feel ill 覺得不舒服"],
+["This liquid hand soap claims to kill 99% of the ____ on one's hands.",["hugs","germs","warmth","illnesses"],1,"germs 細菌"],
+["To weather the financial crisis, many ____ in large corporations had to lay off some staff.",["receivers","employers","employees","customers"],1,"employers 雇主（才有權資遣）"],
+["A dramatic drop in oil prices has led to a rising rate of ____ in this once oil-rich country.",["hesitation","unemployment","corporation","involvement"],1,"unemployment 失業（率）"],
+["Sneezing without covering your mouth could ____ germs to others.",["pass on","pass away","turn down","cheer up"],0,"pass on...to... 將…傳給…"],
+["Annie felt sad and needed a hug to ____ her ____.",["cheer / up","turn / down","pass / on","put / off"],0,"cheer...up 使…振奮、高興"],
+["Sam asked Ada out, but she ____ him ____ because she was already in a relationship.",["turned / down","cheered / up","passed / on","took / over"],0,"turn...down 拒絕…"],
+["Kelly was just ____ unlock the door when a loud bang gave her a huge fright.",["about to","used to","supposed","able"],0,"be about to V 即將；正要"],
+["Maybe we should wear costumes to the party. ____, everyone else is dressing up.",["After all","Above all","At all","In all"],0,"after all 畢竟"],
+["Darren's grandmother ____ peacefully in her sleep last night.",["passed away","passed on","passed by","passed out"],0,"pass away 過世（die 的委婉說法）"],
+["Mrs. Tate ____ in my life because she always tried her best to help me.",["made a difference","made a face","made a fortune","made a living"],0,"make a difference 有所影響"],
+["Uncle Harry ____ a heart condition, so the doctors told him to cut down on fatty foods.",["suffers from","suffers of","suffers with","suffers for"],0,"suffer from 受…之苦"],
+["When your hand comes into ____ with a very hot surface, your body reacts quickly.",["contact","contrast","content","context"],0,"come into contact with 接觸到"],
+["Despite being ____ to a wheelchair after the accident, Lara remained as outgoing as ever.",["confined","refused","stretched","employed"],0,"be confined to a wheelchair 離不開輪椅"],
+["The actor's comment has ____ strong criticism from the public.",["prompted","promoted","promised","protected"],0,"prompt (vt.) 促使；引發"],
+["The boy reached out for the candy canes without ____.",["hesitation","refusal","employment","laughter"],0,"without hesitation 毫不猶豫地"]
+],
+g:[
+["____ a habit of reading before bed is good for your sleep.",["Form","To forming","To form","Formed"],2,"不定詞當主詞，動詞視為單數；也可寫 It is good for your sleep to form..."],
+["Kevin promised ____ the report before Friday.",["finish","finishing","to finish","to finishing"],2,"promise 表意願，接 to V 當受詞"],
+["The old man had no one ____ after the earthquake.",["turning to","to turn","to turn to","whom to turn"],2,"不定詞當形容詞且缺受詞，turn to sb. 需要介系詞 to"],
+["We moved to the front row ____ the screen more clearly.",["for seeing","so as to see","as to see","to seeing"],1,"so as to V 表目的（不可放句首）"],
+["The question is ____ the money for the field trip.",["how raise","how to raise","how raising","why to raise"],1,"疑問詞＋to V 當名詞片語；why 不可接 to V"],
+["Peggy left home early ____ stuck in the morning traffic.",["in order to get","so as to get","in order not to get","for not getting"],2,"in order not to V 為了不要…"],
+["This machine is ____ complicated for a beginner to operate.",["so","such","too","very"],2,"too + adj. + for sb. + to V 太…以致於不能…"],
+["My roommate is quite busy because she has a lot of chores ____.",["doing","to do","doing them","to do them"],1,"不定詞當形容詞修飾 chores，後面不留受詞"],
+["They searched for hours, only ____ that the key had been in the car all along.",["finding","to find","found","to have found"],1,"only to V 表「結果卻…」"],
+["下列何者錯誤？",["To keep a diary in English is helpful.","In order not to be late, Sam set two alarms.","So as to save money, Ivy walks to school.","It is difficult for us to finish the task in one day."],2,"so as to 不可放句首，要改成 In order to save money"],
+["The typhoon was ____ powerful as to tear the roof off the old house.",["too","so","such","very"],1,"so + adj. + as to V 如此…以致於…"],
+["The volunteers held a night market ____ funds for the stray dogs.",["Raise","Raising","To raise","For raising"],2,"to V 表目的"],
+["After hiking for six hours, Ryan was ____ exhausted to say a single word.",["so","as","too","enough"],2,"too...to 太…而不能…"],
+["Teenagers today are more than willing to know ____.",["where can they find part-time jobs","how to build their own brand","which app should they download","when applying for a passport"],1,"疑問詞＋to V；間接問句不可用問句語序"],
+["Against everyone's advice, Frank invested all his savings in the stock, ____ to lose everything within a month.",["in order","only","such as","never"],1,"only to V 結果卻…（出乎意料的壞結果）"],
+["My grandmother is eighty, but she is still strong ____ climb the mountain every morning.",["too to","enough to","as to","in order that"],1,"adj. + enough to V 夠…足以…"],
+["To read one English article every morning ____ a habit I have kept for three years.",["are","be","is","being"],2,"不定詞當主詞，動詞用單數"],
+["The apartment we rented has a small balcony ____ the clothes on.",["to hang","hanging","for hanging","hung"],0,"a balcony to hang the clothes on，介系詞 on 不可少"],
+["Nina still cannot decide ____ for her gap year.",["where to go","where to go there","where going","why to go"],0,"where to V；where 已含地點，不可再加 there"],
+["Sandra is applying for the exchange program. She hopes ____ by the committee.",["to choose","to be chosen","choosing","being chosen"],1,"她是「被」選，用不定詞被動 to be p.p."],
+["We expect ____ at the terminal by our host family.",["to pick up","to be picked up","picking up","to have picked up"],1,"我們是被接，用 to be picked up"],
+["By the time the guests arrive, the chef hopes ____ all the desserts.",["having finished","having been finished","to have finished","to have been finished"],2,"完成式不定詞 to have p.p. 表比主要動詞更早完成"],
+["Ted crashed the school van, but he wasn't fired. He is lucky ____ a second chance.",["having given","having been given","to have given","to have been given"],3,"他是「被」給機會，且早於 is lucky，用 to have been p.p."],
+["The freshmen hope ____ in the school's volunteer program.",["including","being included","to include","to be included"],3,"hope + to V；新生是被納入，用被動"],
+["Ian got into trouble when he refused ____ his backpack for the security guard.",["opening","being opened","to open","to be opened"],2,"refuse to V 拒絕做…"],
+["Please forgive me. I didn't mean ____ your feelings.",["hurting","being hurt","to hurt","to be hurt"],2,"mean to V 有意要…（mean V-ing 是「意味著」）"],
+["This temple is believed ____ during the Qing Dynasty.",["to build","to be built","to have built","to have been built"],3,"廟是過去「被」蓋的：to have been p.p."],
+["Andy seems ____ the novel before. He can even name every character.",["reading","to read","read","to have read"],3,"before 表更早發生，用 to have p.p."],
+["I'm terribly sorry. I don't mean ____ you, but the principal is waiting outside.",["to interrupting","interrupt","interrupting","to interrupt"],3,"mean to V 有意要…"],
+["I intended ____ you last night, but my phone ran out of battery.",["to texting","to have texted","to be texted","to having texted"],1,"intended to have p.p. 表「原本打算…卻沒做成」"],
+["Although the town is quiet now, it is said to ____ a busy mining center a hundred years ago.",["be","been","has been","have been"],3,"to have been：過去的狀態，早於 is said"],
+["The little boy pretended ____ asleep so that his mother would not scold him.",["being","to be","to have been","be"],1,"pretend to V 假裝…"],
+["The document is reported ____ by the fire last week; nothing is left.",["to destroy","to be destroyed","to have destroyed","to have been destroyed"],3,"上週被燒毀，早於 is reported，用 to have been p.p."],
+["I had my brother ____ me to the station.",["to drive","drive","drove","driving"],1,"使役動詞 have + O + 原V"],
+["All the audience could do was ____ in silence.",["waiting","waited","wait","to waiting"],2,"All S have to do is (to) Vr，to 可省略"],
+["We were made ____ the classroom after the party.",["clean","to clean","cleaning","cleaned"],1,"make 用於被動時要把 to 加回來"],
+["Don't make your parents ____ about you.",["to worry","worried","worry","worrying"],2,"make + O + 原V"],
+["Several hikers claimed that they had seen a black bear ____ across the trail.",["walk","walked","was walking","to walk"],0,"感官動詞 see + O + 原V（表全程、事實）"],
+["I finally got my little cousin ____ his toys.",["to put away","put away","putting away","put"],0,"get 是半使役動詞，要用 get + O + to V"],
+["Judy went to the salon to have her hair ____ before the ceremony.",["dyeing","to be dyed","dye","dyed"],3,"have + 物 + p.p. 請人把某物…"],
+["The customers can have their groceries ____ to their homes within an hour.",["delivering","to deliver","delivered","deliver"],2,"have + 物 + p.p.（被動）"],
+["The manager was seen ____ the office right before the money went missing.",["to enter","enter","entered","entering"],0,"感官動詞被動時要把 to 加回來"],
+["My parents would let me ____ the concert if I finished all my homework.",["to attend","attending","to attending","attend"],3,"let + O + 原V"],
+["Kelly went to the dentist last night to have her wisdom tooth ____.",["pulling","to be pulled","pull","pulled"],3,"have + 物 + p.p."],
+["The whole team was made ____ the gym as a punishment for being late.",["mop","mopping","to mop","mopped"],2,"be made to V"],
+["I remember this melody. I heard it ____ at the opening ceremony years ago.",["playing","play","to play","played"],3,"it（旋律）是被演奏，用 hear + O + p.p."],
+["Through clever advertising, consumers often ____ themselves be talked into buying useless products.",["make","have","get","let"],3,"let + O + be p.p. 是使役動詞唯一的被動形"],
+["People with a severe accent sometimes find it hard to make themselves ____.",["understood","understand","understanding","to understand"],0,"make oneself understood 讓別人聽懂自己"],
+["Scientists still cannot fully explain what makes the ground ____ before a major quake.",["shake","to shake","shaken","being shaking"],0,"make + O + 原V"],
+["Our homeroom teacher always has us ____ the vocabulary aloud twice.",["repeat","repeating","repeated","to repeat"],0,"have + 人 + 原V"],
+["Before the competition, the members were made ____ every single day.",["practice","to practice","practicing","practiced"],1,"be made to V"],
+["____, the documentary is not as boring as the critics claimed.",["To do it justice","So to speak","To put it another way","To be brief"],0,"to do it justice 公平地說"],
+["____ my disappointment, I didn't make it into the final round.",["With","To","For","On"],1,"To one's + N 令某人感到…的是"],
+["Much ____ her relief, no one mentioned the mistake she made on stage.",["for","in","to","with"],2,"Much to one's relief 令某人大大鬆一口氣的是"],
+["After the earthquake, ____, the rescue team found all the miners alive.",["to much our joy","much to our joy","very to our joy","to our very joy"],1,"加強語氣是 Much to one's + N"],
+["You ____ out so late; the storm is getting worse.",["had better not go","had not better go","had better not to go","better had not go"],0,"had better not + 原V"],
+["Nathan would rather ____ the whole night than hand in a careless report.",["staying up","to stay up","stay up","stayed up"],2,"would rather Vr than Vr"],
+["Watching the puppy chase its own tail, we could not help ____.",["but laughing","but to laugh","laughing","but laugh"],3,"cannot help but + 原V＝cannot help + V-ing"],
+["She prefers ____ at home to ____ at a noisy café.",["study ... study","studying ... studying","to study ... studying","studying ... to study"],1,"prefer V-ing to V-ing"],
+["The startup launched a free trial ____ more young users to the platform.",["Attract","Attracting","To attract","For attracting"],2,"to V 表目的"],
+["The exchange students are eager to know ____.",["where can they buy cheap textbooks","which dorm should they pick","how to open a bank account","when applying for the card"],2,"疑問詞＋to V"],
+["Sophie stayed up until three, ____ to realize the deadline had been postponed.",["in order","only","such as","never"],1,"only to V 結果卻…"],
+["Every member trains twice a day with a view ____ the national championship.",["to win","winning","to winning","win"],2,"with a view to + V-ing 以…為目標（to 是介系詞）"],
+["Nick seems ____ this route before. He knows every shortcut.",["taking","to take","take","to have taken"],3,"before 表更早，用 to have p.p."],
+["It is hard to get rid of the habit once you ____ leaving things until the last minute.",["are opposed to","are encouraged to","are used to","used to"],2,"be used to + V-ing 習慣於"],
+["We are all looking forward ____ the new gym next semester.",["use","using","to use","to using"],3,"look forward to + V-ing"],
+["The hostel was full, so the backpackers couldn't find a room ____.",["to stay","staying in","staying","to stay in"],3,"a room to stay in，介系詞 in 不可少"],
+["We save part of our salary every month in order ____ in trouble someday.",["to being","not to be","not being","not be"],1,"in order not to V"],
+["____ Michelle is very proud of her daughter's achievement.",["It appears to","It appears that","Michelle seems that","Michelle seems to"],1,"It appears/seems that + S + V"],
+["As a care center staff member, Mike considers ____ an honor ____ the residents.",["it; to help","that; helping","that; to help","it; helping"],0,"consider it + N/adj. + to V（it 為虛受詞）"],
+["Henry dared not look me in the eye; it ____ that he was hiding something from me.",["felt","seemed","took","appealed"],1,"It seemed that… 似乎…"],
+["Many Chinese students feel ____ difficult to learn to speak English.",["that","it","this","which"],1,"feel it + adj. + to V，it 是虛受詞"],
+["____ happy with her new boyfriend.",["It seems that Mary is","Mary seems like","Mary seems to","It seems Mary"],0,"It seems that + S + V＝Mary seems to be…"],
+["In American offices, most staff find ____ normal to address their bosses by their first names.",["this","that","which","it"],3,"find it + adj. + to V"],
+["We considered it an honor ____ able to do something nice for the teacher.",["is","be","to be","to being"],2,"consider it + N + to V"],
+["I highly recommend this novel; you will ____ it inspiring to read.",["find","like","keep","have"],0,"find it + adj. + to V"],
+["The students found ____ finish a sixty-page report in a week.",["hard it to","it was hard that","it hard to","that it hard to"],2,"find it hard to V"],
+["Most people consider ____ necessary to learn English, but Mary thinks otherwise.",["they are","that is","it","it as"],2,"consider it necessary to V"],
+["We could not wait for more help but found ____ essential ____ immediate action.",["it; take","that; take","it; to take","that; you take"],2,"find it essential to take action"],
+["The teacher frowned when I spoke. It seemed ____ he was not satisfied with my answer.",["that","what","which","how"],0,"It seemed that + 子句"],
+["The moment the hikers saw the elderly man ____ in the animal trap, they ran over.",["catch","to catch","catching","caught"],3,"老人是「被」困住，用 see + O + p.p."],
+["You can hear many people ____ when they are on a roller coaster ride.",["to scream","screaming","screams","screamed"],1,"感官動詞 + O + V-ing 表正在進行"],
+["The manager got fired because he ____ revealing the company's confidential information.",["caught","was caught to","was caught","catches to"],2,"be caught + V-ing 被抓到正在…"],
+["To Albert's surprise, he saw a cat ____ in front of his door when he got off work.",["to sit","and sit","sits","sitting"],3,"see + O + V-ing"],
+["Jack is an only child; therefore, he is longing for someone ____.",["with whom play","that he can play","who to play","to play with"],3,"someone to play with，介系詞 with 不可少"],
+["Miss Lin flew into a rage as she found several students ____ to her about their homework.",["lies","lied","lying","to lie"],2,"find + O + V-ing；lie (說謊) 的 V-ing 是 lying"],
+["The man was arrested after he was caught ____ beers and snacks from the supermarket.",["stealing","and stole","to steal","stole"],0,"be caught + V-ing"],
+["Henry doesn't feel like apologizing to her ____.",["too","either","as well","also"],1,"否定句句尾用 either"],
+["Dinosaurs are extinct. They ____ exist on earth.",["not anymore","not any longer","no way","no longer"],3,"no longer 不再（放在一般動詞前）"],
+["After ____ from college two years ago, Samuel still doesn't have a stable job.",["he graduating","graduating","being graduating","graduates"],1,"介系詞 after + V-ing"],
+["Let me know ____ you're going to Peter's birthday party next Friday.",["where","what","who","if"],3,"if 引導名詞子句，表「是否」"],
+["Although Janet is new in our class, she has made ____ friends.",["a little","a few","little","few"],1,"a few + 可數名詞，表「有一些」（肯定語氣）"],
+["It is ____ the law to bring produce with you when you enter our country.",["against","with","off","by"],0,"against the law 違法"],
+["____ a career woman, Tina tries hard to strike a balance between family and work.",["Of","With","To be","As"],3,"As + 身分，表「身為…」"]
+],
+c:[
+["【Ronald Day】On Ronald Day, I dressed up ____ Ronald McDonald and visited sick children.",["in","as","for","with"],1,"dress up as… 打扮成…"],
+["【Ronald Day】Most of the children were ____ terminal illnesses.",["addicting to","contracting to","suffering from","associating with"],2,"suffer from + 疾病"],
+["【Ronald Day】I loved being able to ____ to them.",["take away some sadness","give a little fight","provide little relief","bring some laughter"],3,"bring some laughter to sb. 帶給某人歡笑"],
+["【Ronald Day】This was because I might ____ them with my painted face and red wig.",["frightened","fright","frightening","frighten"],3,"might + 原V"],
+["【Ronald Day】I wasn't allowed to engage in any physical contact with the children, ____.",["either","neither","too","though"],0,"否定句句尾用 either"],
+["【Ronald Day】____ might pass on germs to them.",["To do this","Make such","Doing so","Like this"],2,"Doing so 動名詞片語當主詞"],
+["【Ronald Day】The voice called, ____ me to push open the door.",["prompt","prompted","to prompt","prompting"],3,"分詞構句，主動用 V-ing；prompt sb. to V"],
+["【Ronald Day】I found a small boy ____ about five lying in bed.",["of","for","in","on"],0,"a boy of about five＝一個大約五歲的男孩"],
+["【Ronald Day】The boy asked for a hug. I felt ____. I held him in my arms.",["I was in the hope","I had no choice","I had had no chance","I was in trouble"],1,"have no choice 別無選擇"],
+["【Ronald Day】She wanted to thank me for ____ a difference in his life.",["make","made","makes","making"],3,"for 是介系詞，後接 V-ing"],
+["【Billy】We colored a picture together ____.",["too","either","instead","yet"],2,"instead 取而代之（放句尾）"],
+["【Billy】I didn't want to ____ Billy, of course, but I also didn't want to lose my job.",["prompt","refuse","frighten","employ"],1,"refuse sb. 拒絕某人"],
+["【Billy】We finished our picture, and as I was about ____, Billy asked me again to hold him.",["to leave","to leaving","leave","leaving"],0,"be about to V 正要…"],
+["【Billy】At that moment, ____ nothing was as important as the happiness of this sick boy.",["it seemed to be","that seemed as","it seemed that","to be seem that"],2,"It seemed that + 子句"],
+["【Billy】____ this, I decided to hold Billy despite the risk.",["To realize","Realize","Realized","Realizing"],3,"分詞構句，主動用 V-ing"],
+["【Whale】____ on its yearly winter journey south, it had become caught in the ropes.",["When it travels","Traveling","Traveled","To travel"],1,"分詞構句：主動且主詞相同，用 V-ing"],
+["【Whale】Rescuers checked ____ they could unwind the ropes but found they were too tight.",["if","when","what","where"],0,"check if… 確認是否…"],
+["【Whale】Therefore, they decided to cut the ropes ____.",["then","though","instead","indeed"],2,"instead 改為（用別的方法）"],
+["【Whale】The whale would surely ____ it terrifying to be trapped.",["have","make","find","view"],2,"find it + adj. + to V"],
+["【Whale】One swing of its ____ tail could kill a diver.",["terminal","tremendous","cooperate","drowsy"],1,"tremendous 巨大的"],
+["【Whale】However, the divers' ____ did not stop them from helping.",["fright","warmth","sparkle","illness"],0,"fright 驚嚇、恐懼"],
+["【Whale】The first diver wondered whether their help could ____.",["deliver a speech","take a look","make a difference","get a moment"],2,"make a difference 有所影響"],
+["【Whale】About twelve ropes were cutting into the skin, and it ____ that the animal might never escape.",["kept","found","prompted","seemed"],3,"It seemed that… 似乎…"],
+["【Whale】____, something amazing happened.",["Once","Besides","Hence","Then"],3,"Then 接著（表時間順序）"],
+["【Whale】It seems they still have a way to ____ their thanks to people who helped them.",["pass on","turn down","call for","feed on"],0,"pass on...to... 把…傳達給…"],
+["【文意選填：工作的意義】They spend the money on themselves and never do anything kind ____ other people.",["for","to","with","at"],0,"do something kind for sb. 為某人做好事"],
+["【文意選填：工作的意義】Some owners of large ____ do more than just make money.",["employers","corporations","employments","contacts"],1,"corporations 大企業（owners of large corporations）"],
+["【文意選填：工作的意義】These ____ wish to have a positive effect on society.",["employees","germs","employers","refusals"],2,"employers 雇主，指前文的企業老闆"],
+["【文意選填：工作的意義】They want to be ____ assistance to people in need.",["in","of","for","at"],1,"be of assistance＝be helpful 提供協助"],
+["【文意選填：工作的意義】____, they might set up an organization to help educate children.",["For example","Therefore","In fact","At the same time"],0,"For example 舉例說明"],
+["【文意選填：工作的意義】____, they would also like to inspire their employees to feel the spirit of sharing.",["In fact","At the same time","For example","Therefore"],1,"At the same time 同時"],
+["【文意選填：工作的意義】Not all acts of generosity are ____ to the rich.",["confined","employed","prompted","refused"],0,"be confined to 侷限於"],
+["【文意選填：工作的意義】Rich people sometimes feel it is their duty to ____ in society.",["pass away","make a difference","turn down","cheer up"],1,"make a difference 帶來改變"],
+["【文意選填：工作的意義】____, some of the richest people have been great role models.",["Therefore","For example","In fact","At the same time"],2,"In fact 事實上"],
+["【文意選填：生病的孩子】However, when they are ____, all that strict parenting takes a back seat.",["ill","prompt","frail","drowsy"],0,"ill 生病的"],
+["【文意選填：生病的孩子】Here are three rules that can be broken when your kids are ____ to their beds.",["employed","confined","refused","passed"],1,"be confined to bed 臥床"],
+["【文意選填：生病的孩子】When children are sick, they tend to ____ certain foods.",["refuse","cheer","frighten","suffer"],0,"refuse 拒絕（吃）"],
+["【文意選填：生病的孩子】The reason is simple — it ____ them up.",["passes","cheers","turns","makes"],1,"cheer sb. up 使某人開心"],
+["【文意選填：生病的孩子】When they are ____ an illness, this impatience can intensify.",["suffering from","passing on","turning down","cheering up"],0,"suffer from an illness 受疾病之苦"],
+["【文意選填：生病的孩子】Usually, I try to ____ good manners to my children.",["turn down","pass on","cheer up","pass away"],1,"pass on...to... 把…傳給…"],
+["【文意選填：生病的孩子】When they are under attack by ____, I limit my demands.",["hugs","germs","warmth","laughter"],1,"germs 細菌"],
+["【文意選填：生病的孩子】This exception ____ when they are recovering.",["makes a difference","passes away","turns down","comes true"],0,"make a difference 有所不同、有幫助"],
+["【文意選填：Sam 的故事】You might think a person should never ____ the rules.",["go against","go over","go through","go after"],0,"go against the rules 違反規定"],
+["【文意選填：Sam 的故事】Sam was ____ by McDonald's a few years ago.",["confined","employed","frightened","prompted"],1,"be employed by 受僱於"],
+["【文意選填：Sam 的故事】Sam loved to bring ____ to the sick kids.",["laughter","germs","refusal","fright"],0,"bring laughter 帶來歡笑"],
+["【文意選填：Sam 的故事】Billy ____ from a very serious disease.",["refused","suffered","hesitated","confined"],1,"suffer from 受…之苦"],
+["【文意選填：Sam 的故事】____, there was a rule that Sam could not touch the patients.",["Therefore","However","For example","In fact"],1,"However 然而（語氣轉折）"]
+]};
+const TAGNAME={v:"單字",g:"文法",c:"克漏字"};
+const SRCNAME={v:"B3 L1 單字・片語",g:"B3 L1 文法：不定詞 ＋ it 虛主詞／受詞",c:"B3 L1 克漏字・文意選填"};
+
+/* ============================================================
+   關卡（兩關：阿嬤的家 → 阿嬤的醫院）
+   每關有自己的地圖、家具、道具名稱、巡邏點與最終考題
+   門口都開 3 格寬，比較好走
+   ============================================================ */
+const T=32;
+const LEVELS=[
+{
+ id:1, name:"阿嬤的家", days:5, gspeed:1,
+ exitIcon:"🚪", exitName:"大門", exitHint:"大門被木板釘死、上鎖、還有密碼鎖。",
+ map:[
+ "##############################",
+ "#.............#..............#",
+ "#.............#..............#",
+ "#.............#..............#",
+ "#.............#..............#",
+ "#............................#",
+ "#............................#",
+ "####...############...########",
+ "#............................#",
+ "#............................#",
+ "###...######...########...####",
+ "#........#.........#.........#",
+ "#........#.........#.........#",
+ "#............................#",
+ "#........#.........#.........#",
+ "#........#.........#.........#",
+ "##############################"],
+ exit:{x:29,y:8},
+ spawn:{x:4.5,y:13.5}, gspawn:{x:22.5,y:3.5},
+ rooms:[
+  {n:"客廳",x:1,y:1,w:13,h:6},{n:"廚房",x:15,y:1,w:14,h:6},
+  {n:"走廊",x:1,y:8,w:28,h:2},
+  {n:"臥室",x:1,y:11,w:8,h:5},{n:"浴室",x:10,y:11,w:9,h:5},{n:"儲藏室",x:20,y:11,w:9,h:5}],
+ furn:[
+  {x:3,y:2,i:"🛋️",n:"沙發",t:"v"},   {x:11,y:1,i:"📚",n:"書架",t:"g"},
+  {x:2,y:5,i:"📺",n:"電視櫃",t:"v"},  {x:12,y:5,i:"🕰️",n:"老時鐘",t:"g"},
+  {x:16,y:1,i:"🧊",n:"冰箱",t:"v"},   {x:27,y:1,i:"🗄️",n:"櫥櫃",t:"g"},
+  {x:17,y:5,i:"🍳",n:"爐台",t:"c"},   {x:25,y:4,i:"🍽️",n:"餐桌",t:"v"},
+  {x:10,y:9,i:"🧥",n:"衣帽架",t:"c"}, {x:17,y:8,i:"🖼️",n:"阿嬤的畫像",t:"g"},
+  {x:2,y:12,i:"🛏️",n:"床",t:"v",hide:1}, {x:7,y:11,i:"🧳",n:"衣櫃",t:"g",hide:1},
+  {x:6,y:15,i:"🪑",n:"書桌",t:"c"},
+  {x:11,y:12,i:"🛁",n:"浴缸",t:"c"},  {x:17,y:14,i:"🚰",n:"洗手台",t:"v"},
+  {x:11,y:15,i:"🧺",n:"洗衣機",t:"g"},
+  {x:22,y:12,i:"🧰",n:"工具箱",t:"v"},{x:27,y:15,i:"🔐",n:"保險箱",t:"g"},
+  {x:25,y:13,i:"📦",n:"木箱",t:"c"}],
+ wp:[[22,3],[20,8],[24,12],[13,13],[4,13],[5,8],[6,3],[11,5],[26,14],[4,2]],
+ items:{hammer:["🔨","鐵鎚"],key:["🗝️","大門鑰匙"],code:["🔢","密碼紙條"],
+        phone:["📱","你的手機"],nose:["🤡","小丑紅鼻子"]},
+ junk:["裡面只有一疊舊報紙。","一張泛黃的照片：年輕的阿嬤抱著一個小男孩，笑得很開心。",
+  "空的。但你聽見樓上有腳步聲…","一本筆記寫著：All you have to do is find the key.",
+  "一堆發霉的餅乾。","一支壞掉的手電筒。","紙條：I was about to run, but she was already behind me.",
+  "紙條：Much to my regret, this door is locked.","一把生鏽的湯匙，沒用。",
+  "阿嬤的毛線球，還有一根長針…","一張課表，週一考 B3 L1 單字。","紙條：You had better not wake her up."],
+ finalQ:{type:"c",text:"I was ____ to refuse again, but then I saw the look of hope in his eyes.（阿嬤床頭那張照片的故事）",
+   opts:["about","able","afraid","used"],ans:0,
+   exp:"be about to V 正要…。課文中 Ronald 正要再次拒絕，最後卻選擇抱了 Billy —— Some things are more important than rules."},
+ intro:"你在臥室醒來。先翻家具找道具吧！"
+},
+{
+ id:2, name:"阿嬤的醫院", days:4, gspeed:1.18,
+ exitIcon:"🛗", exitName:"電梯", exitHint:"電梯面板被鎖住，還要刷卡和輸入密碼。",
+ map:[
+ "##############################",
+ "#.......#........#...........#",
+ "#.......#........#...........#",
+ "#.......#........#...........#",
+ "#.......#........#...........#",
+ "#.......#........#...........#",
+ "###...#####....######.....####",
+ "#............................#",
+ "#............................#",
+ "#............................#",
+ "###....#######...######....###",
+ "#..........#.......#.........#",
+ "#..........#.......#.........#",
+ "#..........#.......#.........#",
+ "#..........#.......#.........#",
+ "#..........#.......#.........#",
+ "##############################"],
+ exit:{x:29,y:8},
+ spawn:{x:24.5,y:13.5}, gspawn:{x:4.5,y:3.5},
+ rooms:[
+  {n:"病房 A",x:1,y:1,w:7,h:5},{n:"病房 B",x:9,y:1,w:8,h:5},{n:"護理站",x:18,y:1,w:11,h:5},
+  {n:"三樓走廊",x:1,y:7,w:28,h:3},
+  {n:"藥局",x:1,y:11,w:10,h:5},{n:"檢驗室",x:12,y:11,w:7,h:5},{n:"值班室",x:20,y:11,w:9,h:5}],
+ furn:[
+  {x:2,y:2,i:"🛏️",n:"病床",t:"v",hide:1},   {x:6,y:1,i:"💉",n:"點滴架",t:"g"},
+  {x:2,y:4,i:"🧸",n:"Billy 的玩具箱",t:"c"}, {x:6,y:4,i:"📋",n:"病歷夾",t:"g"},
+  {x:10,y:2,i:"🛏️",n:"空病床",t:"v",hide:1},{x:15,y:1,i:"🖼️",n:"牆上的畫",t:"c"},
+  {x:13,y:4,i:"🪑",n:"陪病椅",t:"v"},        {x:10,y:5,i:"🚿",n:"淋浴間",t:"g"},
+  {x:19,y:1,i:"💻",n:"護理站電腦",t:"g"},    {x:23,y:2,i:"🗄️",n:"病歷櫃",t:"v"},
+  {x:27,y:1,i:"☕",n:"咖啡機",t:"c"},        {x:26,y:4,i:"🧴",n:"消毒液架",t:"v"},
+  {x:20,y:4,i:"🧳",n:"護理師置物櫃",t:"g",hide:1},
+  {x:9,y:7,i:"🦽",n:"輪椅",t:"c"},           {x:17,y:9,i:"🧯",n:"滅火器",t:"v"},
+  {x:27,y:7,i:"🚰",n:"飲水機",t:"g"},
+  {x:2,y:12,i:"💊",n:"藥櫃",t:"v"},          {x:8,y:12,i:"⚖️",n:"配藥檯",t:"g"},
+  {x:5,y:15,i:"📦",n:"紙箱堆",t:"c"},
+  {x:13,y:12,i:"🔬",n:"顯微鏡檯",t:"g"},     {x:17,y:14,i:"🧫",n:"培養皿架",t:"c"},
+  {x:13,y:15,i:"🧊",n:"檢體冰箱",t:"v"},
+  {x:21,y:12,i:"🛏️",n:"值班床",t:"v",hide:1},{x:27,y:12,i:"🗄️",n:"更衣櫃",t:"g",hide:1},
+  {x:24,y:15,i:"📺",n:"監視器螢幕",t:"c"},   {x:27,y:15,i:"🔐",n:"管制藥品櫃",t:"g"}],
+ wp:[[4,3],[13,3],[24,3],[26,8],[15,8],[4,8],[3,12],[15,13],[25,13],[20,8]],
+ items:{hammer:["🪛","螺絲起子"],key:["🪪","門禁卡"],code:["🔢","電梯密碼"],
+        phone:["📱","你的手機"],nose:["🤡","小丑紅鼻子"]},
+ junk:["一疊病歷，字跡看不懂。","一張紙條：Don't hesitate to call me.","空的點滴袋。",
+  "一盒口罩，還有半瓶酒精。","一張兒童畫：一個小丑和一個小男孩。",
+  "紙條：Doing so might pass on germs to them.","一支壞掉的手電筒。",
+  "今晚的值班表上只有一個名字：阿嬤。","一顆掉在地上的糖果。",
+  "一本童書，書名是 The Day I Broke the Rules。","紙條：I had no choice… but I hugged him."],
+ finalQ:{type:"c",text:"Some things in life, ____ all, were more important.（課文最後的領悟）",
+   opts:["at","after","in","above"],ans:1,
+   exp:"after all 畢竟。Ronald 明知會被開除，still 抱了 Billy —— 有些事畢竟比規定更重要。"},
+ intro:"你在值班室的床上醒來。走廊盡頭有電梯，先找道具！"
+}];
+
+/* 目前關卡（loadLevel 會換掉這些） */
+let LV=0, LVDEF=LEVELS[0], MAP=LEVELS[0].map, MW=MAP[0].length, MH=MAP.length,
+    EXIT=LEVELS[0].exit, ROOMS=LEVELS[0].rooms, FURN=LEVELS[0].furn;
+function loadLevel(i){
+  LV=i; LVDEF=LEVELS[i];
+  MAP=LVDEF.map; MW=MAP[0].length; MH=MAP.length;
+  EXIT=LVDEF.exit; ROOMS=LVDEF.rooms; FURN=LVDEF.furn;
+  applyLevelChrome();
+}
+function applyLevelChrome(){
+  $("lvpill").textContent="第 "+LVDEF.id+" 關・"+LVDEF.name;
+  ["hammer","key","code","phone","nose"].forEach(k=>{
+    const el=$("s_"+k), d=LVDEF.items[k];
+    el.querySelector(".ic").textContent=d[0]; el.title=d[1];
+  });
+}
+
+const TAUNT=["You had better not hesitate… 猶豫就會被打到。","I would rather catch you than let you go.",
+ "Much to my delight, 你又回來了。","All you have to do is stand still!","Rules are rules, 孩子。",
+ "I can't help but smile… 你跑不掉的。","Don't make me angry! 我的傘可不長眼睛。"];
+
+/* ============================================================
+   遊戲狀態
+   ============================================================ */
+const cv=document.getElementById("cv"), ctx=cv.getContext("2d");
+const $=id=>document.getElementById(id);
+let G=null, easy=false, last=0, raf=0;
+
+function solidAt(x,y){
+  if(x<0||y<0||x>=MW||y>=MH) return true;
+  if(MAP[y][x]==="#") return true;
+  if(x===EXIT.x&&y===EXIT.y) return true;
+  return G ? G.furn.some(f=>f.x===x&&f.y===y) : FURN.some(f=>f.x===x&&f.y===y);
+}
+function passable(x,y){return !solidAt(x,y);}
+
+const LOOTKEYS=["hammer","key","code","phone","nose"];
+function newGame(lv,carry){
+  loadLevel(lv);
+  const furn=FURN.map(f=>({...f,opened:false,loot:null}));
+  // 隨機把五樣道具（含 🤡 紅鼻子）藏進不同家具
+  const idx=furn.map((_,i)=>i).sort(()=>Math.random()-0.5);
+  LOOTKEYS.forEach((k,i)=>{ furn[idx[i]].loot=k; });
+  return {
+    lv, day:1, lives:LVDEF.days, maxDay:LVDEF.days, noise:0, over:false,
+    p:{x:LVDEF.spawn.x,y:LVDEF.spawn.y,dx:0,dy:0,dir:1,stam:100,hiding:false},
+    g:{x:LVDEF.gspawn.x,y:LVDEF.gspawn.y,state:"patrol",wp:0,path:[],tt:0,target:null,say:"",sayT:0,stun:0},
+    furn, items:{hammer:false,key:false,code:false,phone:false,nose:false},
+    nose:0, inv:0, correct:(carry&&carry.correct)||0,
+    doorTried:false, wrong:(carry&&carry.wrong)||[],
+    asked:(carry&&carry.asked)||{v:[],g:[],c:[]},
+    t:0, shake:0, grace:1.6, saveT:4
+  };
+}
+
+/* ============================================================
+   存檔（localStorage，關掉網頁也還在）
+   ============================================================ */
+const SAVE_KEY="granny_b3l1_save_v1";
+function saveGame(){
+  try{ if(!G||G.over) return;
+    localStorage.setItem(SAVE_KEY,JSON.stringify({v:1,easy,g:G}));
+  }catch(e){}
+}
+function readSave(){
+  try{
+    const raw=localStorage.getItem(SAVE_KEY); if(!raw) return null;
+    const d=JSON.parse(raw);
+    return (d&&d.v===1&&d.g&&LEVELS[d.g.lv])?d:null;
+  }catch(e){ return null; }
+}
+function clearSave(){ try{ localStorage.removeItem(SAVE_KEY); }catch(e){} }
+function refreshContinue(){
+  const d=readSave();
+  const b=$("btnCont"), w=$("btnWipe");
+  if(d){
+    const L=LEVELS[d.g.lv];
+    b.textContent="繼續遊戲（第 "+L.id+" 關・第 "+d.g.day+" 天）";
+    b.style.display="block"; w.style.display="block";
+  }else{ b.style.display="none"; w.style.display="none"; }
+}
+function resumeGame(){
+  const d=readSave(); if(!d){ refreshContinue(); return; }
+  clearInterval(qInt); quizOpen=false; qAfter=null; finalStep=0;
+  $("quiz").classList.remove("on");
+  easy=!!d.easy; G=d.g;
+  loadLevel(G.lv);
+  G.over=false; G.inv=0; G.grace=2.2; G.saveT=4;
+  G.p.hiding=false; G.g.stun=0; G.g.path=[]; G.g.target=null; G.g.state="patrol";
+  if(G.nose===undefined) G.nose=0;
+  if(G.maxDay===undefined) G.maxDay=LVDEF.days;
+  hideScreens(); syncSlots(); syncHUD(); fitCanvas();
+  toast("📂 讀取存檔：第 "+LVDEF.id+" 關・第 "+G.day+" 天",3000);
+  audioInit();
+  if(!raf){ last=performance.now(); raf=requestAnimationFrame(step); }
+}
+function hideScreens(){
+  ["scTitle","scEnd","scCaught","scLevel"].forEach(id=>$(id).classList.remove("on"));
+}
+function syncSlots(){
+  LOOTKEYS.forEach(k=>$("s_"+k).classList.toggle("on",!!G.items[k]));
+  const n=$("noseN");
+  n.textContent=G.nose; n.style.display=G.items.nose?"block":"none";
+  const b=$("inv");
+  b.classList.toggle("on",!!G.items.nose);
+  b.classList.toggle("dim",!(G.nose>0&&G.inv<=0));
+}
+
+/* ---------- 🤡 紅鼻子：無敵 ---------- */
+function activateNose(){
+  if(!G||G.over||quizOpen) return;
+  if(!G.items.nose){ toast("你還沒找到 🤡 小丑紅鼻子，它藏在某個家具裡。"); return; }
+  if(G.inv>0) return;
+  if(G.nose<=0){ toast("🤡 紅鼻子沒電了。<br>再<b>答對 "+(5-G.correct%5)+" 題</b>就能充能一次！",3000); return; }
+  G.nose--; G.inv=8; G.p.hiding=false;
+  toast("🤡 <b>I'm Ronald!</b> 阿嬤不敢打你了 —— 無敵 8 秒！<br><span style='color:#a294ae'>撞到她還能讓她愣住 4 秒</span>",3000);
+  sWin(); syncSlots(); saveGame();
+}
+
+/* ---------- 出題（同類不重覆，用完才重來） ---------- */
+function pick(type){
+  const pool=BANK[type];
+  if(G.asked[type].length>=pool.length) G.asked[type]=[];
+  let i; do{ i=Math.floor(Math.random()*pool.length); }while(G.asked[type].includes(i));
+  G.asked[type].push(i);
+  const q=pool[i];
+  return {type, text:q[0], opts:q[1], ans:q[2], exp:q[3]};
+}
+
+/* ============================================================
+   音效
+   ============================================================ */
+let AC=null;
+function sfx(f,d,type="square",v=.06,slide=0){
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    const o=AC.createOscillator(), g=AC.createGain();
+    o.type=type; o.frequency.setValueAtTime(f,AC.currentTime);
+    if(slide) o.frequency.exponentialRampToValueAtTime(Math.max(40,f+slide),AC.currentTime+d);
+    g.gain.setValueAtTime(v,AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(.0001,AC.currentTime+d);
+    o.connect(g); g.connect(AC.destination); o.start(); o.stop(AC.currentTime+d);
+  }catch(e){}
+}
+const sOpen=()=>sfx(320,.12,"triangle",.05,120);
+const sGood=()=>{sfx(660,.1,"triangle",.07);setTimeout(()=>sfx(990,.16,"triangle",.07),90);};
+const sBad =()=>{sfx(180,.3,"sawtooth",.09,-120);};
+const sHit =()=>{sfx(90,.5,"sawtooth",.12,-60);};
+const sWin =()=>{[523,659,784,1047].forEach((f,i)=>setTimeout(()=>sfx(f,.22,"triangle",.08),i*130));};
+let beatT=0;
+function heartbeat(dist,dt){
+  beatT-=dt;
+  if(dist<7 && beatT<=0){ sfx(60,.12,"sine",.10); beatT=Math.max(.28,dist*.09); }
+}
+
+/* ============================================================
+   BFS 尋路
+   ============================================================ */
+function bfs(sx,sy,tx,ty){
+  sx|=0;sy|=0;tx|=0;ty|=0;
+  if(sx===tx&&sy===ty) return [];
+  const prev=new Int32Array(MW*MH).fill(-1), seen=new Uint8Array(MW*MH);
+  const q=[sy*MW+sx]; seen[sy*MW+sx]=1;
+  const D=[[1,0],[-1,0],[0,1],[0,-1]];
+  let head=0, goal=ty*MW+tx, found=false;
+  while(head<q.length){
+    const c=q[head++], cx=c%MW, cy=(c/MW)|0;
+    if(c===goal){found=true;break;}
+    for(const[dx,dy]of D){
+      const nx=cx+dx, ny=cy+dy, n=ny*MW+nx;
+      if(nx<0||ny<0||nx>=MW||ny>=MH||seen[n]) continue;
+      if(!passable(nx,ny)&&!(nx===tx&&ny===ty)) continue;
+      seen[n]=1; prev[n]=c; q.push(n);
+    }
+  }
+  if(!found) return [];
+  const path=[]; let c=goal;
+  while(c!==-1&&c!==sy*MW+sx){ path.push({x:c%MW,y:(c/MW)|0}); c=prev[c]; }
+  return path.reverse();
+}
+function los(ax,ay,bx,by){          // 視線是否被牆擋住
+  const d=Math.hypot(bx-ax,by-ay), st=Math.ceil(d*3);
+  for(let i=1;i<st;i++){
+    const x=ax+(bx-ax)*i/st, y=ay+(by-ay)*i/st;
+    if(MAP[Math.floor(y)] && MAP[Math.floor(y)][Math.floor(x)]==="#") return false;
+  }
+  return true;
+}
+
+/* ============================================================
+   輸入
+   ============================================================ */
+const keys={};
+addEventListener("keydown",e=>{
+  if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].includes(e.key)) e.preventDefault();
+  const k=e.key.toLowerCase();
+  keys[k]=true;
+  if(k==="e") tryInteract();
+  if(k==="q") activateNose();
+});
+addEventListener("keyup",e=>{keys[e.key.toLowerCase()]=false;});
+
+/* ---------- 虛擬搖桿（類比、可斜走；手指按左半邊任何地方都行） ---------- */
+const touch={x:0,y:0};
+(function(){
+  const zone=$("stick"), base=$("stickBase"), knob=$("stickKnob");
+  const R=54, DEAD=0.16;
+  let pid=null, bx=0, by=0;
+  const reset=()=>{ pid=null; touch.x=0; touch.y=0; base.classList.remove("on"); };
+  zone.addEventListener("pointerdown",e=>{
+    if(pid!==null) return;
+    pid=e.pointerId;
+    try{ zone.setPointerCapture(pid); }catch(err){}
+    const r=zone.getBoundingClientRect();
+    bx=e.clientX-r.left; by=e.clientY-r.top;
+    base.style.left=bx+"px"; base.style.top=by+"px";
+    knob.style.transform="translate(0,0)";
+    base.classList.add("on");
+    e.preventDefault();
+  });
+  zone.addEventListener("pointermove",e=>{
+    if(e.pointerId!==pid) return;
+    const r=zone.getBoundingClientRect();
+    let dx=(e.clientX-r.left)-bx, dy=(e.clientY-r.top)-by;
+    const d=Math.hypot(dx,dy);
+    if(d>R){ dx=dx/d*R; dy=dy/d*R; }
+    knob.style.transform="translate("+dx.toFixed(1)+"px,"+dy.toFixed(1)+"px)";
+    const m=Math.min(1,d/R);
+    if(m<DEAD){ touch.x=0; touch.y=0; }
+    else { const n=Math.hypot(dx,dy)||1; touch.x=dx/n*m; touch.y=dy/n*m; }
+    e.preventDefault();
+  });
+  zone.addEventListener("pointerup",e=>{ if(e.pointerId===pid) reset(); });
+  zone.addEventListener("pointercancel",e=>{ if(e.pointerId===pid) reset(); });
+  zone.addEventListener("lostpointercapture",e=>{ if(e.pointerId===pid) reset(); });
+})();
+const tapBtn=(id,fn)=>{
+  const el=$(id);
+  el.addEventListener("pointerdown",e=>{ e.preventDefault(); fn(); });
+};
+tapBtn("act",()=>tryInteract());
+tapBtn("inv",()=>activateNose());
+if(matchMedia("(pointer:coarse)").matches || location.search.indexOf("touch=1")>=0)
+  $("touch").classList.add("on");
+
+/* ============================================================
+   互動
+   ============================================================ */
+function nearFurn(){
+  if(!G) return null;
+  let best=null,bd=1.25;
+  for(const f of G.furn){
+    const d=Math.hypot(f.x+.5-G.p.x, f.y+.5-G.p.y);
+    if(d<bd){bd=d;best=f;}
+  }
+  return best;
+}
+function nearDoor(){ return G && Math.hypot(EXIT.x-.2-G.p.x, EXIT.y+.5-G.p.y)<1.4; }
+
+function tryInteract(){
+  if(!G||G.over||quizOpen) return;
+  if(G.p.hiding){ G.p.hiding=false; toast("你從躲藏處出來了。"); return; }
+  if(nearDoor()){ openDoor(); return; }
+  const f=nearFurn();
+  if(!f) return;
+  if(f.hide && G.g.state!=="patrol"){ G.p.hiding=true; G.g.target=null; G.g.state="alert"; toast("你躲進"+f.n+"…屏住呼吸 🤫"); sfx(120,.2,"sine",.05); return; }
+  if(f.opened){ toast(f.n+"已經翻過了。"+(f.hide?"（被追時按 E 可以躲進去）":"")); return; }
+  openQuiz(f);
+}
+function openDoor(){
+  const need=[];
+  ["hammer","key","code"].forEach(k=>{ if(!G.items[k]) need.push(LVDEF.items[k].join(" ")); });
+  if(need.length){ toast(LVDEF.exitHint+"<br>你還缺：<b>"+need.join("、")+"</b>"); sfx(140,.2,"square",.05); return; }
+  startFinal();
+}
+
+/* ============================================================
+   小提示
+   ============================================================ */
+let toastT=0;
+function toast(html,ms=2600){
+  const el=$("toast"); el.innerHTML=html; el.classList.add("show");
+  clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove("show"),ms);
+}
+
+/* ============================================================
+   題目視窗
+   ============================================================ */
+let quizOpen=false, qData=null, qTimer=0, qInt=0, qAfter=null, finalStep=0;
+function openQuiz(f,after,forced){
+  quizOpen=true; qAfter=after||null;
+  qData=forced||pick(f?f.t:"v");
+  $("qtag").textContent=TAGNAME[qData.type];
+  $("qsrc").textContent=(f?("🔍 你正在翻找「"+f.n+"」　|　"):"🚪 最終考驗　|　")+SRCNAME[qData.type];
+  $("qtext").textContent=qData.text;
+  $("exp").classList.remove("on"); $("btnNext").style.display="none";
+  const box=$("opts"); box.innerHTML="";
+  qData.opts.forEach((o,i)=>{
+    const b=document.createElement("button");
+    b.className="opt"; b.textContent=String.fromCharCode(65+i)+". "+o;
+    b.onclick=()=>answer(i,f);
+    box.appendChild(b);
+  });
+  qTimer=25; $("qtime").textContent="25"; $("tbar").style.width="100%";
+  clearInterval(qInt);
+  qInt=setInterval(()=>{
+    qTimer-=0.1;
+    $("qtime").textContent=Math.max(0,qTimer).toFixed(0);
+    $("tbar").style.width=Math.max(0,qTimer/25*100)+"%";
+    if(qTimer<=0){ clearInterval(qInt); answer(-1,f); }
+  },100);
+  $("quiz").classList.add("on");
+  sOpen();
+}
+function answer(i,f){
+  clearInterval(qInt);
+  const ok=(i===qData.ans);
+  [...$("opts").children].forEach((b,k)=>{
+    b.disabled=true;
+    if(k===qData.ans)b.classList.add("correct");
+    else if(k===i)b.classList.add("wrong");
+  });
+  const e=$("exp");
+  e.innerHTML=(ok?"✅ <b style='color:#4ad07a'>答對了！</b>":(i<0?"⏰ <b style='color:#e0344a'>時間到！</b>":"❌ <b style='color:#e0344a'>答錯了。</b>"))
+    +"　正解：<b>"+qData.opts[qData.ans]+"</b><br>💡 "+qData.exp;
+  e.classList.add("on");
+  $("btnNext").style.display="block";
+  if(ok){
+    sGood(); G.correct++;
+    if(G.items.nose && G.correct%5===0 && G.nose<3){ G.nose++; qData.charged=true; syncSlots(); }
+  }else{ sBad(); G.wrong.push({q:qData.text,a:qData.opts[qData.ans],e:qData.exp}); }
+  qData.result=ok; qData.furn=f;
+}
+$("btnNext").onclick=()=>{
+  $("quiz").classList.remove("on"); quizOpen=false;
+  const ok=qData.result, f=qData.furn;
+  if(qAfter){ const cb=qAfter; qAfter=null; cb(ok); return; }
+  if(ok){
+    f.opened=true; G.noise=Math.min(100,G.noise+12);
+    if(f.loot){
+      const k=f.loot, ic=LVDEF.items[k][0], nm=LVDEF.items[k][1];
+      G.items[k]=true;
+      if(k==="phone"){ G.lives++; G.maxDay++; toast("📱 找到你的手機了！<b>多撐一天</b>（+1 天）"); }
+      else if(k==="nose"){ G.nose=2; toast("🤡 <b>找到小丑紅鼻子！</b><br>按 <b>Q</b>（手機按「無敵」）可以無敵 8 秒，現在有 <b>2</b> 次。<br><span style='color:#a294ae'>之後每答對 5 題會再充能一次</span>",4200); }
+      else toast("你拿到了 "+ic+" <b>"+nm+"</b>！");
+      sWin(); syncSlots();
+    }else{
+      toast("🔍 "+LVDEF.junk[Math.floor(Math.random()*LVDEF.junk.length)]);
+    }
+    saveGame();
+  }else{
+    // 答錯＝翻倒東西 → 巨大聲響
+    G.noise=100; alertGranny(true);
+    toast("💥 <b style='color:#e0344a'>你打翻了東西，巨大聲響！</b>阿嬤朝你衝過來了！");
+    saveGame();
+  }
+  if(qData.charged) setTimeout(()=>toast("🤡 <b>紅鼻子充能 +1</b>（目前 "+G.nose+" 次）",2400),2000);
+};
+
+/* ---------- 最終考驗（3 題：單字＋文法＋克漏字） ---------- */
+function startFinal(){
+  finalStep=0; toast("🚪 大門的三道鎖亮了起來…答對三題就能逃出去！",2000);
+  setTimeout(nextFinal,700);
+}
+function nextFinal(){
+  const types=["v","g","c"];
+  const q=(finalStep===2) ? Object.assign({},LVDEF.finalQ) : pick(types[finalStep]);
+  openQuiz(null,(ok)=>{
+    if(!ok){
+      G.noise=100; alertGranny(true);
+      toast("🔒 鎖又扣回去了！阿嬤聽見了！",2600);
+      return;
+    }
+    finalStep++;
+    if(finalStep>=3){ if(LV<LEVELS.length-1) levelClear(); else win(); }
+    else { toast("🔓 第 "+finalStep+" 道鎖打開了！",1400); setTimeout(nextFinal,900); }
+  },q);
+}
+
+/* ============================================================
+   阿嬤
+   ============================================================ */
+function alertGranny(chase){
+  G.g.state=chase?"chase":"alert";
+  G.g.target={x:Math.floor(G.p.x),y:Math.floor(G.p.y)};
+  G.g.path=[]; G.g.tt=0;
+  G.g.say=TAUNT[Math.floor(Math.random()*TAUNT.length)]; G.g.sayT=3;
+  sfx(200,.5,"sawtooth",.07,-150);
+}
+function updateGranny(dt){
+  const g=G.g, p=G.p;
+  const dist=Math.hypot(p.x-g.x,p.y-g.y);
+  const canSee=!p.hiding && dist<8 && los(g.x,g.y,p.x,p.y);
+  if(canSee && g.state!=="chase"){ g.state="chase"; g.say=TAUNT[Math.floor(Math.random()*TAUNT.length)]; g.sayT=2.5; }
+  if(g.state==="chase"){
+    if(canSee){ g.target={x:Math.floor(p.x),y:Math.floor(p.y)}; }
+    else if(!g.target || (Math.abs(g.x-g.target.x-.5)<.5&&Math.abs(g.y-g.target.y-.5)<.5)){
+      g.state="alert";
+    }
+  }
+  if(g.state==="alert"){
+    if(!g.target||(Math.abs(g.x-g.target.x-.5)<.6&&Math.abs(g.y-g.target.y-.5)<.6)){
+      g.state="patrol"; g.target=null; g.say="";
+    }
+  }
+  if(g.state==="patrol"){
+    const WP=LVDEF.wp;
+    if(!g.target){ g.wp=(g.wp+1)%WP.length; g.target={x:WP[g.wp][0],y:WP[g.wp][1]}; }
+    if(Math.hypot(g.x-g.target.x-.5,g.y-g.target.y-.5)<.6){ g.target=null; }
+  }
+  // 被紅鼻子嚇到 → 愣住不動
+  if(g.stun>0){
+    g.stun-=dt;
+    if(g.sayT>0) g.sayT-=dt;
+    if(!p.hiding && dist<0.68 && G.inv<=0 && G.grace<=0 && !quizOpen) caught();
+    heartbeat(dist,dt);
+    return dist;
+  }
+  // 重新規劃路線
+  g.tt-=dt;
+  if(g.tt<=0 && g.target){ g.path=bfs(g.x,g.y,g.target.x,g.target.y); g.tt=0.45; }
+  // 移動
+  const base=(easy?2.0:2.55)*(LVDEF.gspeed||1);
+  const spd=(g.state==="chase"?base*1.42:base)*dt;
+  if(g.path&&g.path.length){
+    const n=g.path[0], tx=n.x+.5, ty=n.y+.5;
+    const dx=tx-g.x, dy=ty-g.y, d=Math.hypot(dx,dy);
+    if(d<.12){ g.path.shift(); }
+    else { g.x+=dx/d*spd; g.y+=dy/d*spd; g.face=dx>0?1:(dx<0?-1:(g.face||1)); }
+  }
+  if(g.sayT>0) g.sayT-=dt;
+  // 碰到阿嬤
+  if(!p.hiding && dist<0.68 && !quizOpen){
+    if(G.inv>0){
+      if(g.stun<=0){
+        g.stun=4; g.state="alert"; g.path=[]; g.target=null;
+        g.say="Ronald?! 是你嗎…"; g.sayT=3;
+        sfx(330,.35,"triangle",.09,-160);
+        toast("🤡 阿嬤看到紅鼻子，愣住了！<b>4 秒</b>",2200);
+      }
+    }else if(G.grace<=0) caught();
+  }
+  // 心跳
+  heartbeat(dist,dt);
+  return dist;
+}
+
+/* ============================================================
+   被抓 / 勝負
+   ============================================================ */
+function caught(){
+  if(G.over) return;
+  G.over=true; sHit(); G.shake=.6;
+  const fl=$("flash"); fl.style.opacity=".75"; setTimeout(()=>fl.style.opacity="0",260);
+  G.day++; G.lives--;
+  G.inv=0;
+  setTimeout(()=>{
+    if(G.lives<=0 || G.day>G.maxDay){ lose(); return; }
+    $("caughtTitle").textContent="🌂 被雨傘打中了！";
+    $("caughtMsg").innerHTML="你昏了過去…醒來已是第 <b>"+G.day+"</b> 天。<br>已經找到的道具還留著，繼續找！<br><span style='color:#a294ae'>剩餘天數："+G.lives+"</span>";
+    $("scCaught").classList.add("on");
+  },450);
+}
+$("btnNextDay").onclick=()=>{
+  $("scCaught").classList.remove("on");
+  G.over=false; G.noise=0; G.grace=2.2;
+  G.p.x=LVDEF.spawn.x;G.p.y=LVDEF.spawn.y;G.p.hiding=false;G.p.stam=100;
+  G.g.x=LVDEF.gspawn.x;G.g.y=LVDEF.gspawn.y;G.g.state="patrol";
+  G.g.target=null;G.g.path=[];G.g.say="";G.g.stun=0;
+  syncHUD(); saveGame();
+};
+
+/* ---------- 過關（還有下一關） ---------- */
+function levelClear(){
+  G.over=true; sWin();
+  const nx=LEVELS[LV+1];
+  $("lvTitle").textContent="第 "+LVDEF.id+" 關過關！";
+  $("lvMsg").innerHTML="你在第 <b>"+G.day+"</b> 天衝出了"+LVDEF.exitName+"…<br>但外面不是馬路。";
+  $("lvCard").innerHTML=
+    "<b>【第 "+nx.id+" 關："+nx.name+"】</b><br>"+
+    "門外是一條消毒水味的走廊。牆上寫著「兒童安寧病房」，而阿嬤的腳步聲已經跟上來了。<br><br>"+
+    "・走廊更寬、家具更多（<b>26 個</b>可以翻）<br>"+
+    "・阿嬤走得<b>更快</b>，你只有 <b>"+nx.days+" 天</b><br>"+
+    "・道具換成 "+nx.items.hammer.join(" ")+"、"+nx.items.key.join(" ")+"、"+nx.items.code.join(" ")+"，出口是走廊盡頭的 "+nx.exitIcon+" "+nx.exitName+"<br>"+
+    "・🤡 紅鼻子會重新藏起來，答對題目一樣能充能<br>"+
+    "・錯題會一路累積到最後一起複習";
+  $("btnLvGo").textContent="進入第 "+nx.id+" 關";
+  $("scLevel").classList.add("on");
+  saveGame();
+}
+$("btnLvGo").onclick=()=>{
+  const carry={wrong:G.wrong,asked:G.asked,correct:G.correct};
+  $("scLevel").classList.remove("on");
+  startLevel(LV+1,carry);
+};
+function win(){
+  G.over=true; sWin(); clearSave();
+  $("endArt").textContent="🛗✨🏃";
+  $("endTitle").textContent="兩關全破，你逃出來了！";
+  $("endMsg").innerHTML="你在第 <b>"+G.day+"</b> 天搭上電梯，離開了阿嬤的醫院。<br>"+
+    (G.items.phone?"而且手機也拿回來了 📱":"（手機還在阿嬤那裡…）")+
+    "<br>總答對：<b>"+G.correct+"</b> 題　答錯：<b>"+G.wrong.length+"</b> 題";
+  showWrong(); $("scEnd").classList.add("on"); refreshContinue();
+}
+function lose(){
+  G.over=true; clearSave(); refreshContinue();
+  $("endArt").textContent="👵🌂💀";
+  $("endTitle").textContent="五天到了…";
+  $("endTitle").textContent="第 "+LVDEF.id+" 關・天數用完了…";
+  $("endMsg").innerHTML="阿嬤把你「解決」了。<br>“Rules are rules.” 她說。<br>總答對：<b>"+G.correct+"</b> 題　答錯：<b>"+G.wrong.length+"</b> 題";
+  showWrong(); $("scEnd").classList.add("on");
+}
+function showWrong(){
+  const box=$("wrongList");
+  if(!G.wrong.length){ box.innerHTML="<div class='wq' style='border-left-color:#4ad07a'>全部答對，太強了！👏</div>"; return; }
+  const seen=new Set();
+  box.innerHTML=G.wrong.filter(w=>{if(seen.has(w.q))return false;seen.add(w.q);return true;})
+    .map(w=>"<div class='wq'>"+w.q+"<br>✅ <span class='ans'>"+w.a+"</span><br>💡 "+w.e+"</div>").join("");
+}
+
+/* ============================================================
+   繪圖
+   ============================================================ */
+function fitCanvas(){
+  const st=$("stage"), r=st.getBoundingClientRect();
+  const dpr=Math.min(2,devicePixelRatio||1);
+  cv.width=Math.floor(r.width*dpr); cv.height=Math.floor(r.height*dpr);
+  cv.style.width=r.width+"px"; cv.style.height=r.height+"px";
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  cv._w=r.width; cv._h=r.height;
+}
+addEventListener("resize",()=>{fitCanvas();});
+
+function draw(){
+  const W=cv._w,H=cv._h;
+  ctx.clearRect(0,0,W,H); ctx.fillStyle="#050409"; ctx.fillRect(0,0,W,H);
+  if(!G) return;
+  // 鏡頭
+  const wantTiles = W<620 ? 12 : 19;
+  let sc = Math.min(W/(wantTiles*T), H/(9.5*T));
+  sc = Math.max(sc, Math.min(W/(MW*T), H/(MH*T)));
+  const vw=W/sc, vh=H/sc;
+  let camx=G.p.x*T-vw/2, camy=G.p.y*T-vh/2;
+  camx=Math.max(0,Math.min(MW*T-vw,camx)); camy=Math.max(0,Math.min(MH*T-vh,camy));
+  if(MW*T<vw) camx=(MW*T-vw)/2;
+  if(MH*T<vh) camy=(MH*T-vh)/2;
+  const shk=G.shake>0?(Math.random()-.5)*10*G.shake:0;
+  ctx.save(); ctx.scale(sc,sc); ctx.translate(-camx+shk,-camy+shk);
+
+  // 地板 + 牆
+  for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){
+    const px=x*T,py=y*T;
+    if(MAP[y][x]==="#"){
+      ctx.fillStyle="#241a2b"; ctx.fillRect(px,py,T,T);
+      ctx.fillStyle="#2f2237"; ctx.fillRect(px+1,py+1,T-2,T/2-2);
+      ctx.fillStyle="#1a1220"; ctx.fillRect(px,py+T-3,T,3);
+    }else{
+      ctx.fillStyle=((x+y)%2)?"#161020":"#120d1a"; ctx.fillRect(px,py,T,T);
+      ctx.strokeStyle="rgba(255,255,255,.02)"; ctx.strokeRect(px+.5,py+.5,T-1,T-1);
+    }
+  }
+  // 房名
+  ctx.font="600 13px 'PingFang TC',sans-serif"; ctx.textAlign="center";
+  ROOMS.forEach(r=>{ ctx.fillStyle="rgba(190,170,205,.18)"; ctx.fillText(r.n,(r.x+r.w/2)*T,(r.y+r.h/2)*T+4); });
+
+  // 大門
+  const ex=EXIT.x*T, ey=EXIT.y*T;
+  const allItems=G.items.hammer&&G.items.key&&G.items.code;
+  ctx.fillStyle=allItems?"#6b4a1e":"#3a2a1c"; ctx.fillRect(ex,ey,T,T);
+  ctx.fillStyle=allItems?"#c79a4a":"#5a4530"; ctx.fillRect(ex+3,ey+3,T-6,T-6);
+  ctx.font="16px serif"; ctx.fillText(allItems?LVDEF.exitIcon:"🔒",ex+T/2,ey+T/2+6);
+  if(allItems){ ctx.strokeStyle="rgba(255,181,71,"+(0.35+0.3*Math.sin(G.t*4))+")"; ctx.lineWidth=2; ctx.strokeRect(ex-1,ey-1,T+2,T+2); }
+
+  // 家具
+  ctx.font="19px serif";
+  G.furn.forEach(f=>{
+    const px=f.x*T,py=f.y*T;
+    ctx.fillStyle=f.opened?"#241c2c":"#33263d"; ctx.fillRect(px+2,py+3,T-4,T-5);
+    ctx.fillStyle="rgba(0,0,0,.35)"; ctx.fillRect(px+2,py+T-4,T-4,3);
+    ctx.globalAlpha=f.opened?.35:1; ctx.fillText(f.i,px+T/2,py+T/2+7); ctx.globalAlpha=1;
+    if(f.opened){ ctx.strokeStyle="rgba(74,208,122,.5)";ctx.lineWidth=1.5;ctx.strokeRect(px+2.5,py+3.5,T-5,T-6); }
+  });
+
+  // 玩家
+  drawPlayer(G.p.x*T,G.p.y*T);
+  // 阿嬤
+  drawGranny(G.g.x*T,G.g.y*T);
+
+  // 黑暗
+  const lightR=G.p.hiding?90:(G.inv>0?300:230);
+  const grd=ctx.createRadialGradient(G.p.x*T,G.p.y*T,14,G.p.x*T,G.p.y*T,lightR);
+  grd.addColorStop(0,"rgba(0,0,0,0)"); grd.addColorStop(.55,"rgba(0,0,0,.18)"); grd.addColorStop(1,"rgba(0,0,0,.78)");
+  ctx.fillStyle=grd; ctx.fillRect(camx-10,camy-10,vw+20,vh+20);
+  // 阿嬤的紅光（就算在暗處也看得到一點）
+  const d=Math.hypot(G.p.x-G.g.x,G.p.y-G.g.y);
+  if(d<12){
+    const gg=ctx.createRadialGradient(G.g.x*T,G.g.y*T,2,G.g.x*T,G.g.y*T,70);
+    gg.addColorStop(0,"rgba(224,52,74,"+(0.30*(1-d/12))+")"); gg.addColorStop(1,"rgba(224,52,74,0)");
+    ctx.fillStyle=gg; ctx.fillRect(G.g.x*T-70,G.g.y*T-70,140,140);
+  }
+  // 台詞
+  if(G.g.sayT>0&&G.g.say){
+    ctx.font="600 12px 'PingFang TC',sans-serif"; ctx.textAlign="center";
+    const w=ctx.measureText(G.g.say).width+16;
+    ctx.fillStyle="rgba(20,8,12,.9)"; ctx.fillRect(G.g.x*T-w/2,G.g.y*T-44,w,20);
+    ctx.strokeStyle="#8c2136"; ctx.lineWidth=1; ctx.strokeRect(G.g.x*T-w/2,G.g.y*T-44,w,20);
+    ctx.fillStyle="#ffc9d2"; ctx.fillText(G.g.say,G.g.x*T,G.g.y*T-30);
+  }
+  // 互動提示
+  const f=nearFurn();
+  if(!quizOpen){
+    let hint=null;
+    if(G.p.hiding) hint="按 E 出來";
+    else if(nearDoor()) hint="E 開"+LVDEF.exitName;
+    else if(f) hint=f.opened?(f.hide?"E 躲進去":"已翻過"):("E 搜查 "+f.n);
+    if(hint){
+      ctx.font="600 12px 'PingFang TC',sans-serif"; ctx.textAlign="center";
+      const w=ctx.measureText(hint).width+16;
+      ctx.fillStyle="rgba(10,8,14,.9)"; ctx.fillRect(G.p.x*T-w/2,G.p.y*T-42,w,20);
+      ctx.strokeStyle="#ffb547"; ctx.strokeRect(G.p.x*T-w/2,G.p.y*T-42,w,20);
+      ctx.fillStyle="#ffd9a0"; ctx.fillText(hint,G.p.x*T,G.p.y*T-28);
+    }
+  }
+  ctx.restore();
+
+  // 方向指示（阿嬤在畫面外時）
+  if(d>4){
+    const ang=Math.atan2(G.g.y-G.p.y,G.g.x-G.p.x);
+    const cxp=W/2, cyp=H/2, r=Math.min(W,H)*0.34;
+    ctx.save(); ctx.translate(cxp+Math.cos(ang)*r, cyp+Math.sin(ang)*r); ctx.rotate(ang);
+    ctx.globalAlpha=Math.max(.15,Math.min(.75,1-(d-4)/12));
+    ctx.fillStyle="#e0344a"; ctx.beginPath(); ctx.moveTo(10,0); ctx.lineTo(-6,-6); ctx.lineTo(-6,6); ctx.closePath(); ctx.fill();
+    ctx.restore(); ctx.globalAlpha=1;
+  }
+}
+function drawPlayer(px,py){
+  if(G.p.hiding){
+    ctx.globalAlpha=.4;
+  }
+  // 🤡 無敵光環
+  if(G.inv>0){
+    const hue=(G.t*220)%360;
+    ctx.save();
+    const gr=ctx.createRadialGradient(px,py,4,px,py,30);
+    gr.addColorStop(0,"hsla("+hue+",95%,65%,.45)");
+    gr.addColorStop(1,"hsla("+hue+",95%,65%,0)");
+    ctx.fillStyle=gr; ctx.fillRect(px-30,py-30,60,60);
+    ctx.strokeStyle="hsla("+hue+",95%,70%,"+(G.inv<2?(0.35+0.35*Math.sin(G.t*18)):0.85)+")";
+    ctx.lineWidth=2.2; ctx.beginPath(); ctx.arc(px,py,17,0,7); ctx.stroke();
+    ctx.restore();
+  }
+  ctx.save(); ctx.translate(px,py);
+  ctx.fillStyle="rgba(0,0,0,.4)"; ctx.beginPath(); ctx.ellipse(0,11,9,4,0,0,7); ctx.fill();
+  ctx.fillStyle="#2f6ea8"; ctx.fillRect(-7,-4,14,15);          // 外套
+  ctx.fillStyle="#1f4d76"; ctx.fillRect(-7,8,14,4);
+  ctx.fillStyle="#f2c9a0"; ctx.beginPath(); ctx.arc(0,-9,7,0,7); ctx.fill();   // 頭
+  ctx.fillStyle="#241a1a"; ctx.beginPath(); ctx.arc(0,-11,7,Math.PI,0); ctx.fill();
+  ctx.fillStyle="#1a1a1a";
+  ctx.fillRect(G.p.dir>0?1:-4,-10,3,2); ctx.fillRect(G.p.dir>0?-4:1,-10,2,2);
+  if(G.inv>0){   // 戴上小丑紅鼻子
+    ctx.fillStyle="#ff2f3e"; ctx.beginPath(); ctx.arc(G.p.dir>0?2:-2,-7,2.6,0,7); ctx.fill();
+    ctx.fillStyle="rgba(255,255,255,.7)"; ctx.beginPath(); ctx.arc(G.p.dir>0?1.2:-2.8,-7.8,.9,0,7); ctx.fill();
+  }
+  ctx.restore(); ctx.globalAlpha=1;
+}
+function drawGranny(px,py){
+  const chase=G.g.state==="chase" && G.g.stun<=0;
+  const stunned=G.g.stun>0;
+  ctx.save(); ctx.translate(px,py);
+  if(stunned){
+    ctx.font="14px serif"; ctx.textAlign="center";
+    for(let i=0;i<3;i++){
+      const a=G.t*5+i*2.1;
+      ctx.fillText("💫",Math.cos(a)*13,-24+Math.sin(a)*4);
+    }
+    ctx.font="19px serif";
+  }
+  ctx.fillStyle="rgba(0,0,0,.45)"; ctx.beginPath(); ctx.ellipse(0,12,10,4,0,0,7); ctx.fill();
+  const sway=stunned?Math.sin(G.t*3)*7:Math.sin(G.t*(chase?14:6))*(chase?3:1.2);
+  ctx.rotate(sway*Math.PI/180);
+  // 洋裝
+  ctx.fillStyle=chase?"#61122a":"#43243a";
+  ctx.beginPath(); ctx.moveTo(-6,-3); ctx.lineTo(6,-3); ctx.lineTo(10,13); ctx.lineTo(-10,13); ctx.closePath(); ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,.07)"; ctx.fillRect(-6,-3,12,4);
+  // 頭 + 白髮
+  ctx.fillStyle="#e6cbb2"; ctx.beginPath(); ctx.arc(0,-10,7.5,0,7); ctx.fill();
+  ctx.fillStyle="#dcd6e0"; ctx.beginPath(); ctx.arc(0,-13,7.5,Math.PI,0); ctx.fill();
+  ctx.beginPath(); ctx.arc(0,-19,4,0,7); ctx.fill();             // 髮髻
+  // 眼睛
+  ctx.fillStyle=chase?"#ff2b42":"#5a1220";
+  ctx.beginPath(); ctx.arc(-3,-10,1.8,0,7); ctx.arc(3,-10,1.8,0,7); ctx.fill();
+  if(chase){ ctx.fillStyle="rgba(255,43,66,.35)"; ctx.beginPath(); ctx.arc(-3,-10,4,0,7); ctx.arc(3,-10,4,0,7); ctx.fill(); }
+  ctx.fillStyle="#7a1020"; ctx.fillRect(-2,-6,4,2);
+  // 🌂 雨傘（她的武器）
+  const face=(G.g.face||1);
+  ctx.save(); ctx.translate(face*11,0); ctx.rotate(face*(chase?-0.9:-0.25));
+  ctx.strokeStyle="#2a2028"; ctx.lineWidth=2.5;
+  ctx.beginPath(); ctx.moveTo(0,-6); ctx.lineTo(0,14); ctx.stroke();       // 傘柄
+  ctx.beginPath(); ctx.arc(-3,14,3,0,Math.PI); ctx.stroke();               // 彎柄
+  ctx.fillStyle=chase?"#8c1024":"#1e1a24";                                 // 傘面
+  ctx.beginPath(); ctx.moveTo(-11,-6); ctx.quadraticCurveTo(0,-18,11,-6);
+  ctx.quadraticCurveTo(5.5,-9,0,-6); ctx.quadraticCurveTo(-5.5,-9,-11,-6); ctx.fill();
+  ctx.fillStyle="#3a2b3f"; ctx.fillRect(-1,-20,2,4);
+  ctx.restore();
+  ctx.restore();
+}
+
+/* ============================================================
+   主迴圈
+   ============================================================ */
+function syncHUD(){
+  $("day").textContent=G.day; $("daymax").textContent=G.maxDay; $("lives").textContent=G.lives;
+  $("noise").style.width=G.noise+"%";
+  $("noseN").textContent=G.nose;
+  $("inv").classList.toggle("dim",!(G.nose>0&&G.inv<=0));
+  const st=$("state");
+  if(G.inv>0){ st.textContent="🤡 無敵 "+G.inv.toFixed(1)+"s"; st.style.color="#ffd36e"; }
+  else if(G.g.stun>0){ st.textContent="💫 阿嬤愣住了"; st.style.color="#9fd7ff"; }
+  else if(G.p.hiding){ st.textContent="🫥 躲藏中"; st.style.color="#9fd7ff"; }
+  else if(G.g.state==="chase"){ st.textContent="🏃‍♀️ 阿嬤追來了！"; st.style.color="#e0344a"; }
+  else if(G.g.state==="alert"){ st.textContent="👀 阿嬤在找你"; st.style.color="#ffb547"; }
+  else { st.textContent="🚶‍♀️ 阿嬤在巡邏"; st.style.color="#8fd6a4"; }
+}
+function step(ts){
+  raf=requestAnimationFrame(step);
+  const dt=Math.min(.05,(ts-last)/1000||0); last=ts;
+  if(!G){ draw(); return; }
+  G.t+=dt;
+  if(G.grace>0) G.grace-=dt;
+  if(G.shake>0) G.shake=Math.max(0,G.shake-dt*1.6);
+
+  if(G.inv>0){
+    G.inv=Math.max(0,G.inv-dt);
+    if(G.inv===0){ toast("🤡 紅鼻子的效果結束了 —— 快跑！",2000); syncSlots(); }
+  }
+  if(!quizOpen && !G.over){
+    // 玩家移動（鍵盤＝八方向；搖桿＝類比，推多少走多快）
+    const kx=(keys.arrowleft||keys.a?-1:0)+(keys.arrowright||keys.d?1:0);
+    const ky=(keys.arrowup||keys.w?-1:0)+(keys.arrowdown||keys.s?1:0);
+    const sm=Math.hypot(touch.x,touch.y);
+    let ix=0,iy=0,mag=0,byKey=false;
+    if(kx||ky){ const m=Math.hypot(kx,ky); ix=kx/m; iy=ky/m; mag=1; byKey=true; }
+    else if(sm>0){ ix=touch.x/sm; iy=touch.y/sm; mag=Math.min(1,sm); }
+    if(G.p.hiding){ ix=0;iy=0;mag=0; }
+    const wantRun=(keys.shift||sm>0.9)&&G.p.stam>0&&mag>0;
+    const spd=(wantRun?6.1:3.7)*dt*(byKey?1:Math.max(.5,mag));
+    if(wantRun){ G.p.stam=Math.max(0,G.p.stam-dt*26); G.noise=Math.min(100,G.noise+dt*13); }
+    else G.p.stam=Math.min(100,G.p.stam+dt*13);
+    if(ix) G.p.dir=ix>0?1:-1;
+    if(mag>0){ moveP(ix*spd,0); moveP(0,iy*spd); }
+    // 噪音自然消退；滿了就驚動阿嬤
+    if(!wantRun) G.noise=Math.max(0,G.noise-dt*6);
+    if(G.noise>=100 && G.g.state==="patrol") alertGranny(false);
+
+    updateGranny(dt);
+    syncHUD();
+    G.saveT-=dt; if(G.saveT<=0){ saveGame(); G.saveT=5; }
+  }
+  draw();
+}
+/* 移動：撞到轉角時會自動往旁邊滑一點，才不會卡在門框上 */
+function moveP(dx,dy){
+  const r=.28;
+  const chk=(x,y)=>solidAt(Math.floor(x),Math.floor(y));
+  const canX=(nx,y,d)=>{ const e=nx+(d>0?r:-r); return !chk(e,y-r)&&!chk(e,y+r-.01); };
+  const canY=(x,ny,d)=>{ const e=ny+(d>0?r:-r); return !chk(x-r,e)&&!chk(x+r-.01,e); };
+  if(dx){
+    const nx=G.p.x+dx;
+    if(canX(nx,G.p.y,dx)) G.p.x=nx;
+    else{
+      const n=Math.abs(dx);
+      if(canX(nx,G.p.y-n,dx)&&canY(G.p.x,G.p.y-n,-1)) G.p.y-=n;
+      else if(canX(nx,G.p.y+n,dx)&&canY(G.p.x,G.p.y+n,1)) G.p.y+=n;
+    }
+  }
+  if(dy){
+    const ny=G.p.y+dy;
+    if(canY(G.p.x,ny,dy)) G.p.y=ny;
+    else{
+      const n=Math.abs(dy);
+      if(canY(G.p.x-n,ny,dy)&&canX(G.p.x-n,G.p.y,-1)) G.p.x-=n;
+      else if(canY(G.p.x+n,ny,dy)&&canX(G.p.x+n,G.p.y,1)) G.p.x+=n;
+    }
+  }
+}
+
+/* ============================================================
+   啟動
+   ============================================================ */
+function audioInit(){ try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();}catch(e){} }
+function startLevel(lv,carry){
+  clearInterval(qInt); quizOpen=false; qAfter=null; finalStep=0;
+  $("quiz").classList.remove("on");
+  G=newGame(lv,carry);
+  hideScreens(); syncSlots(); syncHUD(); fitCanvas();
+  toast(LVDEF.intro,3200);
+  audioInit(); saveGame();
+  if(!raf){ last=performance.now(); raf=requestAnimationFrame(step); }
+}
+function start(isEasy){ easy=isEasy; clearSave(); startLevel(0,null); }
+$("btnStart").onclick=()=>start(false);
+$("btnEasy").onclick=()=>start(true);
+$("btnCont").onclick=()=>resumeGame();
+$("btnWipe").onclick=()=>{ clearSave(); refreshContinue(); toast("存檔已清除。",1800); };
+$("btnAgain").onclick=()=>{ $("scEnd").classList.remove("on"); $("scTitle").classList.add("on"); refreshContinue(); };
+addEventListener("beforeunload",()=>{ try{ saveGame(); }catch(e){} });
+document.addEventListener("visibilitychange",()=>{ if(document.hidden) saveGame(); });
+refreshContinue();
+fitCanvas();
+raf=requestAnimationFrame(step);
+</script>
+</body>
+</html>
