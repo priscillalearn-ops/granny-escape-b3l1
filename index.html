@@ -3432,7 +3432,7 @@ function openPick(isEasy){
    老師：把部署好的網頁應用程式網址貼在下面這一行的引號中間就會啟用。
    留空＝關閉排行榜，遊戲其餘功能完全不受影響。
    ============================================================ */
-const BOARD_URL = "";
+const BOARD_URL = "https://script.google.com/macros/s/AKfycbybO1krxWU5fjcITjfYIakTpdnAypeJIWM4JILW7jgJ3ro-uE4lnNb2OVx7bHiWYrohJw/exec";
 
 const ME_KEY = "granny_b3l1_me_v1";
 let ME = { name: "", cls: "" };
@@ -3479,14 +3479,15 @@ $("btnNameSkip").onclick=()=>closeName(false);
 /* ---------- 上傳成績 ---------- */
 function submitScore(win){
   if(!boardOn()||!ME.name||!G) return Promise.resolve(false);
-  const body=JSON.stringify({
-    name:ME.name, cls:ME.cls, scope:scopeLabel(),
+  // Apps Script 的 POST 跨網域會被瀏覽器擋，所以寫入也走 GET
+  const q={action:"add", name:ME.name, cls:ME.cls, scope:scopeLabel(),
     level:LVDEF.id, day:G.day, correct:G.correct, wrong:G.wrong.length,
-    win:!!win, easy:!!easy
-  });
-  return fetch(BOARD_URL,{method:"POST",body:body,
-      headers:{"Content-Type":"text/plain;charset=utf-8"},redirect:"follow"})
-    .then(r=>r.text()).then(()=>true).catch(()=>false);
+    win:win?1:0, easy:easy?1:0, _:Date.now()};
+  const u=BOARD_URL+"?"+Object.keys(q).map(k=>k+"="+encodeURIComponent(q[k])).join("&");
+  return fetch(u,{redirect:"follow"}).then(r=>r.text()).then(t=>{
+    try{ return JSON.parse(t).ok ? "ok" : "fail"; }
+    catch(e){ return "maybe"; }       // 回應是 Google 錯誤頁，但資料通常已寫入
+  }).catch(()=>"fail");
 }
 function afterGameEnd(win){
   const box=$("endBoardMsg"), btn=$("btnEndBoard");
@@ -3498,24 +3499,40 @@ function afterGameEnd(win){
     const b=$("btnEndName");
     if(b) b.onclick=()=>openName(saved=>{
       $("scEnd").classList.add("on");
-      if(saved){ box.textContent="上傳中…"; submitScore(win).then(ok=>{
-        box.textContent=ok?"✅ 成績已上傳到班級排行榜":"⚠️ 上傳失敗（網路問題），成績沒有記錄到";
-        bdCache=null; }); }
+      if(saved){ box.textContent="上傳中…"; bdCache=null;
+        submitScore(win).then(st=>{
+          box.textContent = st==="fail" ? "⚠️ 上傳失敗（網路問題），成績沒有記錄到"
+                                        : "✅ 成績已上傳到班級排行榜"; }); }
       syncWho();
     });
     return;
   }
   box.textContent="上傳中…";
-  submitScore(win).then(ok=>{
-    box.textContent=ok?"✅ 成績已上傳到班級排行榜":"⚠️ 上傳失敗（網路問題），成績沒有記錄到";
-    bdCache=null;
+  bdCache=null;
+  submitScore(win).then(st=>{
+    if(st==="ok"){ box.textContent="✅ 成績已上傳到班級排行榜"; return; }
+    if(st==="fail"){ box.textContent="⚠️ 上傳失敗（網路問題），成績沒有記錄到"; return; }
+    box.textContent="確認中…";
+    fetchBoard().then(d=>{
+      bdCache=d;
+      const hit=(d.list||[]).some(x=>x.name===ME.name&&x.cls===ME.cls);
+      box.textContent=hit?"✅ 成績已上傳到班級排行榜":"⚠️ 可能沒上傳成功，下次再玩一次看看";
+    }).catch(()=>{ box.textContent="✅ 成績已送出（排行榜暫時讀不到，等一下再看）"; });
   });
 }
 
 /* ---------- 讀取與顯示排行榜 ---------- */
-function fetchBoard(){
-  const u=BOARD_URL+(BOARD_URL.indexOf("?")>=0?"&":"?")+"limit=50&_="+Date.now();
-  return fetch(u,{redirect:"follow"}).then(r=>r.json()).catch(()=>jsonp(u));
+function fetchBoard(tries){
+  tries = tries===undefined ? 3 : tries;
+  const u=BOARD_URL+(BOARD_URL.indexOf("?")>=0?"&":"?")+"limit=50&_="+Date.now()+Math.random();
+  return fetch(u,{redirect:"follow"}).then(r=>r.text()).then(t=>{
+    const d=JSON.parse(t);            // Google 偶爾會回錯誤頁，解析失敗就重試
+    if(!d||!d.ok) throw new Error("bad");
+    return d;
+  }).catch(err=>{
+    if(tries>1) return new Promise(r=>setTimeout(r,1200)).then(()=>fetchBoard(tries-1));
+    return jsonp(u);
+  });
 }
 function jsonp(u){
   return new Promise((res,rej)=>{
@@ -3545,7 +3562,7 @@ function reloadBoard(){
 function renderBoard(){
   const wrap=$("bdWrap"), msg=$("bdMsg"), fl=$("bdFilters");
   if(!bdCache){ wrap.innerHTML=""; if(msg.textContent!=="讀取中…") msg.textContent=""; return; }
-  const classes=bdCache.classes||[];
+  const classes=(bdCache.classes||[]).filter(c=>c&&c!=="班級");
   const scopes=[...new Set((bdCache.list||[]).map(x=>x.scope).filter(Boolean))];
   fl.innerHTML="";
   const chip=(label,active,fn)=>{
@@ -3560,7 +3577,7 @@ function renderBoard(){
     chip("全部範圍",!bdFilterScope,()=>{bdFilterScope="";renderBoard();});
     scopes.forEach(sc=>chip("📚 "+sc,bdFilterScope===sc,()=>{bdFilterScope=sc;renderBoard();}));
   }
-  let list=(bdCache.list||[]);
+  let list=(bdCache.list||[]).filter(x=>x && x.name && !(x.name==="名字"&&x.cls==="班級"));
   if(bdFilterCls) list=list.filter(x=>x.cls===bdFilterCls);
   if(bdFilterScope) list=list.filter(x=>x.scope===bdFilterScope);
   if(!list.length){ wrap.innerHTML=""; msg.textContent="還沒有人上傳成績，你可以當第一個！"; return; }
