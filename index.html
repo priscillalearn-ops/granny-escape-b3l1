@@ -126,6 +126,29 @@ canvas{display:block; image-rendering:pixelated; touch-action:none; background:#
 .wq{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--red);
   border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:13px;line-height:1.7}
 .wq .ans{color:var(--green)}
+/* ---------- 班級排行榜 ---------- */
+#who{font-size:12.5px;color:var(--dim);margin-bottom:12px}
+#who b{color:var(--amber)}
+.linkbtn{background:none;border:none;color:#9fd7ff;font:inherit;font-size:12.5px;cursor:pointer;
+  text-decoration:underline;padding:0 4px}
+.field{display:flex;flex-direction:column;gap:6px;width:100%;max-width:340px;margin-bottom:12px;text-align:left}
+.field label{font-size:13px;color:var(--dim)}
+.field input{background:#0d0a11;border:1px solid var(--line);border-radius:10px;padding:11px 13px;
+  color:var(--ink);font-size:16px;font-family:inherit}
+.field input:focus{outline:none;border-color:var(--amber)}
+#bdWrap{width:100%;max-width:560px;max-height:52vh;overflow-y:auto;margin-bottom:12px}
+table.bd{width:100%;border-collapse:collapse;font-size:13px}
+table.bd th{position:sticky;top:0;background:#1d1724;color:var(--dim);font-weight:600;
+  padding:8px 6px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+table.bd td{padding:8px 6px;border-bottom:1px solid #251c2d;vertical-align:middle}
+table.bd tr.me td{background:#2a1e0c}
+table.bd .rk{width:34px;color:var(--amber);font-weight:700;text-align:center}
+table.bd .nm{font-weight:600}
+table.bd .sub2{display:block;font-size:11px;color:var(--dim);font-weight:400}
+table.bd .num{text-align:right;white-space:nowrap}
+#bdMsg{font-size:13px;color:var(--dim);margin-bottom:10px;min-height:18px;line-height:1.7}
+.filters{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:10px}
+
 /* ---------- 選擇範圍 ---------- */
 #unitList{display:flex;flex-direction:column;gap:8px;width:100%;max-width:560px;margin-bottom:12px}
 .unit{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);
@@ -204,8 +227,10 @@ canvas{display:block; image-rendering:pixelated; touch-action:none; background:#
     </div>
     <div class="row" style="margin-top:10px">
       <button class="btn ghost" id="btnEasy">簡單模式（阿嬤慢一點）</button>
+      <button class="btn ghost" id="btnBoard" style="display:none">🏆 班級排行榜</button>
       <button class="btn ghost" id="btnWipe" style="display:none">清除存檔</button>
     </div>
+    <div id="who"></div>
     <div class="sub" style="margin-top:14px;font-size:12px">鍵盤：WASD／方向鍵移動・Shift 跑・E 互動・Q 無敵<br>手機：左半邊按住拖動＝搖桿移動，推到底＝跑</div>
   </div>
 
@@ -215,6 +240,32 @@ canvas{display:block; image-rendering:pixelated; touch-action:none; background:#
     <h2 id="caughtTitle">被雨傘打中了！</h2>
     <div class="sub" id="caughtMsg"></div>
     <button class="btn" id="btnNextDay">醒來，繼續逃</button>
+  </div>
+
+  <!-- 設定名字與班級 -->
+  <div class="screen" id="scName">
+    <div class="granny-art">👤</div>
+    <h2>你是誰？</h2>
+    <div class="sub">填了名字，破關後成績就會上傳到班級排行榜。<br>只會存在你的手機和老師的成績表裡。</div>
+    <div class="field"><label for="inName">名字（或座號）</label><input id="inName" maxlength="20" placeholder="例：王小明 或 05 小明"></div>
+    <div class="field"><label for="inCls">班級</label><input id="inCls" maxlength="20" placeholder="例：三年五班"></div>
+    <div class="row">
+      <button class="btn" id="btnNameSave">儲存</button>
+      <button class="btn ghost" id="btnNameSkip">先不要，直接玩</button>
+    </div>
+  </div>
+
+  <!-- 班級排行榜 -->
+  <div class="screen" id="scBoard">
+    <div class="granny-art">🏆</div>
+    <h2>班級排行榜</h2>
+    <div class="filters" id="bdFilters"></div>
+    <div id="bdMsg"></div>
+    <div id="bdWrap"></div>
+    <div class="row">
+      <button class="btn ghost" id="btnBdReload">重新整理</button>
+      <button class="btn" id="btnBdBack">返回</button>
+    </div>
   </div>
 
   <!-- 選擇題庫範圍 -->
@@ -247,8 +298,10 @@ canvas{display:block; image-rendering:pixelated; touch-action:none; background:#
     <div class="sub" id="endMsg"></div>
     <div class="card" style="margin-bottom:8px"><b>錯題複習</b>（下次別再錯了）</div>
     <div id="wrongList"></div>
+    <div id="endBoardMsg" class="sub" style="margin:4px 0 10px"></div>
     <div class="row" style="margin-top:12px">
       <button class="btn" id="btnAgain">再玩一次</button>
+      <button class="btn ghost" id="btnEndBoard" style="display:none">🏆 班級排行榜</button>
     </div>
   </div>
 
@@ -2636,7 +2689,7 @@ function resumeGame(){
   if(!raf){ last=performance.now(); raf=requestAnimationFrame(step); }
 }
 function hideScreens(){
-  ["scTitle","scEnd","scCaught","scLevel","scPick"].forEach(id=>$(id).classList.remove("on"));
+  ["scTitle","scEnd","scCaught","scLevel","scPick","scName","scBoard"].forEach(id=>$(id).classList.remove("on"));
 }
 function syncSlots(){
   LOOTKEYS.forEach(k=>$("s_"+k).classList.toggle("on",!!G.items[k]));
@@ -3046,7 +3099,7 @@ function win(){
   $("endMsg").innerHTML="你在第 <b>"+G.day+"</b> 天逃出了"+LVDEF.name+"。<br>"+
     (G.items.phone?"而且手機也拿回來了 📱":"（手機還在阿嬤那裡…）")+
     "<br>總答對：<b>"+G.correct+"</b> 題　答錯：<b>"+G.wrong.length+"</b> 題";
-  showWrong(); $("scEnd").classList.add("on"); refreshContinue();
+  showWrong(); $("scEnd").classList.add("on"); refreshContinue(); afterGameEnd(true);
 }
 function lose(){
   G.over=true; clearSave(); refreshContinue();
@@ -3054,7 +3107,7 @@ function lose(){
   $("endTitle").textContent="五天到了…";
   $("endTitle").textContent="第 "+LVDEF.id+" 關・天數用完了…";
   $("endMsg").innerHTML="阿嬤把你「解決」了。<br>“Rules are rules.” 她說。<br>總答對：<b>"+G.correct+"</b> 題　答錯：<b>"+G.wrong.length+"</b> 題";
-  showWrong(); $("scEnd").classList.add("on");
+  showWrong(); $("scEnd").classList.add("on"); afterGameEnd(false);
 }
 function showWrong(){
   const box=$("wrongList");
@@ -3374,6 +3427,162 @@ function openPick(isEasy){
   $("scPick").classList.add("on");
 }
 
+/* ============================================================
+   班級排行榜（Google 試算表 + Apps Script）
+   老師：把部署好的網頁應用程式網址貼在下面這一行的引號中間就會啟用。
+   留空＝關閉排行榜，遊戲其餘功能完全不受影響。
+   ============================================================ */
+const BOARD_URL = "";
+
+const ME_KEY = "granny_b3l1_me_v1";
+let ME = { name: "", cls: "" };
+let bdFilterCls = "", bdFilterScope = "", bdCache = null;
+
+function boardOn(){ return /^https?:\/\//.test(BOARD_URL); }
+function loadMe(){
+  try{ const d=JSON.parse(localStorage.getItem(ME_KEY)||"{}");
+    ME={name:String(d.name||""),cls:String(d.cls||"")}; }catch(e){ ME={name:"",cls:""}; }
+}
+function saveMe(){ try{ localStorage.setItem(ME_KEY,JSON.stringify(ME)); }catch(e){} }
+function syncWho(){
+  const el=$("who");
+  if(!boardOn()){ el.innerHTML=""; $("btnBoard").style.display="none"; return; }
+  $("btnBoard").style.display="block";
+  el.innerHTML = ME.name
+    ? "👤 <b>"+esc(ME.cls?ME.cls+"　":"")+esc(ME.name)+"</b>　<button class='linkbtn' id='btnEditMe'>改名字</button>"
+    : "👤 還沒設定名字，成績不會上排行榜　<button class='linkbtn' id='btnEditMe'>現在設定</button>";
+  const b=$("btnEditMe"); if(b) b.onclick=()=>openName(null);
+}
+function esc(t){ return String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+/* ---------- 設定名字 ---------- */
+let nameAfter=null;
+function openName(after){
+  nameAfter=after||null;
+  $("inName").value=ME.name; $("inCls").value=ME.cls;
+  hideScreens(); $("scName").classList.add("on");
+  setTimeout(()=>{ try{ $("inName").focus(); }catch(e){} },80);
+}
+function closeName(saved){
+  $("scName").classList.remove("on");
+  const cb=nameAfter; nameAfter=null;
+  if(cb) cb(saved); else { $("scTitle").classList.add("on"); syncWho(); }
+}
+$("btnNameSave").onclick=()=>{
+  const n=$("inName").value.trim().slice(0,20);
+  if(!n){ toast("請至少填一個名字或座號。"); return; }
+  ME.name=n; ME.cls=$("inCls").value.trim().slice(0,20); saveMe(); syncWho();
+  closeName(true);
+};
+$("btnNameSkip").onclick=()=>closeName(false);
+
+/* ---------- 上傳成績 ---------- */
+function submitScore(win){
+  if(!boardOn()||!ME.name||!G) return Promise.resolve(false);
+  const body=JSON.stringify({
+    name:ME.name, cls:ME.cls, scope:scopeLabel(),
+    level:LVDEF.id, day:G.day, correct:G.correct, wrong:G.wrong.length,
+    win:!!win, easy:!!easy
+  });
+  return fetch(BOARD_URL,{method:"POST",body:body,
+      headers:{"Content-Type":"text/plain;charset=utf-8"},redirect:"follow"})
+    .then(r=>r.text()).then(()=>true).catch(()=>false);
+}
+function afterGameEnd(win){
+  const box=$("endBoardMsg"), btn=$("btnEndBoard");
+  if(!boardOn()){ box.textContent=""; btn.style.display="none"; return; }
+  btn.style.display="block";
+  btn.onclick=()=>openBoard();
+  if(!ME.name){
+    box.innerHTML="還沒設定名字，成績沒有上傳。<button class='linkbtn' id='btnEndName'>設定名字</button>";
+    const b=$("btnEndName");
+    if(b) b.onclick=()=>openName(saved=>{
+      $("scEnd").classList.add("on");
+      if(saved){ box.textContent="上傳中…"; submitScore(win).then(ok=>{
+        box.textContent=ok?"✅ 成績已上傳到班級排行榜":"⚠️ 上傳失敗（網路問題），成績沒有記錄到";
+        bdCache=null; }); }
+      syncWho();
+    });
+    return;
+  }
+  box.textContent="上傳中…";
+  submitScore(win).then(ok=>{
+    box.textContent=ok?"✅ 成績已上傳到班級排行榜":"⚠️ 上傳失敗（網路問題），成績沒有記錄到";
+    bdCache=null;
+  });
+}
+
+/* ---------- 讀取與顯示排行榜 ---------- */
+function fetchBoard(){
+  const u=BOARD_URL+(BOARD_URL.indexOf("?")>=0?"&":"?")+"limit=50&_="+Date.now();
+  return fetch(u,{redirect:"follow"}).then(r=>r.json()).catch(()=>jsonp(u));
+}
+function jsonp(u){
+  return new Promise((res,rej)=>{
+    const cb="__bd"+Date.now();
+    const sc=document.createElement("script");
+    const t=setTimeout(()=>{ cleanup(); rej(new Error("timeout")); },12000);
+    function cleanup(){ clearTimeout(t); try{delete window[cb];}catch(e){} sc.remove(); }
+    window[cb]=d=>{ cleanup(); res(d); };
+    sc.src=u+"&callback="+cb;
+    sc.onerror=()=>{ cleanup(); rej(new Error("jsonp")); };
+    document.body.appendChild(sc);
+  });
+}
+function openBoard(){
+  hideScreens(); $("scBoard").classList.add("on");
+  if(bdFilterCls==="" && ME.cls) bdFilterCls=ME.cls;
+  renderBoard();
+  if(!bdCache) reloadBoard(); 
+}
+function reloadBoard(){
+  $("bdMsg").textContent="讀取中…";
+  fetchBoard().then(d=>{
+    if(!d||!d.ok) throw new Error("bad");
+    bdCache=d; renderBoard();
+  }).catch(()=>{ $("bdMsg").innerHTML="⚠️ 讀不到排行榜。<br>可能是網路問題，或老師還沒設定好。"; });
+}
+function renderBoard(){
+  const wrap=$("bdWrap"), msg=$("bdMsg"), fl=$("bdFilters");
+  if(!bdCache){ wrap.innerHTML=""; if(msg.textContent!=="讀取中…") msg.textContent=""; return; }
+  const classes=bdCache.classes||[];
+  const scopes=[...new Set((bdCache.list||[]).map(x=>x.scope).filter(Boolean))];
+  fl.innerHTML="";
+  const chip=(label,active,fn)=>{
+    const b=document.createElement("button");
+    b.className="preset"; b.textContent=label;
+    if(active){ b.style.borderColor="#ffb547"; b.style.color="#ffb547"; }
+    b.onclick=fn; fl.appendChild(b);
+  };
+  chip("全部班級",!bdFilterCls,()=>{bdFilterCls="";renderBoard();});
+  classes.forEach(c=>chip(c,bdFilterCls===c,()=>{bdFilterCls=c;renderBoard();}));
+  if(scopes.length>1){
+    chip("全部範圍",!bdFilterScope,()=>{bdFilterScope="";renderBoard();});
+    scopes.forEach(sc=>chip("📚 "+sc,bdFilterScope===sc,()=>{bdFilterScope=sc;renderBoard();}));
+  }
+  let list=(bdCache.list||[]);
+  if(bdFilterCls) list=list.filter(x=>x.cls===bdFilterCls);
+  if(bdFilterScope) list=list.filter(x=>x.scope===bdFilterScope);
+  if(!list.length){ wrap.innerHTML=""; msg.textContent="還沒有人上傳成績，你可以當第一個！"; return; }
+  msg.textContent="每人只顯示最好的一次成績　共 "+list.length+" 人";
+  wrap.innerHTML="<table class='bd'><thead><tr>"+
+    "<th class='rk'>#</th><th>玩家</th><th class='num'>關卡</th><th class='num'>天數</th><th class='num'>答對</th></tr></thead><tbody>"+
+    list.map((x,i)=>{
+      const me=(x.name===ME.name&&x.cls===ME.cls)?" class='me'":"";
+      const medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1);
+      return "<tr"+me+"><td class='rk'>"+medal+"</td>"+
+        "<td><span class='nm'>"+esc(x.name)+"</span>"+
+        "<span class='sub2'>"+esc(x.cls||"—")+(x.scope?"　📚 "+esc(x.scope):"")+"</span></td>"+
+        "<td class='num'>"+(x.win?"✨破關":"第 "+x.level+" 關")+"</td>"+
+        "<td class='num'>"+x.day+"</td>"+
+        "<td class='num'><b style='color:#4ad07a'>"+x.correct+"</b></td></tr>";
+    }).join("")+"</tbody></table>";
+}
+$("btnBdReload").onclick=()=>{ bdCache=null; reloadBoard(); };
+$("btnBdBack").onclick=()=>{ $("scBoard").classList.remove("on"); $("scTitle").classList.add("on"); refreshContinue(); syncWho(); };
+$("btnBoard").onclick=()=>openBoard();
+loadMe();
+
 function audioInit(){ try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();}catch(e){} }
 function startLevel(lv,carry){
   clearInterval(qInt); quizOpen=false; qAfter=null; finalStep=0;
@@ -3391,11 +3600,12 @@ $("btnPickBack").onclick=()=>{ $("scPick").classList.remove("on"); $("scTitle").
 $("btnGo").onclick=()=>{ buildBank([...pickSet]); $("scPick").classList.remove("on"); start(pickEasy); };
 $("btnCont").onclick=()=>resumeGame();
 $("btnWipe").onclick=()=>{ clearSave(); refreshContinue(); toast("存檔已清除。",1800); };
-$("btnAgain").onclick=()=>{ $("scEnd").classList.remove("on"); $("scTitle").classList.add("on"); refreshContinue(); };
+$("btnAgain").onclick=()=>{ $("scEnd").classList.remove("on"); $("scTitle").classList.add("on"); refreshContinue(); syncWho(); };
 addEventListener("beforeunload",()=>{ try{ saveGame(); }catch(e){} });
 document.addEventListener("visibilitychange",()=>{ if(document.hidden) saveGame(); });
 buildBank(SELECTED);
 refreshContinue();
+syncWho();
 fitCanvas();
 raf=requestAnimationFrame(step);
 </script>
