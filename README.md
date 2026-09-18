@@ -15,11 +15,12 @@
 | `SM1U3` | 三民乙版 B1 U3　Clicks, Crumbs, and Consequences | make/leave/keep/find + O + OC | 154 | 91 | 88 | 333 |
 | `B3L1` | 龍騰 B3 L1　The Day I Broke the Rules | 不定詞 ＋ it 虛主詞／受詞 | 65 | 94 | 47 | 206 |
 | `B3L2` | 龍騰 B3 L2　The Marshmallow Challenge | 形容詞子句（關係代名詞） | 80 | 90 | 51 | 221 |
+| `B3L3` | 龍騰 B3 L3　Prometheus: The Champion of Humankind | not only…but also…／by the time＋完成式 | 148 | 108 | 105 | 361 |
 | `GSAT` | 學測高頻單字　GSAT 字根字首 | 字根字首拆解 | 220 | 140 | 190 | 550 |
 | `TOEIC` | 多益單字　TOEIC 商務職場 | 同義字與商務用語 | 220 | 210 | 170 | 600 |
 | `GSATPAST` | 學測歷屆試題　110–115 | 綜合測驗 | 65 | 65 | 60 | 190 |
 
-目前共 **3122 題**。
+目前共 **3483 題**。
 
 選範圍畫面最上方可以依 **版本**（龍騰／三民乙版／學測／多益）和 **年級**（高一／高二／高三）篩選，
 清單也會自動依「年級・版本」分組。每一課在 `UNITS` 裡用 `pub`、`grade` 兩個欄位標示分類，加新課時記得填。
