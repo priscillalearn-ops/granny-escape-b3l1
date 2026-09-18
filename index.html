@@ -166,6 +166,16 @@ table.bd .num{text-align:right;white-space:nowrap}
   padding:7px 14px;font-size:13px;cursor:pointer;font-family:inherit}
 .preset:hover{border-color:var(--amber);color:var(--amber)}
 #pickInfo{font-size:13px;color:var(--dim);margin-bottom:12px;min-height:20px}
+#pickFilters{width:100%;max-width:560px;margin-bottom:10px;display:flex;flex-direction:column;gap:6px}
+.frow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center}
+.frow .flab{font-size:12.5px;color:var(--dim);margin-right:2px;min-width:34px;text-align:right}
+.fchip{background:#1d1724;border:1px solid var(--line);color:#cbb8d6;border-radius:999px;
+  padding:6px 13px;font-size:13px;cursor:pointer;font-family:inherit}
+.fchip.on{background:#3a2610;border-color:#ffb547;color:#ffd48a;font-weight:700}
+.ghead{width:100%;text-align:left;font-size:12.5px;font-weight:700;color:#ffb547;
+  margin:10px 2px 2px;letter-spacing:.05em;border-bottom:1px dashed #3a2b3f;padding-bottom:3px}
+#unitList .ghead:first-child{margin-top:0}
+.pempty{font-size:13px;color:var(--dim);padding:14px;text-align:center}
 @media (max-width:560px){ #hud{font-size:11.5px;gap:6px;padding:6px} .slot{width:26px;height:26px;font-size:14px} }
 </style>
 </head>
@@ -272,7 +282,8 @@ table.bd .num{text-align:right;white-space:nowrap}
   <div class="screen" id="scPick">
     <div class="granny-art">📚</div>
     <h2>這次要考哪個範圍？</h2>
-    <div class="sub">可以複選 —— 選越多課，題目就從那幾課一起出（適合段考複習）。</div>
+    <div class="sub">先選版本或年級縮小範圍，再勾要考的課（可以複選）。</div>
+    <div id="pickFilters"></div>
     <div id="presetRow"></div>
     <div id="unitList"></div>
     <div id="pickInfo"></div>
@@ -336,7 +347,7 @@ table.bd .num{text-align:right;white-space:nowrap}
    ============================================================ */
 const UNITS=[
 {
- id:"B1L1", name:"龍騰 B1 L1　Firsts in Life", short:"B1 L1",
+ id:"B1L1", pub:"龍騰", grade:"高一", name:"龍騰 B1 L1　Firsts in Life", short:"B1 L1",
  src:{v:"B1 L1 單字・片語",g:"B1 L1 文法：名詞子句",c:"B1 L1 克漏字・文意選填"},
  v:[
 ["「難忘的」的英文是？",["memorable","obvious","similar","sacred"],0,"memorable (adj.) 難忘的＝unforgettable"],
@@ -611,7 +622,7 @@ const UNITS=[
  ]
 },
 {
- id:"B1L2", name:"龍騰 B1 L2　Goodbye, John", short:"B1 L2",
+ id:"B1L2", pub:"龍騰", grade:"高一", name:"龍騰 B1 L2　Goodbye, John", short:"B1 L2",
  src:{v:"B1 L2 單字・片語",g:"B1 L2 文法：it 與 there 的句型",c:"B1 L2 克漏字・文意選填"},
 v:[
 ["「使某人初次體驗」的英文是？",["offer","introduce","receive","profit"],1,"introduce (vt.) 使某人初次體驗／介紹：introduce sb. to sth."],
@@ -756,7 +767,7 @@ c:[
 ]
 },
 {
- id:"SM1U1", name:"三民乙版 B1 U1　Mission Possible: Fight Study Monsters", short:"三民 B1U1",
+ id:"SM1U1", pub:"三民乙版", grade:"高一", name:"三民乙版 B1 U1　Mission Possible: Fight Study Monsters", short:"三民 B1U1",
  src:{v:"三民 B1 U1 單字・片語",g:"三民 B1 U1 文法：S + find/believe + that 子句",c:"三民 B1 U1 課文・閱讀・克漏字"},
  v:[
 ["「任務，使命」的英文是？",["mission","motion","permission","emission"],0,"mission (n.)[C] 任務，使命；be on a mission to do sth 以做某事為使命"],
@@ -1087,7 +1098,661 @@ c:[
  ]
 },
 {
- id:"B3L1", name:"龍騰 B3 L1　The Day I Broke the Rules", short:"B3 L1",
+ id:"SM1U2", pub:"三民乙版", grade:"高一", name:"三民乙版 B1 U2　I See You, Taiwan", short:"三民 B1U2",
+ src:{v:"三民 B1 U2 單字・片語",g:"三民 B1 U2 文法：感官動詞 + O + V／V-ing／p.p.",c:"三民 B1 U2 課文・閱讀・克漏字"},
+ v:[
+["「問候，打招呼；（景象、氣味）呈現於…之前」的英文是？",["greed","grade","great","greet"],3,"greet (vt.) 問候；(影像、聲音、氣味) 呈現於…之前"],
+["「問候，致意」（名詞）的英文是？",["greedy","grading","greeting","greatness"],2,"greeting (n.) 問候；exchange greetings 相互問候"],
+["「單一的；單身的」的英文是？",["signal","simple","single","singer"],2,"single (adj.) 單一的；single parent 單親"],
+["「氣氛，氛圍；心情」的英文是？",["moon","mode","mud","mood"],3,"mood (n.) 氣氛；心情；in a good mood"],
+["「景色，風景；看法」的英文是？",["vow","review","value","view"],3,"view (n.) 景色；看法；view A as B 把 A 視為 B"],
+["「相配，相稱；比賽」的英文是？",["match","catch","march","patch"],0,"match (vt.) 相配；(n.) 比賽；a perfect match 絕配"],
+["「活力，能量；能源」的英文是？",["energy","envy","entry","enemy"],0,"energy (n.)[U] 活力；full of energy 充滿活力"],
+["「精力充沛的，充滿活力的」的英文是？",["economic","electric","energetic","enthusiastic"],2,"energetic (adj.) 精力充沛的"],
+["「多樣化」（名詞）的英文是？",["university","divinity","diversity","variety"],2,"diversity (n.)[U] 多樣化；cultural diversity 文化多樣性"],
+["「多樣化的」（形容詞）的英文是？",["divorce","diverse","reverse","divine"],1,"diverse (adj.) 多樣化的；a diverse range of topics"],
+["「使多樣化，多角經營」的英文是？",["classify","simplify","identify","diversify"],3,"diversify (v.) 多樣化；-fy 字尾表「使…化」"],
+["「旅行，行程；經歷」的英文是？",["journal","joy","journey","jury"],2,"journey (n.)[C] 旅行；go on a journey"],
+["「色調，深淺不同的顏色；陰涼處」的英文是？",["shape","shake","shadow","shade"],3,"shade (n.) 色調；a shade of green；in the shade 在陰涼處"],
+["「影子；尾隨」的英文是？",["shadow","shallow","shade","shower"],0,"shadow (n.) 影子；(vt.) 尾隨"],
+["「經典的，典型的」的英文是？",["classical","classroom","classic","classify"],2,"classic (adj.) 經典的；a classic novel"],
+["「古典的」的英文是？",["critical","classic","classical","clinical"],2,"classical (adj.) 古典的；classical music 古典樂"],
+["「繪畫作品，圖畫」的英文是？",["printing","painting","planting","pointing"],1,"painting (n.)[C] 繪畫作品"],
+["「移動，運動；動議」的英文是？",["motion","notion","mission","emotion"],0,"motion (n.) 移動；in motion 移動中"],
+["「靜止不動的」的英文是？",["emotionless","motionless","meaningless","restless"],1,"motionless (adj.) 靜止不動的"],
+["「加油用的；令人振奮的」的英文是？",["cheating","checking","cheering","chewing"],2,"cheering (adj.) 加油用的；cheering sticks 加油棒"],
+["「愉快的，開朗的」的英文是？",["cheerful","fearful","careful","cheerless"],0,"cheerful (adj.) 愉快的，開朗的"],
+["「木製的；（行為）僵硬的」的英文是？",["woolen","golden","wooden","wounded"],2,"wooden (adj.) 木製的；a wooden door"],
+["「森林」的英文是？",["forecast","fortress","forest","forehead"],2,"forest (n.)[C] 森林；a forest fire 森林大火"],
+["「燈籠，提燈」的英文是？",["lantern","lectern","lanterns'","pattern"],0,"lantern (n.)[C] 燈籠；sky lantern 天燈"],
+["「印象」的英文是？",["impression","expression","impressive","depression"],0,"impression (n.)[C] 印象；leave an impression on sb"],
+["「使印象深刻」的英文是？",["impress","depress","compress","express"],0,"impress (vt.) 使印象深刻；impress sb with sth"],
+["「令人印象深刻的」的英文是？",["impression","impressive","impressed","expressive"],1,"impressive (adj.) 令人印象深刻的"],
+["「峭壁，懸崖」的英文是？",["claw","cliff","clip","clay"],1,"cliff (n.)[C] 峭壁，懸崖"],
+["「體育場，運動場」的英文是？",["stadium","studio","station","statue"],0,"stadium (n.)[C] 體育場；a baseball stadium"],
+["「峽，峽谷」的英文是？",["forge","George","gorgeous","gorge"],3,"gorge (n.)[C] 峽谷；Taroko Gorge 太魯閣"],
+["「大理石」的英文是？",["marker","mable","marvel","marble"],3,"marble (n.)[U] 大理石"],
+["「時代，年代」的英文是？",["area","era","error","aura"],1,"era (n.)[C] 時代；Japanese-era 日治時期的"],
+["「書法」的英文是？",["photography","geography","biography","calligraphy"],3,"calligraphy (n.)[U] 書法"],
+["「香草，藥草」的英文是？",["herd","hurt","heart","herb"],3,"herb (n.)[C] 香草，藥草"],
+["「一系列，連續；影集」的英文是？",["serious","series","service","serial"],1,"series (n.) 一系列；a series of + 複數名詞"],
+["「引人注目的，顯著的」的英文是？",["stinking","sticking","stroking","striking"],3,"striking (adj.) 引人注目的"],
+["mood 的中文是？",["月亮","泥土","模式","氣氛；心情"],3,"mood 氣氛，氛圍；心情"],
+["diversity 的中文是？",["神性","大學","多餘","多樣化"],3,"diversity 多樣化"],
+["journey 的中文是？",["日記","陪審團","喜悅","旅行，行程"],3,"journey 旅行；經歷"],
+["shade 的中文是？",["形狀","搖動","色調；陰涼處","影子"],2,"shade 色調；陰涼處（shadow 才是影子）"],
+["shadow 的中文是？",["影子","淺的","陣雨","色調"],0,"shadow 影子"],
+["motion 的中文是？",["移動，運動","任務","觀念","情緒"],0,"motion 移動；emotion 才是情緒"],
+["impression 的中文是？",["沮喪","印象","表情","壓縮"],1,"impression 印象"],
+["lantern 的中文是？",["燈籠","圖案","講桌","燈塔"],0,"lantern 燈籠"],
+["striking 的中文是？",["撫摸的","黏人的","發臭的","引人注目的"],3,"striking 引人注目的"],
+["calligraphy 的中文是？",["書法","地理","傳記","攝影"],0,"calligraphy 書法"],
+["era 的中文是？",["錯誤","時代","氣場","區域"],1,"era 時代，年代"],
+["The delicious smell of freshly baked bread ____ us when we walked into the bakery.",["greeted","graded","greed","granted"],0,"greet：(氣味) 呈現於…之前"],
+["Roger greeted everyone in the office ____ a bright smile.",["by","with","to","for"],1,"greet sb with sth 以…向某人問候"],
+["John hugged his friend in ____ as he stepped out of the car.",["greetings","greeted","greet","greeting"],3,"in greeting 致意，打招呼"],
+["Please send my sincere ____ to your family.",["greeting","greeted","greets","greetings"],3,"send one's greetings 轉達問候（問候語用複數）"],
+["Phoebe hasn't replied to a ____ text message from Felix since last week.",["sincere","signal","simple","single"],3,"not a single… 連一個…都沒有"],
+["It's difficult for a ____ parent to strike a balance between work and family.",["sole","single","simple","singular"],1,"single parent 單親"],
+["The sad movie changed the ____ in the room. Everyone became quiet.",["mood","mud","mode","moon"],0,"mood 氣氛"],
+["After hearing the good news, Mia was in a great ____ and sang all the way home.",["mind","moment","mood","mode"],2,"in a great mood 心情非常好"],
+["The messy living room really put Lily in a bad ____.",["place","mode","way","mood"],3,"put sb in a bad mood 讓某人心情變差"],
+["Since the midterm is over today, I'm in the ____ for a movie tonight.",["place","need","mode","mood"],3,"be in the mood for sth 有做…的心情"],
+["The tired boy was in no mood ____ play.",["in","for","to","of"],2,"be in no mood to V 沒有心情做…"],
+["To deal with the spoiled child's mood ____ is definitely not easy.",["waves","changes","turns","swings"],3,"mood swings 情緒的大起大落"],
+["Jack and Eileen had a beautiful ____ of the sea from their hotel room.",["view","visit","vision","review"],0,"a view of the sea 海景"],
+["My wife and I have different ____ on how to spend our money.",["vision","viewers","visits","views"],3,"a view on sth 對…的看法"],
+["Oliver ____ his brother as a role model and works hard to be like him.",["reviews","watches","views","visits"],2,"view A as B 把 A 視為 B"],
+["Karen ____ her red shoes with a red bag.",["marched","catched","patched","matched"],3,"match A with B 以 B 搭配 A"],
+["The color of the tie is a perfect ____ for James' light blue suit.",["pair","mate","match","mix"],2,"a perfect match 完美搭配"],
+["The professional tennis ____ lasted for nearly four hours.",["motion","match","mission","march"],1,"a tennis match 網球比賽"],
+["The dance team was full of ____, and even people in the back row could feel it.",["energy","energetic","energize","enemy"],0,"full of energy 充滿活力"],
+["After a short rest, the children became ____ again and ran back to the playground.",["energetic","enemies","energized","energy"],0,"become + adj.：energetic 精力充沛的"],
+["The university president invited foreign students to share their stories to encourage cultural ____.",["diversify","diversity","diverse","divide"],1,"cultural diversity 文化多樣性"],
+["This magazine covers a ____ range of topics, from travel to science.",["diverse","divorce","diversity","divided"],0,"a diverse range of 範圍多樣的"],
+["The consultant encouraged her clients to ____ their investments.",["diversify","diverse","divert","diversity"],0,"diversify investments 分散投資"],
+["The couple went on a ____ to a foreign country to relieve stress.",["journey","jury","journal","journalist"],0,"go on a journey 去旅行"],
+["Learning a new language is a long ____ that requires daily practice.",["journey","joint","journal","joke"],0,"journey 經歷，路程"],
+["As the sun rose, the travelers set ____ on a journey to the nearby island.",["out","up","off","in"],0,"set out on a journey 展開旅程"],
+["The painter used a ____ of green to show the trees after the rain.",["shade","shell","shape","shadow"],0,"a shade of green 一種綠色的色調"],
+["The farmers took a break in the ____ because the midday sun was too hot.",["shadow","shade","shed","shape"],1,"in the shade 在陰涼處"],
+["Anyone who stands and blocks the projector would cast a ____ on the screen.",["shadow","shake","shape","shade"],0,"cast a shadow on sth 投射影子"],
+["The police have been ____ the suspect for a month.",["shading","shaking","shaping","shadowing"],3,"shadow (vt.) 尾隨"],
+["Without a shadow of a ____, Gordon is the best chef I've ever met.",["doubt","question","fear","reason"],0,"without a shadow of a doubt 毫無疑問地"],
+["Coral is so timid that she is afraid of her own ____.",["shade","shelter","shadow","shape"],2,"afraid of one's own shadow 非常膽小"],
+["My father still reads a ____ novel from his school days every summer.",["classic","class","classical","classy"],0,"a classic novel 經典小說"],
+["Last night, Jane listened to beautiful ____ music performed by an orchestra.",["classic","classical","classified","classy"],1,"classical music 古典樂"],
+["On the classroom wall hung a Chinese ____ of mountains and a small river.",["pointing","painter","printing","painting"],3,"a Chinese painting 中國畫"],
+["Keep your seat belt on when the bus is in ____.",["motion","emotion","notion","action"],0,"in motion 移動中"],
+["The injured bird lay ____ on the ground.",["motive","moving","motion","motionless"],3,"motionless 靜止不動的"],
+["The students hit their ____ sticks loudly when the final point was scored.",["cheering","cheered","cheerful","cheers"],0,"cheering sticks 加油棒"],
+["The doctor gave us ____ news and said my grandfather could go home the next day.",["chewing","cheerless","cheering","cheating"],2,"cheering news 令人振奮的消息"],
+["We all cheered ____ our class team when the game entered the last minute.",["at","to","for","with"],2,"cheer for sb 為某人喝采"],
+["Emily brought chocolates to cheer ____ her sister after a bad day.",["on","out","up","for"],2,"cheer up sb 使某人高興起來"],
+["Her friends were in the front row to cheer her ____.",["off","out","up","on"],3,"cheer sb on 為正在努力的某人打氣"],
+["Even on rainy days, our teacher stays ____ and greets every student with a smile.",["cheers","cheering","cheer","cheerful"],3,"stay cheerful 保持開朗"],
+["The old shop had a ____ door that opened with a long, low sound.",["woolen","wooded","wooden","wood"],2,"a wooden door 木門"],
+["The director asked the young actor to relax because his expression was too ____.",["golden","woolen","warm","wooden"],3,"wooden (行為) 僵硬的"],
+["The severe lack of rain could create a ____ fire in the national park.",["forecast","forehead","foreign","forest"],3,"forest fire 森林大火"],
+["On the festival night, each child carried a paper ____ down the street.",["lantern","pattern","lane","lecture"],0,"lantern 燈籠"],
+["People release sky ____ in Pingxi to make wishes.",["lights","lamps","candles","lanterns"],3,"sky lantern 天燈"],
+["The company's well-designed website leaves a good ____ on its customers.",["impressive","pressure","expression","impression"],3,"leave an impression on sb"],
+["Daniel ____ everyone in his class with his excellent Spanish speaking skills.",["impressive","impressed","impression","expressed"],1,"impress sb with sth"],
+["The view from the top of the mountain was very ____.",["impression","impress","impressed","impressive"],3,"impressive 令人印象深刻的"],
+["Jackson jumped off the ____ and dove into the lake below.",["claw","cliff","clip","clap"],1,"cliff 懸崖"],
+["The modern sports ____ can host international track and field events.",["station","studio","status","stadium"],3,"sports stadium 運動場"],
+["The wealthy businessman covered his kitchen island with Italian ____.",["marvel","market","margin","marble"],3,"marble 大理石"],
+["The retirement of the legendary player marked the end of an ____.",["area","era","aura","error"],1,"the end of an era 一個時代的結束"],
+["My grandfather writes lucky phrases in beautiful ____ before Lunar New Year.",["calligraphy","photography","biography","geography"],0,"calligraphy 書法"],
+["This hand cream has natural ____ extracts that calm dry skin.",["herd","heap","hurt","herb"],3,"herb 藥草"],
+["The environmental club scheduled a ____ of beach cleanups.",["series","service","serious","serial"],0,"a series of + 複數名詞"],
+["Alexa watches her favorite drama ____ on TV every evening.",["serial","series","scenes","serious"],1,"drama series 戲劇影集"],
+["The actress has a ____ appearance, with bright blue eyes and a warm smile.",["sticking","stroking","striking","stinking"],2,"striking 引人注目的"],
+["The foreign student seems shy, but ____ fact, he won a Mandarin speaking contest.",["of","on","in","at"],2,"in fact 事實上"],
+["Julian's angry words turned a small problem ____ a big fight.",["with","to","for","into"],3,"turn A into B 把 A 變成 B"],
+["My family is going camping this weekend, and we are really looking forward ____ it.",["on","to","for","at"],1,"look forward to + N/V-ing 期待"],
+["Amy and Emily look forward to ____ each other this weekend.",["see","be seen","seeing","saw"],2,"look forward to + V-ing（to 是介系詞）"],
+["in fact 的意思是？",["事實上","終於","因此","例如"],0,"in fact ＝ actually ＝ as a matter of fact"],
+["look forward to 的意思是？",["照顧","向前看","尋找","期待"],3,"look forward to sth 期待"],
+["turn A into B 的意思是？",["把 A 交給 B","把 A 變成 B","把 A 關掉","轉向 B"],1,"turn sb/sth into sb/sth"],
+["Lantern Festival 是指？",["元宵節","中秋節","清明節","端午節"],0,"Lantern Festival 元宵節"],
+["jack-o'-lantern 是指？",["天燈","燈塔","聖誕燈","萬聖節南瓜燈"],3,"jack-o'-lantern 萬聖節南瓜燈"],
+["portrait 是指哪一種畫？",["靜物畫","肖像畫","風景畫","壁畫"],1,"portrait 肖像畫；landscape painting 風景畫；still life 靜物畫；mural 壁畫"],
+["motion sickness 的意思是？",["動暈症（暈車、暈船）","動議","慢動作","運動定律"],0,"motion sickness 動暈症"],
+["-fy 字尾表「使…化」，下列哪一個意思是「簡化」？",["purify","justify","simplify","unify"],2,"simplify 簡化；justify 使正當化；purify 淨化；unify 統一"]
+ ],
+ g:[
+["I watched the boy ____ three rice dumplings without taking a break.",["to eat","eaten","eat","ate"],2,"感官動詞 + O + 原V：看完整個過程"],
+["I saw a cat ____ out of the box and running into the living room.",["to jump","jumps","jumping","jumped"],2,"感官動詞 + O + V-ing：動作正在進行"],
+["I noticed a young man ____ down the street by two police officers.",["chased","chase","chasing","to chase"],0,"感官動詞 + O + p.p.：受詞是被追的（被動）"],
+["I noticed the square ____ with people who were watching the Dragon and Lion Dance.",["fill","filled","filling","to fill"],1,"廣場「被填滿」→ p.p."],
+["I heard the kids ____ cheerfully because they just got red envelopes.",["to laugh","laughing","laughs","laughed"],1,"hear + O + V-ing 正在笑"],
+["I saw the firecrackers ____ off last night to celebrate Lunar New Year.",["setting","to set","sets","set"],3,"鞭炮「被施放」；set 的 p.p. 仍是 set"],
+["I watched the sky lanterns ____ up into the sky.",["flew","flown","fly","to fly"],2,"watch + O + 原V 看完整個飛上去的過程"],
+["I could feel the ground ____ because the drums were so loud.",["to shake","shook","shaken","shaking"],3,"can/could + 感官動詞時多用 V-ing"],
+["Within seconds, I saw a flag ____ by the fastest team.",["catch","catching","to catch","caught"],3,"旗子「被抓到」→ p.p."],
+["The girls were frightened when they felt the ground ____.",["to shake","shake","shook","shaken"],1,"feel + O + 原V 表事實"],
+["Chris heard the clock ____ all night, so he didn't sleep well.",["to tick","ticking","ticks","ticked"],1,"hear + O + V-ing 反覆進行的動作"],
+["The driver was surprised to see his car ____ away by the police.",["towed","towing","tow","to tow"],0,"車子「被拖走」→ p.p."],
+["Bill noticed his towel ____ by someone else.",["used","to use","using","use"],0,"毛巾「被使用」→ p.p."],
+["Luke's mother heard him talk on the phone. → Luke was heard ____ on the phone.",["to talk","talks","talked","talk"],0,"感官動詞被動：原V 要改成 to V"],
+["We saw some butterflies flying in the garden. → Some butterflies were seen ____ in the garden.",["flying","to flying","flown","fly"],0,"原句是 V-ing，被動時維持 V-ing"],
+["If you visit the park in the morning, you can see many people ____.",["exercises","exercised","exercising","to exercise"],2,"can + 感官動詞 + O + V-ing"],
+["I saw Mark ____ in line for the new iPhone yesterday.",["waiting","waits","to wait","waited"],0,"see + O + V-ing"],
+["Angela listened to the young man ____ about his working holiday experience.",["talked","talk","talks","to talk"],1,"listen to + O + 原V"],
+["Holly felt her heart ____ a beat when Danny gave her a wink.",["skip","skips","to skip","skipped"],0,"feel + O + 原V"],
+["The waiter noticed the coffee ____ by a customer.",["spilling","spilled","spill","to spill"],1,"咖啡「被打翻」→ p.p."],
+["Owen complained about his work, and his boss heard it. → Owen was heard ____ about his work.",["complained","to complain","complain","complaining"],1,"被動：be heard to V"],
+["These boys were excited to hear their idol ____ in the concert.",["to sing","sang","sung","sing"],3,"hear + O + 原V（也可 singing）"],
+["Elinor enjoys watching her children ____ soccer.",["play","played","to play","plays"],0,"watch + O + 原V／V-ing"],
+["Several senior citizens are seen ____ in the park every Sunday morning.",["exercised","to exercise","exercise","to exercising"],1,"被動 be seen to V"],
+["Betty heard a mosquito ____ around her.",["to fly","flew","flown","flying"],3,"hear + O + V-ing 正在飛"],
+["In the crowded theater, Vic felt himself ____.",["to push","pushed","pushing","push"],1,"自己「被推擠」→ p.p."],
+["The nervous speaker was noticed ____ water several times during the speech.",["drinking","drink","to drink","drunk"],2,"被動 be noticed to V"],
+["I noticed the drummers ____ a steady rhythm to keep their teammates rowing.",["beat","beats","to beat","beaten"],0,"notice + O + 原V（也可 beating）"],
+["As the boats came closer, I heard the racers ____ to encourage their teammates.",["to shout","shouted","shouts","shouting"],3,"hear + O + V-ing"],
+["The old woman sat on the bench, watching her grandson ____ with the dog.",["plays","played","playing","to play"],2,"watch + O + V-ing"],
+["下列哪一句正確？",["I heard my name called in the hall.","I heard my name to call in the hall.","I heard my name to be call in the hall.","I heard my name calling in the hall."],0,"名字「被叫」→ p.p."],
+["下列哪一句正確？",["The thief was seen enter the building.","The thief was seen to enter the building.","The thief was seen entered the building.","The thief saw to enter the building."],1,"感官動詞被動：be seen to V"],
+["I noticed the light and mood ____ from place to place and hour to hour.",["to change","changes","changed","changing"],3,"notice + O + V-ing（課文原句）"],
+["Down below, I watched the Liwu River ____ between tall cliffs.",["to run","run","running's","ran"],1,"watch + O + 原V（課文原句）"],
+["I saw lanterns ____ the street in gold light.",["painted","to paint","paints","painting"],3,"see + O + V-ing（課文原句）"],
+["As a talent scout, Jack has to travel from ____ to place to find a potential star.",["places","place","a place","the place"],1,"from place to place；名詞用單數、不加冠詞"],
+["The mailman delivered the mail from ____ to door even though it was raining.",["the door","doors","door","a door"],2,"from door to door 挨家挨戶"],
+["The reviews of the movie seem to differ from person to ____.",["person","a person","persons","people"],0,"from person to person 因人而異"],
+["Logan woke up feeling thirsty in the ____ of the night.",["inside","middle","half","center"],1,"in the middle of + N"],
+["Amy was in the middle of ____ dinner when the lights went out.",["prepared","to prepare","preparing","prepare"],2,"in the middle of + V-ing 正忙於…"],
+["Jackson played some ____ music to cheer everyone up at the party.",["alive","living","lively","live"],2,"lively 活潑的"],
+["The children were excited to see some ____ animals at the zoo.",["lively","living's","alive","live"],3,"live (adj.) 活生生的（放名詞前）"],
+["Millions of people watched the Olympic Games ____ from their homes.",["lives","live","lively","alive"],1,"live (adv.) 以直播方式地"],
+["Although the old tree looks dry, Mr. Brown is sure that it is still ____.",["lively","alive","life","live"],1,"alive 活著的，放 be 動詞後"],
+["Oliver handled the angry customer's complaint in a highly professional ____.",["method","way","mean","road"],1,"in a(n) + adj. + way 以…的方式"],
+["Karen didn't like ____ the salesman treated her.",["the way","the way how","what way","the how"],0,"the way (that) = how；不可說 the way how"],
+["Dylan finished the coding project after a ____ effort.",["five-weeks","five-week's","five-week","five weeks"],2,"數字-名詞 複合形容詞，名詞用單數"],
+["The fresh roses in the garden smell ____ after the rain.",["sweetly","sweeten","sweetness","sweet"],3,"smell + adj."],
+["This fruit juice tastes ____ a mix of apples and oranges.",["as","like","to","with"],1,"taste like + N"],
+["Asher looked extremely ____ after finishing the marathon.",["tiredly","tiring","tire","tired"],3,"look + adj."],
+["Gabriel noticed the thick smoke ____ from the burning building.",["rose","raise","rise","risen"],2,"notice + O + 原V；rise 自動詞（升起）"],
+["Light gray marble walls ____ high on both sides.",["rose","risen","raised","rise"],0,"rise-rose-risen，課文過去式 rose"],
+["Levi told a funny joke to make his crying little brother ____.",["to laugh","laugh","laughed","laughing"],1,"make + O + 原V"],
+["The new learning app makes preparing for exams much ____ for students.",["easily","easy to","ease","easier"],3,"make + O + adj."],
+["The king decided to make the brave soldier a ____ of the royal army.",["leader","leading","led","lead"],0,"make + O + N 使…成為…"],
+["The children left the kitchen tap ____, so the floor was completely wet.",["to run","running","ran","run"],1,"leave + O + V-ing；run 此指液體流動"],
+["Although he tried to stay calm, Jack showed a ____ of sadness.",["tough","taste","torch","touch"],3,"a touch of 一點點…"],
+["The little girl ran toward her father with her hair ____ in the wind.",["to fly","flown","flies","flying"],3,"with + O + V-ing（主動）"],
+["With the project ____, we can finally take a long vacation.",["completed","complete","to complete","completing"],0,"with + O + p.p.（被動、已完成）"],
+["Please don't talk to me with your mouth ____ of food.",["filled","filling","full","fill"],2,"with + O + adj."],
+["Ken collected ____ than five hundred rare stamps.",["above","over","more","much"],2,"more than + 數字 超過…"],
+["As ____ as 50 people showed up at Max's party last night.",["much","many","more","most"],1,"as many as + 複數可數名詞，表驚訝"],
+["The store is offering discounts of ____ to seventy percent today.",["as","up","more","over"],1,"up to + 數字 多達…"],
+["Ron recognized the famous singer ____ black sunglasses.",["on","by","with","in"],3,"in + 服裝/配件 穿戴著…"],
+["The fans cheered in the stadium, ____ their flags high.",["to wave","waved","waving","wave"],2,"分詞構句：and they waved → waving"],
+["The old building stood in the center, ____ by tall trees.",["surrounded","surrounding","surround","to surround"],0,"分詞構句被動：and it was surrounded → surrounded"],
+["They moved like noisy waves, ____ and crashing.",["risen","to rise","rose","rising"],3,"課文分詞構句 rising and crashing"],
+["Simon met the tough challenge of the game ____ courage and confidence.",["with","by","for","in"],0,"meet … with + N 以…迎接"],
+["Ruby's apartment is decorated with a ____ of modern and traditional styles.",["mixed","mixes","mixing","mix"],3,"a mix of A and B"],
+["This living room is a ____ of warm colors and soft lighting.",["combined","combination","combining","combine"],1,"a combination of A and B"],
+["Jasmine walked down the street that was ____ with old bookstores.",["lines","lined","lining","line"],1,"line (v.) 排列在兩側；be lined with"],
+["Cora carefully ____ the laundry on the balcony to dry.",["hanged","hanging","hung","hang"],2,"hang-hung-hung 懸掛（hanged 是吊死）"],
+["The traditional bakery stands out ____ the modern stores in the district.",["among","across","along","between"],0,"among + 複數名詞（三者以上）"],
+["Kael smelled something ____ in the kitchen and turned off the stove.",["burned","burns","burning","to burn"],2,"smell + O + V-ing"],
+["Lisa slipped and fell ____ she was running down the wet stairs.",["or","as","but","so"],1,"as 當…的時候"],
+["After the sun went ____, the temperature in the desert dropped quickly.",["off","down","out","up"],1,"go down (太陽) 下山"],
+["Tuition at that university goes ____ every single year.",["up","down","on","off"],0,"go up (價格) 上漲"],
+["The tall clock tower ____ in the center of the town.",["stands","is stood","stood by","standing"],0,"S + stand/sit/lie + 介系詞 某物位於…（主動）"],
+["The new library is ____ three kilometers from the city center.",["located","location","locating","locates"],0,"be located/situated 位於（被動）"],
+["Alec's communication skills make him stand ____ among all the applicants.",["for","up","by","out"],3,"stand out 顯眼，突出"],
+["The photographer took a photo of the bird ____ the clear blue sky.",["among","along","against","across"],2,"against 以…為背景"],
+["Leo wore the exact same sneakers ____ his best friend.",["as","like","to","with"],0,"the same … as …"],
+["Can you see the bird ____ across the blue sky?",["flown","fly to","flied","flying"],3,"分詞片語修飾名詞（主動）"],
+["The letter ____ by my friend arrived this morning.",["to send","sending","sent","send"],2,"分詞片語修飾名詞（被動）"],
+["The internet changed the world when it took off in the late ____.",["the 1990","1990","1990's year","1990s"],3,"in the late + 年份s"],
+["The anxious student was ____ his legs from side to side.",["swing","swung","swinging","swings"],2,"swing-swung-swung"],
+["Gideon lit a fire in the fireplace to ____ the living room up.",["warm","warmly","warming","warmth"],0,"warm (v.) 使溫暖"],
+["Maria's new classmates welcomed her ____ open arms.",["for","by","with","in"],2,"welcome sb with + N"],
+["The museum is holding a ____ of events to celebrate its 50th anniversary.",["serie","serial","serious","series"],3,"a series of + 複數名詞"],
+["Ella takes lots of photos ____ time she travels to a new city.",["every","each of","some","all"],0,"every time + S + V 每次…"],
+["Red signs with black calligraphy hung above the shop fronts. ____ gave the old street a bright touch.",["That","These","Those","This"],1,"these 進一步說明前面的 red signs"],
+["I saw lanterns painting the street in gold light. ____ was the same color as real gold.",["That","These","This one","Those"],0,"that 回指前面提到的 gold light"],
+["Some students join too many clubs and sleep very little. ____ are hard habits to change.",["It","That","This","These"],3,"these 指前面這些習慣（複數）"],
+["The entrance fee was low and the displays were amazing. ____ was a wonderful surprise.",["These","They","Those","This"],3,"this 進一步說明整件事（單數）"]
+ ],
+ c:[
+["【課文】Taiwan did not ____ me with one single color.",["grant","great","greet","grade"],2,"greet sb with sth"],
+["【課文】During my two weeks here, I noticed the light and ____ changing from place to place.",["mood","moon","mode","mud"],0,"mood 氛圍"],
+["【課文】From eastern gray cliffs to a loud ____ in the middle of Taiwan…",["studio","statue","stadium","station"],2,"stadium 體育場（台中棒球場）"],
+["【課文】…Taiwan's views ____ its lively energy.",["patched","matched","marched","caught"],1,"match 相配"],
+["【課文】In fact, this mix showed the island's ____ in a simple way.",["university","variety","diverse","diversity"],3,"diversity 多樣性"],
+["【課文】These ____ images shaped the way I saw this beautiful island.",["void","valid","vivid","vital"],2,"vivid images 生動的畫面"],
+["【課文】…during my two-____ journey.",["week's","week","weeks","weekly"],1,"two-week 複合形容詞，名詞單數"],
+["【課文】In Taroko Gorge, the first ____ I saw felt cool and clean.",["shadows","shapes","sheds","shades"],3,"shade 色調"],
+["【課文】Light gray ____ walls rose high on both sides.",["marvel","marker","margin","marble"],3,"marble 大理石"],
+["【課文】…and dark ____ made the stone look almost black.",["shadows","shades","shelters","shells"],0,"shadow 影子"],
+["【課文】The water below gave the gray stone a ____ of green.",["tough","taste","touch","torch"],2,"a touch of 一點點"],
+["【課文】It looked like a ____ Chinese painting, with stone, water, and light moving together.",["classical","class","classic","classy"],2,"classic 經典的"],
+["【課文】In Taichung, the baseball park turned color into ____.",["emotion","motion","mission","notion"],1,"turn A into motion 讓顏色動起來"],
+["【課文】More than 20,000 fans in yellow shirts were hitting their yellow ____ sticks together.",["cheerful","cheers","cheering","cheered"],2,"cheering sticks 加油棒"],
+["【課文】Up in Old Taipei, Dihua Street met me with a colorful ____ of old and new.",["mixture's","mixes","mixed","mix"],3,"a mix of A and B"],
+["【課文】Gray Japanese-____ buildings lined the street.",["error","area","era","age's"],2,"Japanese-era 日治時期的"],
+["【課文】…with dark ____ doors and windows set into their walls.",["wooden","wooded","woolen","wood"],0,"wooden 木製的"],
+["【課文】Red signs with black ____ hung above the shop fronts.",["calligraphy","photography","biography","geography"],0,"calligraphy 書法"],
+["【課文】…glass containers showed dried foods and ____ in orange, brown, red, and green.",["herbs","herds","heads","hurts"],0,"herb 藥草"],
+["【課文】Finally, the mountain town of Jiufen looked soft as the sun went ____.",["down","out","off","up"],0,"go down 太陽下山"],
+["【課文】Old red buildings sat close together and stood out ____ deep green hills with thick forests.",["among","along","after","against"],3,"stand out against… 在…的襯托下顯眼"],
+["【課文】…I saw ____ painting the street in gold light.",["patterns","lanterns","lamps'","lectures"],1,"lanterns 燈籠"],
+["【課文】These lanterns ____ in the soft wind.",["swing","swang","swinged","swung"],3,"swing-swung-swung"],
+["【課文】Taiwan welcomed me with a ____ of vivid impressions.",["set's","serious","serial","series"],3,"a series of"],
+["【課文】The trip ended, but the ____ scenes did not.",["stinking","striking","stroking","sticking"],1,"striking 引人注目的"],
+["【課文】They come back every time I close my eyes, and I already look forward ____ my next visit.",["at","to","on","for"],1,"look forward to 期待"],
+["【課文理解】What is the passage mainly about?",["Problems that tourists may face in Taiwan.","The different places and scenes the author experienced during a trip in Taiwan.","Reasons why the author plans to move to Taiwan.","Advice for foreigners who want to work or study in Taiwan."],1,"課本 p.30 Main Idea 答案 (D)"],
+["【課文理解】Which scene does NOT appear in the author's travel blog?",["Lanterns lighting a narrow street in Jiufen as the sky grows dark.","Fans cheering and banging sticks at a baseball game in Taichung.","Visitors walking along a street lined with old buildings and red signs.","Tourists watching a fireworks show above the Jiufen mountains at night."],3,"課本 p.30 Details 答案 (C)"],
+["【課文理解】What can be inferred from the passage?",["The author believes Taiwan is difficult for travelers to explore.","The author has already visited every famous place in Taiwan.","The author plans to return to Taiwan in the future.","The author prefers quiet mountains to busy cities."],2,"課本 p.30 Inference 答案 (B)"],
+["【課文理解】這篇部落格的作者是哪裡人？",["澳洲","英國","加拿大","美國"],2,"a Canadian traveler writes about his two-week trip"],
+["【課文理解】作者在台灣待了多久？",["兩年","兩週","兩天","兩個月"],1,"his two-week trip"],
+["【課文理解】作者描述的四個地方依序是？",["九份→迪化街→台中棒球場→太魯閣","台中→太魯閣→九份→迪化街","太魯閣→九份→迪化街→台中","太魯閣→台中棒球場→迪化街→九份"],3,"Taroko Gorge, a baseball park in Taichung, Dihua Street, and Jiufen"],
+["【課文理解】台中棒球場有多少球迷？",["兩百人","兩千人","超過兩萬人","超過二十萬人"],2,"More than 20,000 fans"],
+["【課文理解】球迷穿著什麼顏色的球衣？",["黃色","藍色","紅色","綠色"],0,"fans in yellow shirts"],
+["【課文理解】太魯閣峽谷中流過的河是？",["濁水溪","高屏溪","立霧溪","淡水河"],2,"the Liwu River"],
+["【課文理解】九份燈籠的金色光芒，和什麼的顏色一樣？",["稻田","1800 年代末在九份附近發現的真金","廟宇","夕陽"],1,"the same color as the real gold found near Jiufen in the late 1800s"],
+["【課文理解】迪化街的店裡飄著什麼味道？",["咖啡","香水","茶和藥草","烤肉"],2,"I could smell tea and herbs in the air"],
+["【課文理解】作者用什麼來呈現台灣各地？",["美食與價格","交通與路線","顏色、光線與日常景象","歷史年代表"],2,"He uses colors, light, and daily scenes to show…"],
+["【圖表組織】From place to place and hour to hour, Taiwan reveals changing ____, diverse views, and a lively energy.",["colors","energy","views","signs"],0,"課本 p.29 第 1 格答案 (B) colors"],
+["【圖表組織】I watched the Liwu River ____.",["painting the street","hitting cheering sticks","hung above the entrances","run between tall gray cliffs"],3,"課本 p.29 答案 (G)"],
+["【圖表組織】____ hung above the entrances. I smelled tea and herbs.",["Red signs with black calligraphy","Taichung baseball park","Gold lanterns","Tall gray cliffs"],0,"課本 p.29 答案 (D)"],
+["【圖表組織】I saw lanterns ____ in gold light as evening fell.",["run between tall gray cliffs","painting the street","hitting sticks","rising and crashing"],1,"課本 p.29 答案 (F)"],
+["【掃讀技巧】Scanning 時，要一次找一種資訊，並注意哪一類字？",["所有的連接詞","標點符號","冠詞與介系詞","名詞、動詞、形容詞等實義字"],3,"focus on related content words like nouns, verbs, or adjectives"],
+["【掃讀技巧】找到符合的資訊時應該怎麼做？",["放慢速度，仔細再讀一次那部分","直接跳到下一段","只看標題","整篇重讀"],0,"slow down and carefully read that part again"],
+["【指示代名詞】this / these 通常用來？",["表示時間","引出進一步的說明","回指前面的想法","表示地點"],1,"this / these: to introduce more explanation"],
+["【指示代名詞】that / those 通常用來？",["回指前面提到的想法","表示原因","表示比較","引出新的說明"],0,"that / those: to refer back to an idea"],
+["【指示代名詞】指示代名詞的主要作用是？",["表示強調語氣","連接兩個句子","增加文章長度","避免重複，讓文章更易懂"],3,"They help avoid repetition and make a passage easier to understand."],
+["【Anton 的推薦】If you want to feast your eyes on natural scenery, I recommend the gorge and waterfalls at ____.",["Dapeng Bay","Sun Moon Lake","Donggang","Taroko National Park"],3,"課本 p.33"],
+["【Anton 的推薦】As for recreation, Anton thinks of ____ as the best spot.",["Qixing Lake","Dapeng Bay","Sun Moon Lake","Taroko"],2,"I think of Sun Moon Lake as the best spot."],
+["【Anton 的推薦】Anton gave ____ the highest score in terms of food.",["Taroko","Qixing Lake","Dapeng Bay","Sun Moon Lake"],2,"the seafood I tried there was the best"],
+["【Anton 的推薦】Which location might Anton recommend to Lauraaro, who wants outdoor recreation?",["Qixing Lake","Sun Moon Lake","Taroko National Park","Dapeng Bay"],1,"課本 p.33 答案 Sun Moon Lake"],
+["【Anton 的推薦】feast your eyes on 的意思最接近？",["To greatly enjoy looking at something.","To carefully avoid looking at something.","To look at something that cannot be found in nature.","To look at something that makes one's mouth water."],0,"課本 p.33 答案 (A)"],
+["【Anton 的推薦】I went biking and kayaking there. kayaking 的意思是？",["騎腳踏車","划獨木舟","衝浪","潛水"],1,"kayaking 划獨木舟"],
+["【Anton 的推薦】in terms of 的意思是？",["除了…","在…方面","為了…","因為…"],1,"in terms of 在…方面"],
+["【聽力】What is the interview between Melissa and Matt mainly about?",["Some places to visit on vacation.","A person's travel experiences.","The programs on a TV channel.","Friendship between teenagers."],1,"課本 p.42 答案 (C)"],
+["【聽力】Matt 從幾歲開始看國家地理頻道？",["10 歲","5 歲","20 歲","15 歲"],0,"I've been watching the National Geographic Channel since I was 10 years old."],
+["【聽力】Matt 最喜歡哪一個國家？",["埃及","芬蘭","加拿大","越南"],1,"I really love Finland."],
+["【聽力】Matt 在芬蘭最愛的自然景觀是？",["沙灘","金字塔","雨林","極光"],3,"especially the beautiful auroras"],
+["【聽力】What is Matt's plan for the future?",["To move to Finland.","To host a TV show.","To open a travel agency.","To write a book about his travel experiences."],3,"課本 p.42 答案"],
+["【聽力】Matt 透過寫書想要做到什麼？",["成為名人","賺很多錢","分享所學，讓台灣變得更好","移民國外"],2,"help make Taiwan a better place"],
+["【Matt 的部落格】At Lake Saimaa, I stayed in a cabin where I could enjoy a ____ view of the lake.",["stunning","majestic","fantastic","peaceful"],3,"課本 p.43 答案 (D) Peaceful"],
+["【Matt 的部落格】In Kemi, a small town where light ____ is low, I saw the stunning auroras.",["position","pollution","portion","population"],1,"light pollution 光害"],
+["【Matt 的部落格】In Kemi, Matt also paid a visit to the world's biggest ____ castle.",["sand","glass","snow","stone"],2,"the world's biggest snow castle"],
+["【Matt 的部落格】The Orinoro Gorge was carved by ____.",["rivers","winds","humans","glaciers"],3,"It was carved by glaciers."],
+["【Matt 的部落格】majestic 的意思是？",["壯麗的","渺小的","可怕的","平靜的"],0,"majestic 壯麗的"],
+["【Matt 的部落格】Finland never fails to ____ me.",["amazing","amazed","amazes","amaze"],3,"never fails to V 總是會…；fail to + 原V"],
+["【Matt 的部落格】根據對話與部落格，Matt 在北方城市最可能做了什麼？",["Hiking in a gorge.","Checking out a lake scene.","Walking in natural forests.","Visiting a snow castle."],3,"課本 p.43 答案 (B)：北方城市 Kemi 有雪堡"],
+["【文章結構】太魯閣那一段描述的是？",["燈籠的暖光","球賽的活力","老街的新舊交融","冷色調的景觀與美麗景色"],3,"Paragraph 2 describes the cool colors and beautiful view of Taroko Gorge."],
+["【文章結構】迪化街那一段透過哪些元素呈現新舊融合？",["燈籠與山林","峭壁與河流","球迷與加油棒","建築、招牌與氣味"],3,"through its buildings, signs, and smells"],
+["【文章結構】最後一段作者說這些畫面讓他？",["想搬到台灣工作","不想再來台灣","想再次造訪台灣","想寫一本書"],2,"I already look forward to my next visit."],
+["【克漏字】The night market was full of ____ and noise, and I loved every minute of it.",["energy","enemy","envy","entry"],0,"full of energy 充滿活力"],
+["【克漏字】Taiwan is famous for its cultural ____; you can see temples, churches, and modern malls on the same street.",["diversify","diversity","university","diverse"],1,"cultural diversity"],
+["【克漏字】Visiting Jiufen at night left a deep ____ on me.",["impress","impressive","expression","impression"],3,"leave an impression on sb"],
+["【克漏字】The view from Taipei 101 was so ____ that we took hundreds of photos.",["impress","impressive","impression","impressed"],1,"impressive 令人印象深刻的"],
+["【克漏字】On hot summer days, people like to rest in the ____ of big trees.",["shade","shell","shadow","shape"],0,"in the shade 在樹蔭下"],
+["【克漏字】The old temple is a ____ example of traditional Taiwanese buildings.",["classy","class","classical","classic"],3,"a classic example 典型的例子"],
+["【克漏字】I watched the dragon boats ____ across the river.",["raced","to race","races","race"],3,"watch + O + 原V"],
+["【克漏字】I heard people ____ loudly when their team scored.",["cheering","cheered","cheers","to cheer"],0,"hear + O + V-ing"],
+["【克漏字】I saw my photo ____ on the school website.",["posted","to post","posting","post"],0,"照片「被張貼」→ p.p."],
+["【克漏字】During the Lantern Festival, people carry colorful ____ in the streets.",["lamps","candles","lights","lanterns"],3,"lanterns 燈籠"],
+["【克漏字】We had a long ____ from Taipei to Kenting, but the beach was worth it.",["journey","joke","jury","journal"],0,"journey 旅程"],
+["【克漏字】The sunset turned the sky ____ a sea of orange and pink.",["for","to","with","into"],3,"turn A into B"],
+["【克漏字】Her bright red dress made her stand ____ in the crowd.",["out","for","up","by"],0,"stand out 顯眼"],
+["【克漏字】The old house is ____ at the top of the hill.",["location","located","locating","locate"],1,"be located 位於"],
+["【克漏字】The smell of beef noodles was ____ the air.",["on","at","with","in"],3,"in the air 在空氣中"],
+["【克漏字】After a long day of hiking, I'm in no ____ to cook.",["mood","mode","mud","mind"],0,"in no mood to V"],
+["【克漏字】Every time I hear this song, it ____ me of my trip to Hualien.",["recalls","remembers","reminds","reviews"],2,"remind sb of sth 使某人想起"],
+["【克漏字】We really look forward ____ visiting Penghu next summer.",["for","in","at","to"],3,"look forward to + V-ing"]
+ ]
+},
+{
+ id:"SM1U3", pub:"三民乙版", grade:"高一", name:"三民乙版 B1 U3　Clicks, Crumbs, and Consequences", short:"三民 B1U3",
+ src:{v:"三民 B1 U3 單字・片語",g:"三民 B1 U3 文法：make/leave/keep/find + O + OC",c:"三民 B1 U3 課文・閱讀・克漏字"},
+ v:[
+["「點擊；卡嗒聲」的英文是？",["click","clip","clerk","clock"],0,"click (n./v.) 點擊；卡嗒聲；click on sth"],
+["「結果，後果」的英文是？",["convenience","conference","consequence","confidence"],2,"consequence (n.)[C] 後果；a consequence of sth"],
+["「因此」（副詞）的英文是？",["conveniently","consequently","confidently","constantly"],1,"consequently (adv.) 因此 ＝ as a result"],
+["「隨之發生的，由…而起的」的英文是？",["consequent","content","consistent","constant"],0,"consequent (adj.) 隨之發生的"],
+["「令人滿足的」的英文是？",["satisfying","satisfactory","satisfied","satisfaction"],0,"satisfying (adj.) 令人滿足的（主觀感受愉快）"],
+["「使滿足，使滿意」的英文是？",["simplify","specify","satisfy","signify"],2,"satisfy (vt.) 使滿足；satisfy one's needs"],
+["「滿足要求的，合格的」的英文是？",["satisfactory","satisfy","satisfying","satisfied"],0,"satisfactory 剛好達標、合格"],
+["「資料，消息」的英文是？",["inflation","information","imagination","invitation"],1,"information (n.)[U] 資料；a piece of information"],
+["「通知，知會」的英文是？",["inform's","invite","inform","infer"],2,"inform (vt.) 通知；inform sb of sth"],
+["「資訊豐富的，增進知識的」的英文是？",["information","informative","informal","informed"],1,"informative (adj.) 資訊豐富的"],
+["「包括，包含」（介系詞）的英文是？",["inclusion","including","include","included"],1,"including (prep.) 包括 ↔ excluding"],
+["「搜索，搜尋」的英文是？",["search","sketch","surge","research"],0,"search (n./v.) 搜尋；in search of"],
+["「無害的」的英文是？",["harmful","hopeless","harmless","helpless"],2,"harmless (adj.) 無害的"],
+["「有害的」的英文是？",["harmless","harmful","helpful","hopeful"],1,"harmful (adj.) 有害的；harmful to sth"],
+["「傷害，損害」（名詞/動詞）的英文是？",["hurry","harsh","harp","harm"],3,"harm (n./v.) 傷害；do harm to sth"],
+["「影響」（動詞）的英文是？",["effect","afford","affect","effort"],2,"affect (vt.) 影響；effect 是名詞"],
+["「效果，影響」（名詞）的英文是？",["effort","affect","effect","afford"],2,"effect (n.) 效果；have an effect on sth"],
+["「有效的」的英文是？",["effortless","efficient","effective","affective"],2,"effective (adj.) 有效的 ↔ ineffective"],
+["「內容」的英文是？",["contest","content","contact","context"],1,"content (n.)[U] 內容；contents 內容物"],
+["「廣告」的英文是？",["advertisement","advancement","adventure","advisement"],0,"advertisement (n.)[C] 廣告 (ad)"],
+["「打廣告」的英文是？",["advertise","advise","advance","adventure"],0,"advertise (v.) 打廣告；advertise for 登廣告徵求"],
+["「討厭的事物；厭惡」的英文是？",["likely","alike","dislike","unlike"],2,"dislike (n./v.) 厭惡；likes and dislikes 好惡"],
+["「形象，印象；影像」的英文是？",["image","immune","imitate","imagine"],0,"image (n.) 形象；public image 公眾形象"],
+["「想像力」的英文是？",["imitation","immigration","imagination","information"],2,"imagination (n.) 想像力"],
+["「評論，意見」的英文是？",["comment's","comment","command","common"],1,"comment (n./v.) 評論；leave a comment"],
+["「形成，產生；形式；表格」的英文是？",["farm","foam","form","from"],2,"form (v./n.) 形成；a form of；fill out a form"],
+["「想法，意見」的英文是？",["operation","onion","opinion","option"],2,"opinion (n.) 想法；in my opinion"],
+["「冒犯的」的英文是？",["offensive","intensive","expensive","defensive"],0,"offensive (adj.) 冒犯的 ↔ inoffensive"],
+["「冒犯」（動詞）的英文是？",["defend","offer","afford","offend"],3,"offend (v.) 冒犯"],
+["「冒犯；犯罪行為」（名詞）的英文是？",["offensive","offense","offend","defense"],1,"offense (n.) 冒犯；take offense at；commit an offense"],
+["「申請人」的英文是？",["applause","appliance","applicant","application"],2,"applicant (n.)[C] 申請人"],
+["「申請；應用軟體」的英文是？",["application","applicant","appliance","appreciation"],0,"application (n.) 申請；app"],
+["「申請；應用；塗敷」（動詞）的英文是？",["imply","supply","apply","reply"],2,"apply (v.) 申請；apply for / apply to"],
+["「提供；機會，提議」的英文是？",["effort","offend","offer","afford"],2,"offer (n./v.) 提供；an admission offer 錄取通知"],
+["「破壞，損害」的英文是？",["message","image","manage","damage"],3,"damage (n./v.) 損害；cause damage to sth"],
+["「身分」的英文是？",["identical","identity","identify","idea"],1,"identity (n.) 身分；digital identity 數位身分"],
+["「識別；認同」（動詞）的英文是？",["ideal","identify","identical","identity"],1,"identify (v.) 識別；identify with sb 認同"],
+["「數位的」的英文是？",["dignity","dig","digit","digital"],3,"digital (adj.) 數位的"],
+["「腳印，足跡」的英文是？",["footstep","footnote","footprint","footwear"],2,"footprint (n.) 足跡；carbon footprint 碳足跡"],
+["「（食物或數位）碎屑」的英文是？",["crust","crime","crumble","crumb"],3,"crumb (n.) 碎屑；digital crumb 數位碎屑"],
+["「個人化的，量身製作的」的英文是？",["personality","personally","personalized","personal"],2,"personalized (adj.) 個人化的"],
+["「私人的，個人的」的英文是？",["personnel","person","personal","personality"],2,"personal (adj.) 私人的；personal details 個人資料"],
+["「人格，性格」的英文是？",["personality","personally","personal","personnel"],0,"personality (n.) 人格，性格"],
+["「動態消息；餵養」的英文是？",["feed","fade","feet","fee"],0,"feed (n.) 動態消息；(v.) 餵"],
+["「教學課程」的英文是？",["territorial","tutorial","tutor","editorial"],1,"tutorial (n.) 教學課程"],
+["「影片片段」的英文是？",["clip","clue","clap","click"],0,"clip (n.) 影片片段"],
+["「運動服裝」的英文是？",["sportscar","sportsman","swimwear","sportswear"],3,"sportswear (n.)[U] 運動服裝"],
+["「名牌（戴在身上）」的英文是？",["brand name","nickname","name card","name tag"],3,"name tag 名牌"],
+["「准許進入；承認」的英文是？",["addition","admiration","admission","ambition"],2,"admission (n.) 准許進入；admission offer 錄取"],
+["「獎學金」的英文是？",["friendship","scholar","scholastic","scholarship"],3,"scholarship (n.) 獎學金"],
+["「名譽，名聲」的英文是？",["regulation","population","repetition","reputation"],3,"reputation (n.) 名聲；damage one's reputation"],
+["「聲譽好的」的英文是？",["repeatable","reputable","respectable","remarkable"],1,"reputable (adj.) 聲譽好的"],
+["「跟隨，尾隨；痕跡，小道」的英文是？",["tail","trail","trial","train"],1,"trail (v./n.) 跟隨；痕跡；鄉間小道"],
+["「滑動（觸控螢幕）」的英文是？",["sweep","swipe","swing","swap"],1,"swipe (n./v.) 滑動；swipe your card 刷卡"],
+["consequence 的中文是？",["後果，結果","方便","會議","信心"],0,"consequence 後果"],
+["harmless 的中文是？",["絕望的","無助的","無害的","有害的"],2,"harmless 無害的"],
+["affect 的中文是？",["負擔得起","影響（動詞）","努力","效果（名詞）"],1,"affect (v.) 影響"],
+["offensive 的中文是？",["防禦的","冒犯的","密集的","昂貴的"],1,"offensive 冒犯的"],
+["reputation 的中文是？",["重複","名譽，名聲","人口","規定"],1,"reputation 名聲"],
+["identity 的中文是？",["識別","身分","相同的","想法"],1,"identity 身分；identify 識別"],
+["applicant 的中文是？",["家電","掌聲","申請人","申請"],2,"applicant 申請人"],
+["scholarship 的中文是？",["學術的","獎學金","學者","友誼"],1,"scholarship 獎學金"],
+["feed 的中文（在社群媒體上）是？",["腳","動態消息","褪色","費用"],1,"feed 動態消息"],
+["Many popular songs are on the music app, and each one is just a ____ away.",["click","clip","clock","clap"],0,"just a click away 輕鬆可得"],
+["I heard a ____, and the door locked.",["clock","clap","clip","click"],3,"click 卡嗒聲"],
+["____ on the link in the description to learn more about this product.",["Click","Clap","Clock","Clip"],0,"click on sth 點擊"],
+["Key in the correct password, and the safe will click ____ right away.",["opening","open","opened","to open"],1,"click open 卡嗒一聲打開"],
+["Accidents often happen as a ____ of not paying attention to small details.",["confidence","conference","consequence","convenience"],2,"as a consequence of 因為…"],
+["If you are not careful, you will suffer the ____.",["conferences","conditions","contents","consequences"],3,"suffer the consequences 承擔後果"],
+["Leonard missed the bus; ____, he was late for school.",["confidently","conveniently","consequently","constantly"],2,"consequently 因此"],
+["This vacation has been truly ____ for all of us.",["satisfy","satisfying","satisfaction","satisfied"],1,"satisfying 令人滿足的（事物）"],
+["The six-bedroom house is large enough to ____ the needs of a big family.",["satisfying","satisfaction","satisfied","satisfy"],3,"satisfy one's needs"],
+["The room is small, but it's ____ for one person.",["satisfying","satisfactory","satisfy","satisfied"],1,"be satisfactory for sb 合格，已足夠"],
+["Jack was ____ with his performance in the contest.",["satisfy","satisfied","satisfactory","satisfying"],1,"be satisfied with sth 對…感到滿意（人）"],
+["You can find some ____ about this singer on her fan page.",["informations","informative","information","inform"],2,"information 不可數"],
+["Thank you for giving me several ____ of information about the poet.",["bits'","pieces","parts","piece"],1,"pieces of information（information 不可數）"],
+["The hospital will ____ patients of the results in a week.",["informed","informative","information","inform"],3,"inform sb of sth"],
+["Please keep the customers ____ of any changes.",["inform","information","informing","informed"],3,"keep sb informed 讓某人持續知道"],
+["This online dictionary is highly ____.",["informative","informed","information","inform"],0,"informative 資訊豐富的"],
+["Jessica invited the whole class, ____ the classmates she didn't know well.",["including","includes","included","include"],0,"including 包括（介系詞）"],
+["The price of a package tour usually ____ the cost of hotels, meals, and plane tickets.",["including","included","includes","inclusion"],2,"include (v.) 包含"],
+["Birds fly around this area in ____ of a perfect place to build their nests.",["researcher","searched","searching","search"],3,"in search of sth 尋找"],
+["Dogs were sent to search the building ____ the missing people.",["of","to","at","for"],3,"search (sth) for sb/sth"],
+["I've searched high and ____, but still can't find my car keys.",["low","far","down","wide"],0,"search high and low 到處找"],
+["Though some animals look cute and ____, they can attack people when angry.",["harmless","hopeless","harmful","helpless"],0,"harmless 無害的"],
+["The mean words on Rita's Instagram did ____ to her mental health.",["harms","harmless","harm","harmful"],2,"do harm to sth"],
+["Taking this pill to lose weight might do more harm than ____.",["help","good","well","better"],1,"do more harm than good 弊大於利"],
+["This chemical has been proven to be ____ to the environment.",["harming","harmful","harmless","harm"],1,"harmful to sth"],
+["Bad weather and insect damage can both ____ the quality of apples.",["effort","affect","effect","afford"],1,"affect 影響（動詞）"],
+["Reading can have a very positive ____ on a young mind.",["affect","effort","effect","effective"],2,"have an effect on sth"],
+["Read the label for possible side ____ before taking the medicine.",["effects","efforts","effectives","affects"],0,"side effects 副作用"],
+["The new law will take ____ on July 1st.",["effective","affect","effort","effect"],3,"take effect 生效"],
+["A compass is an ____ tool for finding directions.",["effect","affective","effective","efficiently"],2,"effective 有效的"],
+["The ____ of the book is about different cultures around the world.",["contact","content","contest","context"],1,"content 內容"],
+["Tony carefully checked the ____ of the box again before he packed it.",["content","contents","contests","contexts"],1,"contents 內容物（複數）"],
+["Use the table of ____ to find a specific section quickly.",["content","contest","contents","context"],2,"table of contents 目錄"],
+["In this all-you-can-eat restaurant, you can eat to your heart's ____.",["contents","contest","content","context"],2,"to your heart's content 盡情地"],
+["Peter is ____ with his life although he doesn't make a lot of money.",["contents","contest","content","context"],2,"be content with sth 對…感到滿足（形容詞）"],
+["The company placed ____ on buses, trains, and shopping mall walls.",["advisers","advertisements","advertises","adventures"],1,"place an advertisement 投放廣告"],
+["The organization ____ for volunteers to help clean the beach.",["advised","advertised","advanced","adventured"],1,"advertise for… 登廣告徵求"],
+["Although Mark enjoys most sports, one of his few ____ is swimming.",["dislikes","unlikes","alikes","likes"],0,"dislike (n.) 討厭的事物"],
+["Helen dislikes ____ housework.",["to do","did","doing","do"],2,"dislike + V-ing"],
+["The actor cared about his public ____ and chose his words carefully.",["imagine","imitation","imagination","image"],3,"public image 公眾形象"],
+["____ taking a walk on a sandy beach at sunset.",["Imaginary","Image","Imagination","Imagine"],3,"imagine + V-ing"],
+["Viewers can leave ____ to share their thoughts with others.",["commons","commands","commerce","comments"],3,"leave a comment"],
+["My professor will comment ____ my report in the meeting.",["at","for","to","on"],3,"comment on sth"],
+["When asked about the matter, Peter simply replied, \"No ____.\"",["comment","commend","comments","command"],0,"No comment. 無可奉告"],
+["A long line quickly ____ outside the store when the sale began.",["former","formal","formed","forms"],2,"form (vi.) 形成"],
+["Using emojis is a common ____ of showing feelings in text messages.",["form","from","forum","farm"],0,"a form of sth 一種形式"],
+["Please fill ____ the form and bring it to your appointment.",["out","over","up","off"],0,"fill out/in a form 填表"],
+["The boss asked everyone to share their ____ about the new project.",["opinions","options","onions","operations"],0,"an opinion about sth"],
+["In my ____, summer is the best season.",["mind's","option","view's","opinion"],3,"in my opinion 依我看"],
+["Under the pressure of public ____, the government introduced a new law.",["option","opinion","content","image"],1,"public opinion 輿論"],
+["Many women said the song's lyrics are ____ to them.",["offense","offensive","offended","offend"],1,"be offensive to sb"],
+["If you ask people too many personal questions, you are likely to ____ them.",["offend","offense","offer","offensive"],0,"offend (v.) 冒犯"],
+["Karen took ____ at Mark's rude comments.",["offer","offend","offense","offensive"],2,"take offense at 因…感到被冒犯"],
+["No ____, but I don't think you thought it through.",["offer","offensive","offend","offense"],3,"No offense 無意冒犯"],
+["As an ____ for the training program, you need to provide your full name and ID number.",["application","appliance","applicant","applause"],2,"an applicant for sth"],
+["Anyone who plans to travel to Australia must apply ____ a visa.",["with","at","to","for"],3,"apply for sth 申請（簽證、職位、獎學金）"],
+["Jordy applied ____ several universities but hasn't received any replies yet.",["for","at","with","to"],3,"apply to a university/company"],
+["Kent's ____ for the manager's position was not accepted.",["appliance","apply","applicant","application"],3,"application for sth"],
+["Tina was excited to receive an admission ____ from her top choice.",["order","effort","offer","offend"],2,"admission offer 錄取通知"],
+["My father offered ____ me up from the airport.",["pick","picking","to pick","picked"],2,"offer to V 主動提議做…"],
+["The restaurant owner offers free meals ____ homeless people once a year.",["with","at","to","for"],2,"offer sth to sb ＝ offer sb sth"],
+["Luckily, the driver wasn't hurt, even though his car was badly ____.",["damaged","damages","damaging","damage"],0,"damage (vt.) 損害；被動 was damaged"],
+["Loud music can cause ____ to your hearing.",["damage","damaged","damaging","damages"],0,"cause damage to sth（damage 不可數）"],
+["Many people use fake names online instead of showing their true ____.",["identicals","ideas","identities","identifies"],2,"show one's identity 表明身分"],
+["The witness was able to ____ the suspect from the lineup.",["idealize","identical","identify","identity"],2,"identify (v.) 識別"],
+["You must show your ____ when entering the building.",["ID","IP","IQ","IT"],0,"ID ＝ identification 身分證明"],
+["Eat the cookies over a plate so that you don't drop ____ everywhere.",["crusts","crumbs","crowns","crimes"],1,"crumb 碎屑"],
+["To slow down global warming, we should reduce our carbon ____.",["footprint","footwear","footstep","footnote"],0,"carbon footprint 碳足跡"],
+["This restaurant is known for its ____ service.",["personnel","personality","personalized","personal"],2,"personalized service 個人化服務"],
+["The DVD is for personal ____ only.",["use","used","useful","using"],0,"for personal use 供個人使用"],
+["This website offers step-by-step ____ for DIY home projects.",["editorials","tutorials","territories","tutors"],1,"tutorial 教學"],
+["I watched a funny ____ from the comedian's latest show.",["clap","click","club","clip"],3,"clip 影片片段"],
+["Everyone is required to wear their ____ tag for easy identification.",["brand","name","label","nickname"],1,"name tag 名牌"],
+["Many students applied for the music ____.",["scholarship","friendship","membership","scholar"],0,"scholarship 獎學金"],
+["This town has a ____ for its scenic landscape and hospitable residents.",["repetition","regulation","relation","reputation"],3,"reputation for… 因…而有名"],
+["The celebrity chef has truly lived up to his ____.",["repetition","reputation","population","permission"],1,"live up to one's reputation 不負盛名"],
+["The little puppy ____ after its owner wherever he went.",["trialed","trained","tailed","trailed"],3,"trail after 尾隨"],
+["____ right to answer the call.",["Swipe","Swap","Swing","Sweep"],0,"swipe right 往右滑"],
+["Tina ____ her credit card to pay for the groceries.",["swept","swapped","swung","swiped"],3,"swipe a card 刷卡"],
+["At first, Jack didn't like country life, but over ____, he grew to enjoy it.",["time","the time","times","a time"],0,"over time 隨著時間過去"],
+["Iris saved money bit ____ bit until she could afford a vacation.",["for","by","to","after"],1,"bit by bit 一點一點地 ＝ little by little"],
+["The heavy rain brought ____ a terrible flood.",["about","out","in","up"],0,"bring about 導致"],
+["____ to the weather report, there will be a typhoon this weekend.",["Accord","According","Accordingly","Accordance"],1,"according to 根據"],
+["In addition ____ the guitar, Emma also plays the piano and violin.",["for","to","with","of"],1,"in addition to N 除了…還有"],
+["Peter doesn't like certain vegetables. For ____, he never eats carrots.",["instead","insight","instant","instance"],3,"for instance ＝ for example"],
+["A great idea suddenly ____ to me, and I quickly wrote it down.",["came up","happened","appeared","occurred"],3,"occur to sb (想法) 浮現"],
+["It never occurred to me ____ the shop would be closed today.",["what","that","which","if"],1,"It occurs to sb that…"],
+["over time 的意思是？",["隨著時間過去","準時","及時","超時"],0,"over time ＝ as time goes by"],
+["bit by bit 的意思是？",["一點一點地","一口咬下","位元","斷斷續續"],0,"bit by bit ＝ little by little ＝ gradually"],
+["bring about 的意思是？",["帶回","提起","帶走","導致，帶來"],3,"bring about ＝ cause ＝ lead to ＝ result in"],
+["occur to sb 的意思是？",["（想法）浮現於某人腦海","打擾某人","發生在某人身上","提醒某人"],0,"occur to sb 某人想到"]
+ ],
+ g:[
+["Tina put on makeup to make herself ____.",["attraction","attractive","attract","attractively"],1,"make + O + adj."],
+["Winning the lottery made Greg ____ overnight.",["millionairing","a millionaire","to be millionaire","millionaire's"],1,"make + O + N 使…成為…"],
+["The influencer's YouTube videos about fashion made her ____.",["popularly","popularity","popular","to popular"],2,"make + O + adj. 表狀態"],
+["Well-developed data systems make the website an effective advertising ____.",["platforms","platformed","to platform","platform"],3,"make + O + N"],
+["Joe's terrible joke left the room ____ total silence.",["at","in","with","on"],1,"leave + O + 介系詞片語 in silence"],
+["The program errors kept computer engineers ____ day and night.",["work","worked","to work","working"],3,"keep + O + V-ing 主動、持續進行"],
+["Anna keeps her social media status ____ on a daily basis.",["updated","to update","update","updating"],0,"keep + O + p.p. 狀態被更新（被動）"],
+["A stranger's comment made me ____ because it included my phone number.",["nerve","nervously","nervousness","nervous"],3,"make + O + adj."],
+["This scary experience left me ____ about my personal safety.",["thinking","think","to think","thought"],0,"leave + O + V-ing"],
+["To stay safe, I kept my profile ____ and removed some old posts.",["privatize","private","privacy","privately"],1,"keep + O + adj."],
+["In the end, I found my account much ____.",["safer","safely","save","safety"],0,"find + O + adj."],
+["Some students left their lunchboxes ____ after lunchtime.",["to unwash","unwash","unwashing","unwashed"],3,"leave + O + p.p."],
+["Mia found the bookcase ____ a mess.",["at","in","on","with"],1,"find + O + prep. phrase: in a mess"],
+["Mr. Chen makes every student ____ of the importance of personal hygiene.",["awarely","awareness","to aware","aware"],3,"make + O + adj.：be aware of"],
+["Mr. Chen made his guidance clear and kept everyone ____.",["motivate","motivation","motivated","motivating"],2,"keep + O + p.p. 被激勵"],
+["Ellen was busy doing her assignment and left her friends ____ outside the classroom.",["to wait","waiting","waited","wait"],1,"leave + O + V-ing 讓人一直等"],
+["Make it ____ first, then rub the sponge over the stains to remove them.",["wets","wetness","wetly","wet"],3,"make + O + adj."],
+["With these easy steps, you may find these tough stains ____.",["to remove","remove","removed","removing"],2,"find + O + p.p. 汙漬「被去除」"],
+["How can you easily keep the floor ____?",["cleaning","cleanly","clean","cleaner"],2,"keep + O + adj."],
+["With the Robot Vacuum, you can leave it ____ while doing other chores.",["working","to work","works","worked"],0,"leave + O + V-ing"],
+["Do you always leave your place ____ a mess?",["on","in","at","by"],1,"leave + O + in a mess"],
+["Do you want to make your house a cozy ____?",["to place","placed","placing","place"],3,"make + O + N"],
+["Don't let little kids drink coffee. It will keep them ____ all night.",["awaken","awoke","awaking","awake"],3,"keep + O + adj."],
+["The mother always kept her child ____ her side.",["for","to","by","of"],2,"keep + O + by one's side"],
+["The chef left the soup ____ the stove to cook while she prepared the salad.",["by","on","at","in"],1,"leave + O + prep. phrase"],
+["The speaker told good stories, so the audience found the speech ____.",["interest","interested","interesting","interestingly"],2,"find + O + adj.（事物用 -ing）"],
+["Stanley's excellent skills make ____ a great salesperson.",["he","his","him","himself"],2,"make + 受格 + N"],
+["Pamela keeps the windows ____ to stay warm.",["closing","to close","close","closed"],3,"keep + O + p.p. 窗戶「被關著」"],
+["The film maker tried to make the actor a ____.",["superstardom","super star's","superstar","superstars"],2,"make + O + N"],
+["The fire left many people ____.",["died","die","dead","death"],2,"leave + O + adj."],
+["Sitting with strangers made me ____ uncomfortable.",["feeling","felt","to feel","feel"],3,"make + O + 原V（使役）"],
+["Dan keeps all the letters ____ a box.",["at","with","on","in"],3,"keep + O + prep. phrase"],
+["A strong earthquake left thousands of people ____.",["homes","home","homely","homeless"],3,"leave + O + adj."],
+["Please don't leave the trash ____ the house.",["on","in","for","at"],1,"leave + O + prep. phrase"],
+["A good entertainer knows how to leave his audience ____ more.",["wanted","want","to want","wanting"],3,"leave + O + V-ing"],
+["Victor left the door ____.",["to unlock","unlocked","unlock","unlocking"],1,"leave + O + p.p."],
+["The noise on the street kept me ____ all night.",["awake","awaken","awaking","awoke"],0,"keep + O + adj."],
+["The coach asked the players to keep the ball ____.",["moving","to move","move","moved"],0,"keep + O + V-ing"],
+["The Internet keeps me ____ of what's going on in the world.",["information","informing","inform","informed"],3,"keep + O + p.p."],
+["The depressed man found life ____.",["meaningless","mean","meaning","meaningfully"],0,"find + O + adj."],
+["Mom found our dog ____ under the sofa.",["hiding","hidden","to hide","hide"],0,"find + O + V-ing"],
+["Zack found her bike ____ the next morning.",["steal","stole","stolen","stealing"],2,"find + O + p.p."],
+["You watch one video, then two, then three, and before you know it, you find yourself ____ to stop.",["enable","inability","disable","unable"],3,"find + O + adj.（課文原句）"],
+["If you search for basketball shoes, you will soon find sportswear ads ____ up on your phone.",["pop","to pop","popped","popping"],3,"find + O + V-ing（課文原句）"],
+["It may also keep the things you see ____ to a narrow range of repeated themes.",["limit","limited","limiting","to limit"],1,"keep + O + adj./p.p.（課文原句）"],
+["As a smart user, would you leave your digital footprint ____ of your control?",["off","away","over","out"],3,"leave + O + out of control（介系詞片語）"],
+["The teacher made her students ____ a poem every day.",["to recite","recited","recite","reciting"],2,"使役 make + O + 原V"],
+["The foreigner found it hard to make himself ____.",["understanding","to understand","understand","understood"],3,"make oneself understood（被動關係用 p.p.）"],
+["Kevin had the engine ____ for some time before driving to work.",["running","ran","to run","run"],0,"have + O + V-ing 使持續進行"],
+["Sam got her children ____ her with the housework.",["help","to help","helped","helps"],1,"get + O + to V"],
+["It took a lot of effort to get the shy person ____.",["talking","talk","talked","talks"],0,"get + O + V-ing 使開始某狀態"],
+["Steve got his homework ____.",["done","to do","do","doing"],0,"get + O + p.p. 被完成"],
+["For many, watching them ____ a sense of joy.",["bringing","brought them","brings","bring"],2,"動名詞當主詞視為單數"],
+["Going on vacation ____ me get away from work stress.",["helps","helped to","helping","help"],0,"動名詞主詞 → 單數動詞"],
+["The lake was as calm ____ a mirror in the early morning.",["than","so","as","like"],2,"as + adj. + as"],
+["These students snack ____ chips and cookies while studying late at night.",["on","at","with","for"],0,"snack on sth 把…當零食吃"],
+["Sandy's lack of self-control makes it hard for her to say ____ to junk food.",["not","never","none","no"],3,"say no to 拒絕"],
+["The doctors seem ____ to agree if the drug is safe or not.",["inability","unable","disable","enable"],1,"unable to V 無法…"],
+["Just ____ a plant needs sunlight to grow, children need encouragement.",["likely","alike","like","as like"],2,"just like + clause 正如同…"],
+["Matt left his coat ____ because the weather suddenly got warm.",["below","behind","after","back"],1,"leave … behind 留下"],
+["____ social media connects people globally, deep connection is often lacking.",["While","Unless","When","Because"],0,"while 雖然 ＝ although"],
+["The baby ____ tired after spending the whole day playing outside.",["seems","seemed to be seem","seem","seeming"],0,"seem + adj."],
+["Jayce had a busy week. To ____ with, he had three tests this Wednesday.",["began","begin","beginning","begun"],1,"to begin with 首先 ＝ to start with"],
+["Mark looks similar ____ his brother, and sometimes it's hard to tell them apart.",["to","for","with","as"],0,"similar to 與…相似"],
+["The two projects are similar ____ ideas but different in content.",["with","on","to","in"],3,"similar in 在…方面相似"],
+["Jerry ____ be at the library right now, as he has a history exam tomorrow.",["may","may to","mays","maybe"],0,"may + 原V 表推測"],
+["Maria starts ____ along when the radio plays her favorite song.",["sung","sang","sings","singing"],3,"start + V-ing/to V"],
+["Reading is a great way to spend free time; ____, spending time in nature is good for you.",["simply","similarity","similarly","similar"],2,"similarly 同樣地"],
+["An ad suddenly popped ____ on Ray's screen while he was watching a video.",["off","in","up","out"],2,"pop up 跳出"],
+["A new ____ shop of Marie's favorite show is about to open in Ximending.",["pop up","popping-up","pop-up","popped-up"],2,"pop-up (adj.) 快閃的"],
+["Katy keeps ____ with her friends through social media without noticing the time.",["chat","chatting","to chat","chatted"],1,"keep + V-ing 一直做…"],
+["The public ____ view your posts and form opinions about you.",["cans","canning","to can","can"],3,"the public 視為整體"],
+["People no longer support the politician after he lied to the ____.",["publicly","publics","publicity","public"],3,"the public 大眾"],
+["Helen didn't study. As a ____, she failed the test.",["resulting","results","result","resulted"],2,"as a result 因此"],
+["The baseball game was ____ because of heavy rain.",["canceled","canceling","cancels","cancel"],0,"cancel 取消；被動 was canceled"],
+["It is clear ____ technology plays an important role in our daily life.",["which","whether","that","what"],2,"It 虛主詞 + that 子句"],
+["An actual conversation speaks ____ than your résumé.",["loudly","louder","loudest","loud"],1,"speak louder than 比…更有說服力"],
+["This novel completely changes ____ I look at the world.",["which","the way how","what way","how"],3,"the way (that) ＝ how，不可說 the way how"],
+["The repair job took ____ than we planned.",["long","longer","length","lengthy"],1,"longer than 比…還久"],
+["Every student, teacher, or parent ____ different opinions about the issue.",["having","has","have","are having"],1,"every + 單數名詞 → 單數動詞"],
+["Exercise should become ____ of your daily routine.",["parts","partly","a parts","part"],3,"become part of sth"],
+["As a ____, I try to set a good example for my children.",["parents","parent","parental","parenting"],1,"as + 身分 作為…"],
+["The fire quickly spread and went ____ of control due to strong winds.",["out","off","away","over"],0,"out of control 失控"],
+["It is important to stay ____ control of your feelings when you are angry.",["on","at","under","in"],3,"stay in control of sth 掌控"],
+["Everything is ____ control. Please don't panic!",["under","out","in","on"],0,"under control 在控制之下"],
+["The police conducted a search ____ the forest for the missing child.",["of","for","at","to"],0,"a search of 地點 for 目標"],
+["The purchasing agent ordered some office equipment, a new printer ____.",["included","include","includes","including"],0,"… N included ＝ including N"],
+["下列哪一句正確？",["The noise kept me awaking.","The noise kept me awake.","The noise kept me to awake.","The noise kept awake me."],1,"keep + O + adj."],
+["下列哪一句正確？",["I found my wallet to steal.","I found my wallet steal.","I found my wallet stolen.","I found my wallet stealing."],2,"錢包「被偷」→ p.p."],
+["下列哪一句正確？",["Winning the game made him a hero.","Winning the game made him to a hero.","Winning the game made a hero him.","Winning the game made him heroic to."],0,"make + O + N"],
+["下列哪一句錯誤？",["It made me happy.","It made me feel happy.","It made me to feel happy.","It left me feeling happy."],2,"make 使役後接原V，不接 to V"]
+ ],
+ c:[
+["【課文】Click! Who would say no ____ fun videos online?",["with","at","for","to"],3,"say no to 拒絕"],
+["【課文】For many, watching them brings a sense of joy, a feeling as ____ as snacking on cookies.",["satisfy","satisfied","satisfactory","satisfying"],3,"satisfying 令人滿足的"],
+["【課文】…before you know it, you find yourself ____ to stop.",["disable","able","unable","enable"],2,"find oneself unable to V"],
+["【課文】…just like eating cookies leaves ____ behind, every move you make on the Internet drops digital crumbs.",["crowns","crumbs","crimes","crusts"],1,"crumb 碎屑"],
+["【課文】Over time, these tiny pieces of ____ you leave become your digital footprint.",["informations","informative","inform","information"],3,"pieces of information"],
+["【課文】…including your search ____ and the webpages you visit…",["historic","story","history","histories"],2,"search history 搜尋紀錄"],
+["【課文】While this footprint may seem ____, bit by bit, it can affect your life.",["harmless","helpful","hopeless","harmful"],0,"seem harmless 看似無害"],
+["【課文】…and even bring about unexpected ____.",["conveniences","confidences","conferences","consequences"],3,"bring about consequences 帶來後果"],
+["【課文】To begin with, your digital footprint ____ the content you see online.",["affects","efforts","affords","effects"],0,"affect 影響（動詞）"],
+["【課文】When you like a post or click on a video, platforms ____ your actions, habits, and interests.",["study","studied","studies","studying"],0,"study 分析；主詞 platforms 複數"],
+["【課文】…they show you similar content and even ____ advertisements.",["personalized","personality","personally","personal"],0,"personalized 個人化的"],
+["【課文】…according to your likes and ____.",["unlikes","alike","likely","dislikes"],3,"likes and dislikes 好惡"],
+["【課文】…your ____ starts showing dance tutorials or concert tickets after you watch a K-pop clip.",["food","feet","feed","fee"],2,"feed 動態消息"],
+["【課文】…you will soon find sportswear ads ____ up on your phone.",["pop","popped","popping","to pop"],2,"find + O + V-ing"],
+["【課文】…the content you see online keeps ____ with every click you make.",["change","to change","changed","changing"],3,"keep + V-ing"],
+["【課文】…it may also keep the things you see limited to a ____ range of repeated themes and sources.",["large","wide","narrow","broad"],2,"a narrow range 狹窄的範圍"],
+["【課文】In addition, your digital footprint shapes your online ____.",["image","imagine","imitation","imagination"],0,"online image 網路形象"],
+["【課文】Your likes, posts, and comments sit on social media pages like a name ____.",["card","brand","tag","list"],2,"name tag 名牌"],
+["【課文】The public can view them and ____ opinions about you.",["form","forum","farm","from"],0,"form opinions 形成看法"],
+["【課文】In 2020, some U.S. colleges found ____ posts on their applicants' social media pages.",["defensive","offensive","expensive","intensive"],1,"offensive 冒犯的"],
+["【課文】As a result, they canceled these students' ____ offers and sports scholarships.",["admission","ambition","addition","admiration"],0,"admission offer 錄取通知"],
+["【課文】It probably never ____ to the students that a few careless posts would come back later.",["occurred","arrived","happened","appeared"],0,"It occurs to sb that…"],
+["【課文】…and even speak ____ than their application letters.",["loudly","louder","loud","loudest"],1,"speak louder than 更有說服力"],
+["【課文】Even small online actions can leave traces that affect the way people see you, or even worse, damage your ____!",["repetition","regulation","reputation","relation"],2,"damage one's reputation 損害名聲"],
+["【課文】The digital footprint you leave online doesn't just ____ even when you delete it.",["appear","disappear","dismiss","disagree"],1,"disappear 消失"],
+["【課文】This tiny trace may ____ behind you longer than you expect.",["trail","tail","trade","trial"],0,"trail 如影隨形地跟著"],
+["【課文】Every tap, swipe, or click becomes part of your digital ____.",["idea","identity","identical","identify"],1,"digital identity 數位身分"],
+["【課文】…would you leave your digital footprint out of your ____?",["contrast","control","contract","contact"],1,"out of one's control 脫離掌控"],
+["【課文理解】What is the passage mainly about?",["Why people enjoy watching different videos online.","How simple online actions can affect us in unexpected ways.","Why and how the Internet is harmful to us.","How digital cookies are created on the Internet."],1,"課本 p.50 Main Idea 答案 (D)"],
+["【課文理解】Which statement is true according to the passage?",["A digital footprint comes only from playing online games.","A digital footprint is made from the things you do online.","A digital footprint can be deleted easily.","A digital footprint is only created when you post photos."],1,"課本 p.50 Details 答案 (C)"],
+["【課文理解】數位足跡（digital footprint）是什麼？",["人們在網路上留下的資料痕跡","網站的程式碼","手機的電池紀錄","真實世界的腳印"],0,"Digital footprints are traces of data people leave online."],
+["【課文理解】課文把網路上的行為比喻成什麼？",["寫日記","在沙灘上走路","吃餅乾留下碎屑","拍照"],2,"just like eating cookies leaves crumbs behind"],
+["【課文理解】數位足跡的第一個影響是？",["影響你在網路上看到的內容","讓你交到朋友","讓手機變慢","讓你成績變好"],0,"your digital footprint affects the content you see online"],
+["【課文理解】數位足跡的第二個影響是？",["讓你變有錢","讓你睡不好","讓網速變快","塑造你的網路形象"],3,"your digital footprint shapes your online image"],
+["【課文理解】2020 年美國一些大學發現申請者的什麼？",["推薦信是假的","社群媒體上有冒犯性貼文","成績造假","沒繳學費"],1,"found offensive posts on their applicants' social media pages"],
+["【課文理解】那些大學因此做了什麼？",["取消他們的錄取與運動獎學金","提高學費","要他們重考","要他們道歉就好"],0,"canceled these students' admission offers and sports scholarships"],
+["【課文理解】個人化內容的缺點是？",["讓你看到太多不同觀點","讓你看到的東西侷限在重複的主題與來源","讓網路變慢","讓廣告消失"],1,"keep the things you see limited to a narrow range of repeated themes"],
+["【主動 vs. 被動足跡】你自己選擇發文、分享、按讚、留言所產生的資料，屬於？",["碳足跡","被動數位足跡 Passive Digital Footprint","實體足跡","主動數位足跡 Active Digital Footprint"],3,"You create this data when you choose to post, share, like, comment…"],
+["【主動 vs. 被動足跡】網站和 app 透過 cookies 自動收集你的瀏覽紀錄和位置，屬於？",["名牌","被動數位足跡 Passive Digital Footprint","個人資料","主動數位足跡 Active Digital Footprint"],1,"Websites and apps automatically collect data… you may not be aware of it."],
+["【段落結構】A good topic sentence points out the ____ of a paragraph.",["last word","small details","first example","main idea"],3,"topic sentence 指出段落主旨"],
+["【段落結構】主題句最常出現在段落的哪裡？",["最後一句","標題","正中間","第一句"],3,"It can appear anywhere, but it is often the first sentence."],
+["【段落結構】主題句後面接的，提供更多細節的句子叫？",["titles","supporting sentences","topic sentences","conclusions"],1,"A topic sentence is followed by supporting sentences."],
+["【段落結構】第二段的主題句是？",["When you like a post or click on a video, platforms study your actions.","This can sometimes be helpful.","For example, you may notice your feed starts showing dance tutorials.","To begin with, your digital footprint affects the content you see online."],3,"課本 p.46 第二段主題句"],
+["【段落結構】第三段的主題句是？",["The public can view them and form opinions about you.","In addition, your digital footprint shapes your online image.","As a result, they canceled these students' admission offers.","The lesson?"],1,"課本 p.46 第三段主題句"],
+["【漢堡結構】文章像漢堡，最上面的麵包代表？",["例子","結論","細節","文章主旨"],3,"The top bun shows the main idea of the passage."],
+["【漢堡結構】Your online actions become part of your ____. You should think before you click.",["digital crumb","digital identity","search history","name tag"],1,"課本 p.49 答案 digital identity"],
+["【漢堡結構】Careless posts can even ____ or ruin college chances.",["affect your life","damage your reputation","limit your feed","form opinions"],1,"課本 p.49 答案 damage your reputation"],
+["【漢堡結構】It might keep the things you see ____.",["out of control","informed","limited to a narrow range","in a mess"],2,"課本 p.49 答案 limited to a narrow range"],
+["【因果轉折詞】下列哪一個是表示「結果」的副詞？",["because","although","unless","therefore"],3,"Adverbs: thus, therefore, consequently, as a result"],
+["【因果轉折詞】下列哪一個是表示「導致」的動詞片語？",["lead to","result from","look for","depend on"],0,"lead to, result in, cause, give rise to, contribute to, bring about"],
+["【因果轉折詞】What transition phrase shows the results in paragraph 3?",["in addition","as a result","for instance","to begin with"],1,"As a result, they canceled…"],
+["【因果轉折詞】Eric's posts ____ the loss of his sports scholarship.",["looked at","led to","resulted from","depended on"],1,"lead to 導致（課本 p.51 選項 A 正確）"],
+["【因果轉折詞】下列哪一句錯誤使用了因果轉折詞？",["The memes spread quickly; as a result, the university began an investigation.","Eric lost his scholarship; therefore, he posted offensive memes online.","Eric's posts gave rise to serious damage to his reputation.","Eric's posts led to the loss of his sports scholarship."],1,"因果顛倒：是先貼文才失去獎學金（課本 p.51 C 錯）"],
+["【因果轉折詞】The accident resulted ____ Peter's reckless driving habits.",["from","in","with","to"],0,"result from 起因於（result in 才是導致）"],
+["【保護個資】Which piece of advice is NOT given about protecting your personal data?",["Protect your data by adding \"https\" to your password.","Visit only websites that protect the privacy of users' data.","Avoid using your birthday or phone numbers as your password.","Create separate accounts for work and personal purposes."],0,"課本 p.53 答案 (B)"],
+["【保護個資】https 中的 s 最可能代表？",["Special","Secure","Smart","Secret"],1,"課本 p.53 答案 (B) Secure"],
+["【保護個資】下列哪個網站比較可能洩漏個資？",["https://elearninginfographics.com/","https://drive.google.com/drive/","https://www.foodorder.net/","http://www.grammarchecker.com/"],3,"以 http（沒有 s）開頭的網站比較不安全"],
+["【保護個資】建議把帳號分成兩個，是為了？",["讓手機更快","避免把私人資訊給不太信任的人","多拿免費贈品","讓帳號更好記"],1,"one for school or work, the other for personal use"],
+["【保護個資】A long and ____ password is safer.",["difficult","simple","short","easy"],0,"create a long and difficult password"],
+["【聽力】Kevin 說在社群媒體打廣告的第一個好處是？",["快速又方便","可以認識朋友","不用花時間","很便宜"],0,"advertising on social media is fast and convenient"],
+["【聽力】社群廣告為什麼能觸及很多人？",["電視會播出","廣告會寄到家裡","政府會幫忙宣傳","喜歡產品的人會分享廣告"],3,"people who like my products will share my advertisements"],
+["【聽力】Kevin 可以從社群廣告得知目標客戶的哪些資訊？",["名字和電話","成績和學校","年齡、性別、位置和消費能力","住址和身分證字號"],2,"their age, gender, location, and financial ability"],
+["【聽力】What is Lisa's comment mainly about?",["Customers prefer expensive restaurants.","Social media ads are useful for finding cheap restaurants.","Advertising on social media is cheap.","Advertising on social media is really beneficial to business people."],3,"課本 p.66 答案 (C)"],
+["【聽力】Lisa 以前是怎麼打廣告的？",["在報紙上登","在電視上打廣告","請明星代言","印傳單在街上發"],3,"I used to print out flyers and hand them out in the streets."],
+["【聽力】Kevin 和 Lisa 都提到的是？",["可以了解目標客戶","廣告服務很貴","社群廣告服務很有效","客戶都喜歡便宜餐廳"],2,"課本 p.67：Advertising services on social media are effective."],
+["【預測技巧】Prediction 時，可以從哪裡找 1–3 個關鍵字？",["廣告價格","最後一句話","標題和視覺線索","聽眾的名字"],2,"choose 1–3 key words from the title and key visual clues"],
+["【詢問意見】下列哪一句是「詢問別人意見」的用法？",["What's your opinion on social media ads?","In my opinion, social media ads are useful.","I believe that ads are helpful.","I think so."],0,"詢問：What do you think of…? / What's your opinion on…?"],
+["【詢問意見】下列哪一句是「表達自己看法」的用法？",["Do you like ads?","What's your opinion about ads?","In my opinion, social media ads are useful.","What do you think of social media ads?"],2,"表達：In my opinion… / I believe (that)…"],
+["【克漏字】Think twice before you post, because every click leaves a digital ____.",["footprint","footwear","footnote","footstep"],0,"digital footprint"],
+["【克漏字】Posting your home address online may put you at risk; the ____ can be serious.",["contexts","contents","consequences","conferences"],2,"consequences 後果"],
+["【克漏字】Some apps collect your ____ without asking you first.",["informed","informations","inform","information"],3,"information 不可數"],
+["【克漏字】Changing your privacy settings can keep your account ____.",["safe","safely","safety","save"],0,"keep + O + adj."],
+["【克漏字】A rude comment can easily ____ other users.",["offer","offend","offense","offensive"],1,"offend 冒犯"],
+["【克漏字】Careless posts can ____ your reputation for years.",["damage","image","imagine","manage"],0,"damage 損害"],
+["【克漏字】After I searched for running shoes, ads for sportswear kept ____ up.",["to pop","popped","popping","pop"],2,"keep + V-ing"],
+["【克漏字】I found my feed ____ with cat videos after I liked just one.",["filled","fill","to fill","filling"],0,"find + O + p.p."],
+["【克漏字】Leaving your phone ____ in class is not a good idea.",["unlocking","unlocked","to unlock","unlock"],1,"leave + O + p.p."],
+["【克漏字】Many universities check applicants' social media before making ____ decisions.",["admiration","ambition","addition","admission"],3,"admission decisions 錄取決定"],
+["【克漏字】She received a ____ for her excellent grades.",["scholar","membership","friendship","scholarship"],3,"scholarship 獎學金"],
+["【克漏字】In my ____, we should spend less time on our phones.",["opinion","option","operation","onion"],0,"in my opinion"],
+["【克漏字】The new rule will take ____ next month.",["effective","affect","effort","effect"],3,"take effect 生效"],
+["【克漏字】Too much screen time can ____ your sleep.",["afford","effect","affect","effort"],2,"affect 影響"],
+["【克漏字】Bit ____ bit, he learned how to protect his privacy online.",["to","after","by","on"],2,"bit by bit 一點一點地"],
+["【克漏字】Using the same weak password everywhere can bring ____ serious problems.",["in","up","out","about"],3,"bring about 導致"],
+["【克漏字】According ____ the report, most teens spend over three hours online a day.",["to","for","with","at"],0,"according to 根據"],
+["【克漏字】In addition ____ games, the app offers English lessons.",["with","for","of","to"],3,"in addition to N"],
+["【克漏字】It never ____ to him that his old posts could be seen by his future boss.",["appeared","occurred","happened","showed"],1,"It occurs to sb that…"],
+["【克漏字】Some platforms offer ____ ads based on what you have searched for.",["personality","personnel","personal","personalized"],3,"personalized ads 個人化廣告"]
+ ]
+},
+{
+ id:"B3L1", pub:"龍騰", grade:"高二", name:"龍騰 B3 L1　The Day I Broke the Rules", short:"B3 L1",
  src:{v:"B3 L1 單字・片語",g:"B3 L1 文法：不定詞 ＋ it 虛主詞／受詞",c:"B3 L1 克漏字・文意選填"},
 v:[
 ["「僱用」的英文是？",["employ","deserve","adapt","collaborate"],0,"employ (vt.) 僱用；be employed by 受僱於"],
@@ -1303,7 +1968,7 @@ c:[
 ]
 },
 {
- id:"B3L2", name:"龍騰 B3 L2　The Marshmallow Challenge", short:"B3 L2",
+ id:"B3L2", pub:"龍騰", grade:"高二", name:"龍騰 B3 L2　The Marshmallow Challenge", short:"B3 L2",
  src:{v:"B3 L2 單字・片語",g:"B3 L2 文法：形容詞子句",c:"B3 L2 克漏字・文意選填"},
  v:[
 ["「創新的」的英文是？",["innovative","economical","upright","annual"],0,"innovative (adj.) 創新的"],
@@ -1534,7 +2199,7 @@ c:[
  ]
 },
 {
- id:"GSAT", name:"學測高頻單字　GSAT 字根字首", short:"學測單字",
+ id:"GSAT", pub:"學測", grade:"高三", name:"學測高頻單字　GSAT 字根字首", short:"學測單字",
  src:{v:"學測高頻單字・字義",g:"學測高頻單字・字根字首拆解",c:"學測高頻單字・例句填空"},
  v:[
 ["「提到；說起」的英文是？",["postpone","inhale","educate","mention"],3,"mention (v./n.) 提到；說起；字根：ment (想/提)"],
@@ -2094,7 +2759,7 @@ c:[
  ]
 },
 {
- id:"TOEIC", name:"多益單字　TOEIC 商務職場", short:"多益",
+ id:"TOEIC", pub:"多益", grade:"", name:"多益單字　TOEIC 商務職場", short:"多益",
  src:{v:"多益單字・字義",g:"多益單字・同義字與商務用語",c:"多益單字・例句填空"},
  v:[
 ["「收入或所得」的英文是？",["disposition","income","critic","resume"],1,"income (n.) 收入或所得　同義：salary, earnings"],
@@ -2704,7 +3369,7 @@ c:[
  ]
 },
 {
- id:"GSATPAST", name:"學測歷屆試題　110–115", short:"學測歷屆",
+ id:"GSATPAST", pub:"學測", grade:"高三", name:"學測歷屆試題　110–115", short:"學測歷屆",
  src:{v:"學測歷屆・詞彙題",g:"學測歷屆・綜合測驗",c:"學測歷屆・文意選填"},
  v:[
 ["Tom is really a naughty boy. He likes to ____ and play jokes on his younger sister when their parents are not around.",["alert","spare","tease","oppose"],2,"110 學測 第 1 題（詞彙題）　正解：tease"],
@@ -2909,9 +3574,10 @@ c:[
    所以可以先把段考範圍寫好放著，等 B3L2、B3L3 的題庫加進 UNITS 之後，
    「第一次段考範圍」那顆按鈕就會自動冒出來，不用再改程式。 */
 const PRESETS=[
- {name:"課本四課混合", ids:["B1L1","B1L2","B3L1","B3L2"]},
- {name:"高一第一次段考", ids:["B1L1","B1L2"]},
- {name:"高二第一次段考", ids:["B3L1","B3L2"]},
+ {name:"龍騰課本四課混合", ids:["B1L1","B1L2","B3L1","B3L2"]},
+ {name:"龍騰高一第一次段考", ids:["B1L1","B1L2"]},
+ {name:"三民乙版 B1 U1–U3", ids:["SM1U1","SM1U2","SM1U3"]},
+ {name:"龍騰高二第一次段考", ids:["B3L1","B3L2"]},
  {name:"學測衝刺（單字書）", ids:["GSAT"]},
  {name:"多益衝刺（商務職場）", ids:["TOEIC"]},
  {name:"學測歷屆考古題", ids:["GSATPAST"]},
@@ -4043,10 +4709,61 @@ function moveP(dx,dy){
    選擇題庫範圍
    ============================================================ */
 let pickSet=new Set(["B3L1"]), pickEasy=false;
+const PICKF_KEY="granny_b3l1_pickfilter_v1";
+const PUBS=["龍騰","三民乙版","學測","多益"];
+const GRADES=["高一","高二","高三"];
+let pickF={pub:"",grade:""};
+try{ const d=JSON.parse(localStorage.getItem(PICKF_KEY)||"{}"); pickF={pub:d.pub||"",grade:d.grade||""}; }catch(e){}
+function saveF(){ try{ localStorage.setItem(PICKF_KEY,JSON.stringify(pickF)); }catch(e){} }
+function unitVisible(u){
+  if(pickF.pub && u.pub!==pickF.pub) return false;
+  if(pickF.grade && u.grade!==pickF.grade) return false;
+  return true;
+}
+function unitCount(u){ return (u.v||[]).length+(u.g||[]).length+(u.c||[]).length; }
+function renderFilters(){
+  const box=$("pickFilters"); box.innerHTML="";
+  const row=(label,key,opts)=>{
+    const r=document.createElement("div"); r.className="frow";
+    r.innerHTML='<span class="flab">'+label+'</span>';
+    [["","全部"]].concat(opts.map(o=>[o,o])).forEach(([val,txt])=>{
+      // 只顯示「在另一個條件下仍有課」的選項，避免點了變空
+      if(val){
+        const other=key==="pub"?"grade":"pub";
+        const any=UNITS.some(u=>u[key]===val && (!pickF[other]||u[other]===pickF[other]));
+        if(!any) return;
+      }
+      const b=document.createElement("button");
+      b.className="fchip"+(pickF[key]===val?" on":""); b.textContent=txt;
+      b.onclick=()=>{ pickF[key]=val; saveF(); renderPick(); sfx(470,.05,"triangle",.04); };
+      r.appendChild(b);
+    });
+    box.appendChild(r);
+  };
+  row("版本","pub",PUBS);
+  row("年級","grade",GRADES);
+}
 function renderPick(){
+  renderFilters();
+  const gOrd=g=>{ const i=GRADES.indexOf(g); return i<0?99:i; };
+  const pOrd=x=>{ const i=PUBS.indexOf(x); return i<0?99:i; };
+  const vis=UNITS.map((u,i)=>[u,i]).filter(([u])=>unitVisible(u))
+    .sort((a,b)=>gOrd(a[0].grade)-gOrd(b[0].grade)||pOrd(a[0].pub)-pOrd(b[0].pub)||a[1]-b[1])
+    .map(([u])=>u);
+  // 篩選後被隱藏的課自動取消勾選；都沒勾就勾第一個看得到的
+  [...pickSet].forEach(id=>{ const u=UNITS.find(x=>x.id===id); if(!u||!unitVisible(u)) pickSet.delete(id); });
+  if(!pickSet.size && vis.length) pickSet.add(vis[0].id);
+
   const list=$("unitList"); list.innerHTML="";
-  UNITS.forEach(u=>{
-    const n=(u.v||[]).length+(u.g||[]).length+(u.c||[]).length;
+  if(!vis.length){ list.innerHTML='<div class="pempty">這個分類目前還沒有課</div>'; }
+  let lastGroup=null;
+  vis.forEach(u=>{
+    const group=(u.grade?u.grade+"・":"")+u.pub;
+    if(group!==lastGroup){
+      const h=document.createElement("div"); h.className="ghead"; h.textContent=group;
+      list.appendChild(h); lastGroup=group;
+    }
+    const n=unitCount(u);
     const b=document.createElement("button");
     b.className="unit"+(pickSet.has(u.id)?" on":"");
     b.innerHTML='<span class="box">'+(pickSet.has(u.id)?"✓":"")+'</span>'+
@@ -4059,22 +4776,27 @@ function renderPick(){
     };
     list.appendChild(b);
   });
+
   const row=$("presetRow"); row.innerHTML="";
   PRESETS.forEach(p=>{
-    const ids=p.ids.filter(i=>UNITS.some(u=>u.id===i));
-    if(ids.length!==p.ids.length) return;   // 課還沒加齊就先不顯示
+    const us=p.ids.map(i=>UNITS.find(u=>u.id===i));
+    if(us.some(u=>!u)) return;                 // 課還沒加齊就先不顯示
+    if(!us.every(unitVisible)) return;         // 不屬於目前分類就不顯示
     const b=document.createElement("button");
-    b.className="preset"; b.textContent=p.name+"（"+ids.length+" 課）";
-    b.onclick=()=>{ pickSet=new Set(ids); renderPick(); sfx(520,.08,"triangle",.05); };
+    b.className="preset"; b.textContent=p.name+"（"+p.ids.length+" 課）";
+    b.onclick=()=>{ pickSet=new Set(p.ids); renderPick(); sfx(520,.08,"triangle",.05); };
     row.appendChild(b);
   });
+
   let tot=0;
-  UNITS.filter(u=>pickSet.has(u.id)).forEach(u=>tot+=(u.v||[]).length+(u.g||[]).length+(u.c||[]).length);
+  UNITS.filter(u=>pickSet.has(u.id)).forEach(u=>tot+=unitCount(u));
   $("pickInfo").innerHTML="已選 <b style='color:#ffb547'>"+pickSet.size+"</b> 課，題庫共 <b style='color:#ffb547'>"+tot+"</b> 題";
 }
 function openPick(isEasy){
   pickEasy=isEasy;
   pickSet=new Set(SELECTED.length?SELECTED:[UNITS[0].id]);
+  const selU=UNITS.filter(u=>pickSet.has(u.id));
+  if(selU.length && !selU.some(unitVisible)){ pickF={pub:"",grade:""}; saveF(); }
   renderPick();
   $("scTitle").classList.remove("on");
   $("scPick").classList.add("on");
