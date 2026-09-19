@@ -4,6 +4,28 @@
 
 **遊戲網址**：https://priscillalearn-ops.github.io/granny-escape-b3l1/
 
+## 獨立的週評量版本（不跟上面的題庫混在一起）
+
+| 版本 | 網址 | 內容 |
+|---|---|---|
+| 主站 | https://priscillalearn-ops.github.io/granny-escape-b3l1/ | 課本、學測、多益等所有題庫 |
+| WEEK 12 週評量 | https://priscillalearn-ops.github.io/granny-escape-b3l1/week12/ | 只有 A01～A05 文法總評鑑（50 題） |
+
+`week12/index.html` 是**完全獨立的一個檔案**，用同一套恐怖阿嬤的遊戲範本做的：
+
+- 題庫只有 PW 100+ 第一期 WEEK 12 週評量的範圍：
+  A01 五大句型和五大動詞・A02 代名詞・A03 動詞的問句與答句・A04 名詞與計量詞・A05 現在簡單式，
+  每個單元 10 題、共 **50 題**，答案與解析依照週評量的參考答案。
+- 選範圍畫面可以只練一個單元，也可以五個一起考；另有「WEEK 12 全範圍」「句型＋動詞」等組合包。
+- **存檔和主站分開**（用不同的 localStorage key），兩邊的進度互不影響；名字設定共用。
+- 五關的最終考驗也換成 A01～A05 的題目。
+- **不記錄成績**：`BOARD_URL` 留空，所以不用輸入名字、不上傳、也不顯示排行榜，純練習用。
+  想改成會上傳，把主站 `index.html` 裡那串 Apps Script 網址貼進 `week12/index.html` 的 `BOARD_URL` 即可。
+
+要再做一份新的週評量，就把 `week12/` 複製成新資料夾，改掉裡面的 `UNITS`、`PRESETS`、
+`SAVE_KEY`／`PICKF_KEY`（記得改成不一樣的字串，否則存檔會互相覆蓋）和標題文字即可。
+
+
 ## 目前收錄的課
 
 | 代號 | 課名 | 文法重點 | 單字 | 文法 | 克漏字 | 合計 |
