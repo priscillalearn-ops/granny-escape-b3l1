@@ -11,7 +11,7 @@
 | 主站 | https://priscillalearn-ops.github.io/granny-escape-b3l1/ | 課本、學測、多益等所有題庫 |
 | PW 100+ WEEK 12 | https://priscillalearn-ops.github.io/granny-escape-b3l1/week12/ | A01～A05 文法總評鑑（50 題） |
 | PW 300+ T1 W12 | https://priscillalearn-ops.github.io/granny-escape-b3l1/t1w12-300/ | E01～E04 期末文法評鑑（40 題） |
-| PW 200+ T1 W12 | https://priscillalearn-ops.github.io/granny-escape-b3l1/t1w12-200/ | 情境對話 U6–U15・閱讀單字・閱讀文章（135 題，待老師重新整理範圍） |
+| PW 200+ T1 W12 | https://priscillalearn-ops.github.io/granny-escape-b3l1/t1w12-200/ | 情境對話 U6–U15・閱讀單字 80 字（290 題） |
 
 每一份都是**完全獨立的一個檔案**，用同一套恐怖阿嬤的遊戲範本做的，彼此和主站都不共用題庫：
 
@@ -37,12 +37,16 @@
 - 原卷的「圈出正確答案」保留兩個選項，畫面會自動排成兩顆按鈕；「填入正確答案」改寫成四選一。
 - 一樣不記錄成績，存檔 key 是 `granny_pw300_w12_*`。
 
-### `t1w12-200/`（PW 200+ 第一期 T1 W12 閱讀）
+### `t1w12-200/`（PW 200+ 第一期 T1 W12）
 
-- 題目取自 `T1W12_200-Reading.pptx`：情境對話 U6–U15（片語 22 題＋閱讀理解 28 題）、
-  閱讀單字 30 字中英互選（60 題）、閱讀文章問答與句子填空（25 題），共 **135 題**。
-- 選擇題的選項順序與答案照投影片上標示的正解。
-- **這一份的範圍老師要重新整理**，整理好之後直接改 `t1w12-200/index.html` 裡的 `UNITS` 就好。
+- `R01 情境對話 U6–U15`：片語與口語句意 22 題、閱讀理解 28 題，
+  取自 `T1W12_200-Reading.pptx`，選項順序與正解都照投影片上標示的。
+- `V1`～`V5` **閱讀單字 80 字**，取自單字表 PDF，依五篇文章分包：
+  V1 化妝品的歷史（17）・V2 各國的牙齒習俗（16）・V3 火環帶與板塊（17）・
+  V4 青春痘（15）・V5 腸道與氣體（15）。
+  每個字出三題：中翻英、英翻中、例句填空（例句和中譯都照單字表），共 240 題。
+- 全部合計 **290 題**。意思太接近的字（acne／pimple／zit、dye／henna、powder／chalk、
+  cosmetics／kohl）程式裡設了互斥，不會互相當誘答。
 
 ## 要再做一份新的評量
 

@@ -214,13 +214,13 @@ table.bd .num{text-align:right;white-space:nowrap}
     <div class="granny-art">👵🌂</div>
     <div class="brand">Priscilla English</div>
     <h1>恐怖阿嬤的英文逃脫</h1>
-    <div class="sub">PW 200+ 第一期　T1 WEEK 12 閱讀　｜　情境對話 U6–U15・閱讀單字・閱讀文章（135 題）</div>
+    <div class="sub">PW 200+ 第一期　T1 WEEK 12　｜　情境對話 U6–U15・閱讀單字 80 字（290 題）</div>
     <div class="card">
       <b>【劇情】</b><br>
       你的手機被恐怖阿嬤沒收了，還被鎖進她那棟老房子。她手裡永遠握著那把黑雨傘 ——
       <i>“You <b>had better not</b> break my rules.”</i> —— 被打到一下就結束了。<br><br>
       <b>【五關】</b>阿嬤的家 → 醫院 → 考場 → 百貨公司 → 機場，一關比一關難：場景更大、阿嬤更快、天數更少。<br><br>
-      <b>【範圍】</b>情境對話 U6–U15 的片語與閱讀理解、閱讀單字 30 字（中英互選）、四篇閱讀文章（化妝品的歷史・各國牙齒習俗・火環帶與板塊・青春痘與腸道氣體）。按「開始逃脫」後可以只練其中一包，也可以三包一起混著考。<br><br>
+      <b>【範圍】</b>R01 情境對話 U6–U15（片語與閱讀理解）；閱讀單字 80 字，依五篇文章分成 V1 化妝品的歷史・V2 各國的牙齒習俗・V3 火環帶與板塊・V4 青春痘・V5 腸道與氣體，每個字都會考中翻英、英翻中和例句填空。按「開始逃脫」後可以只練其中一包，也可以全部混著考。<br><br>
       <b>【目標】</b>找齊三樣道具，走到出口，通過最後三道英文考驗就能過關。<br><br>
       <b>【玩法】</b>走到家具前按 <b>E</b>（手機按「搜查」）翻找，翻找時要答一題英文。<br>
       答錯 → <b style="color:#e0344a">巨大聲響！阿嬤立刻朝你衝過來</b>。<br>
@@ -228,7 +228,7 @@ table.bd .num{text-align:right;white-space:nowrap}
       被追時可躲進 🛏️ 床底或 🧳 衣櫃（按 E）。<br><br>
       <b>【🤡 無敵道具】</b>某個家具裡藏著<b>小丑紅鼻子</b>。戴上後 8 秒內阿嬤打不到你，
       撞到她還能讓她愣住 4 秒。按 <b>Q</b>（手機按「無敵」）使用。<br>
-      每<b>答對 5 題</b>就會自動充能一次（最多存 3 次）—— 想無敵就把單字和片語記熟。<br><br>
+      每<b>答對 5 題</b>就會自動充能一次（最多存 3 次）—— 想無敵就把單字背熟。<br><br>
       <b>【存檔】</b>遊戲會自動存檔，關掉網頁下次回來可以按「繼續遊戲」接著玩。
     </div>
     <div class="row">
@@ -331,9 +331,9 @@ table.bd .num{text-align:right;white-space:nowrap}
 
 <script>
 /* ============================================================
-   題庫：PW 200+ 第一期 T1 WEEK 12 閱讀（共 135 題）
-   單字 v＝閱讀單字 30 字　片語 g＝情境對話 U6–U15　閱讀 c＝對話理解與文章問答
-   這是「獨立的一包」，跟主站 index.html、week12/ 的題庫都完全分開，互不影響。
+   題庫：PW 200+ 第一期 T1 WEEK 12（共 290 題）
+   片語 g＝情境對話 U6–U15　閱讀 c＝對話理解與單字例句填空　單字 v＝閱讀單字 80 字中英互選
+   這是「獨立的一包」，跟主站 index.html 和其他評量的題庫完全分開，互不影響。
    ============================================================ */
 /* ============================================================
    題庫：一課一包。要加新課，就在 UNITS 陣列裡再加一個 {...}
@@ -408,104 +408,288 @@ const UNITS=[
  ]
 },
 {
- id:"R02", pub:"PW 200+", grade:"T1 W12", name:"R02　閱讀單字 30 字", short:"R02 單字",
- src:{v:"T1 W12 閱讀單字（中英互選）",g:"T1 W12 閱讀單字",c:"T1 W12 閱讀單字"},
- v:[
-["「鏈；一連串」的英文是？",["chain","pressure","century","swallow"],0,"chain 鏈；一連串　an enormous chain of volcanoes 一長串的火山"],
-["「仙子」的英文是？",["chemical","fairy","bacterium","myth"],1,"fairy 仙子　the tooth fairy 牙仙"],
-["「化妝品」的英文是？",["myth","cosmetics","surface","rate"],1,"cosmetics 化妝品　恆用複數形 cosmetics"],
-["「表面」的英文是？",["chain","bacterium","fairy","surface"],3,"surface 表面　the surface of the earth 地表"],
-["「壓力」的英文是？",["pressure","myth","pillow","chain"],0,"pressure 壓力　pressure under the earth 地底的壓力"],
-["「習俗」的英文是？",["melt","surface","custom","exchange"],2,"custom 習俗　follow their own special customs 遵循自己的習俗"],
-["「西方的」的英文是？",["harmful","western","chain","pupil"],1,"western 西方的　western tradition 西方傳統"],
-["「瞳孔」的英文是？",["pupil","melt","chemical","poison"],0,"pupil 瞳孔　belladonna 讓瞳孔變大；pupil 也有「學生」的意思"],
-["「尊敬」的英文是？",["respect","rate","release","century"],0,"respect 尊敬　show respect 表示尊敬"],
-["「枕頭」的英文是？",["pillow","process","irritate","cosmetics"],0,"pillow 枕頭　put the tooth under the pillow 把牙齒放枕頭下"],
-["「染色；染料」的英文是？",["dye","material","process","chemical"],0,"dye 染色；染料　dye one's hair 染頭髮"],
-["「交換」的英文是？",["chemical","myth","sulfur","exchange"],3,"exchange 交換　in exchange for money 用來換錢"],
-["「毒；毒藥」的英文是？",["poison","process","absorb","myth"],0,"poison 毒；毒藥　belladonna 顛茄就是一種 poison"],
-["「細菌」的英文是？",["swallow","bacterium","material","custom"],1,"bacterium 細菌　複數是 bacteria；bacteria living in our intestines 腸道裡的細菌"],
-["「比率；速度」的英文是？",["cosmetics","surface","rate","swallow"],2,"rate 比率；速度　at a slow rate 以很慢的速度"],
-["「材料；物質」的英文是？",["custom","cosmetics","exchange","material"],3,"material 材料；物質　melted material 熔化的物質"],
-["「融化」的英文是？",["frequently","chemical","myth","melt"],3,"melt 融化　the ice cream melts 冰淇淋融化"],
-["「承認」的英文是？",["cosmetics","admit","western","myth"],1,"admit 承認　admit the truth 承認事實"],
-["「迷思；神話」的英文是？",["myth","pillow","cure","melt"],0,"myth 迷思；神話　a common myth 常見的迷思"],
-["「硫磺」的英文是？",["pillow","release","swallow","sulfur"],3,"sulfur 硫磺　含硫的食物會讓氣味變臭"],
-["「刺激；使不適」的英文是？",["irritate","cosmetics","poison","respect"],0,"irritate 刺激；使不適　irritate the skin 刺激皮膚"],
-["「世紀」的英文是？",["swallow","chemical","chain","century"],3,"century 世紀　in the 16th century 在十六世紀"],
-["「釋放」的英文是？",["release","fairy","chemical","cosmetics"],0,"release 釋放　release gas 排出氣體"],
-["「治療；療法」的英文是？",["fairy","absorb","pupil","cure"],3,"cure 治療；療法　a cure for pimples 治痘痘的方法"],
-["「化學物質」的英文是？",["swallow","chemical","century","pupil"],1,"chemical 化學物質　chemical reactions 化學反應"],
-["「吸收」的英文是？",["release","chain","absorb","frequently"],2,"absorb 吸收　absorb the poison 吸收毒素"],
-["「吞下」的英文是？",["custom","surface","swallow","chemical"],2,"swallow 吞下　the air we swallow 我們吞下的空氣"],
-["「經常」的英文是？",["custom","material","frequently","pillow"],2,"frequently 經常　teenagers frequently develop pimples 青少年經常長痘痘"],
-["「過程」的英文是？",["frequently","sulfur","myth","process"],3,"process 過程　a slow process 緩慢的過程"],
-["「有害的」的英文是？",["admit","harmful","exchange","surface"],1,"harmful 有害的　harmful to the skin 對皮膚有害"],
-["chain 的中文是？",["瞳孔","治療；療法","鏈；一連串","西方的"],2,"chain 鏈；一連串　an enormous chain of volcanoes 一長串的火山"],
-["fairy 的中文是？",["表面","世紀","仙子","壓力"],2,"fairy 仙子　the tooth fairy 牙仙"],
-["cosmetics 的中文是？",["細菌","化妝品","融化","經常"],1,"cosmetics 化妝品　恆用複數形 cosmetics"],
-["surface 的中文是？",["染色；染料","西方的","化學物質","表面"],3,"surface 表面　the surface of the earth 地表"],
-["pressure 的中文是？",["習俗","壓力","硫磺","治療；療法"],1,"pressure 壓力　pressure under the earth 地底的壓力"],
-["custom 的中文是？",["習俗","仙子","細菌","表面"],0,"custom 習俗　follow their own special customs 遵循自己的習俗"],
-["western 的中文是？",["過程","染色；染料","西方的","吞下"],2,"western 西方的　western tradition 西方傳統"],
-["pupil 的中文是？",["世紀","表面","瞳孔","交換"],2,"pupil 瞳孔　belladonna 讓瞳孔變大；pupil 也有「學生」的意思"],
-["respect 的中文是？",["毒；毒藥","化學物質","化妝品","尊敬"],3,"respect 尊敬　show respect 表示尊敬"],
-["pillow 的中文是？",["刺激；使不適","迷思；神話","枕頭","毒；毒藥"],2,"pillow 枕頭　put the tooth under the pillow 把牙齒放枕頭下"],
-["dye 的中文是？",["染色；染料","瞳孔","習俗","化學物質"],0,"dye 染色；染料　dye one's hair 染頭髮"],
-["exchange 的中文是？",["材料；物質","交換","毒；毒藥","染色；染料"],1,"exchange 交換　in exchange for money 用來換錢"],
-["poison 的中文是？",["迷思；神話","交換","毒；毒藥","表面"],2,"poison 毒；毒藥　belladonna 顛茄就是一種 poison"],
-["bacterium 的中文是？",["融化","交換","細菌","材料；物質"],2,"bacterium 細菌　複數是 bacteria；bacteria living in our intestines 腸道裡的細菌"],
-["rate 的中文是？",["比率；速度","化妝品","融化","迷思；神話"],0,"rate 比率；速度　at a slow rate 以很慢的速度"],
-["material 的中文是？",["硫磺","有害的","材料；物質","西方的"],2,"material 材料；物質　melted material 熔化的物質"],
-["melt 的中文是？",["瞳孔","融化","世紀","過程"],1,"melt 融化　the ice cream melts 冰淇淋融化"],
-["admit 的中文是？",["吸收","承認","迷思；神話","材料；物質"],1,"admit 承認　admit the truth 承認事實"],
-["myth 的中文是？",["迷思；神話","仙子","習俗","吸收"],0,"myth 迷思；神話　a common myth 常見的迷思"],
-["sulfur 的中文是？",["瞳孔","硫磺","鏈；一連串","毒；毒藥"],1,"sulfur 硫磺　含硫的食物會讓氣味變臭"],
-["irritate 的中文是？",["化學物質","治療；療法","仙子","刺激；使不適"],3,"irritate 刺激；使不適　irritate the skin 刺激皮膚"],
-["century 的中文是？",["西方的","經常","世紀","化妝品"],2,"century 世紀　in the 16th century 在十六世紀"],
-["release 的中文是？",["瞳孔","交換","細菌","釋放"],3,"release 釋放　release gas 排出氣體"],
-["cure 的中文是？",["瞳孔","治療；療法","經常","化妝品"],1,"cure 治療；療法　a cure for pimples 治痘痘的方法"],
-["chemical 的中文是？",["硫磺","融化","化學物質","釋放"],2,"chemical 化學物質　chemical reactions 化學反應"],
-["absorb 的中文是？",["壓力","經常","尊敬","吸收"],3,"absorb 吸收　absorb the poison 吸收毒素"],
-["swallow 的中文是？",["承認","世紀","治療；療法","吞下"],3,"swallow 吞下　the air we swallow 我們吞下的空氣"],
-["frequently 的中文是？",["經常","吸收","壓力","鏈；一連串"],0,"frequently 經常　teenagers frequently develop pimples 青少年經常長痘痘"],
-["process 的中文是？",["比率；速度","表面","過程","染色；染料"],2,"process 過程　a slow process 緩慢的過程"],
-["harmful 的中文是？",["經常","有害的","迷思；神話","世紀"],1,"harmful 有害的　harmful to the skin 對皮膚有害"]
- ],
+ id:"V1", pub:"PW 200+", grade:"T1 W12", name:"V1　閱讀單字：化妝品的歷史（17 字）", short:"V1 化妝品",
+ src:{v:"T1 W12 閱讀單字：化妝品的歷史（中英互選）",g:"T1 W12 閱讀單字：化妝品的歷史",c:"T1 W12 閱讀單字：化妝品的歷史（例句填空）"},
  g:[],
- c:[]
+ v:[
+["「改善；增進」的英文是？",["drop","improve","cosmetics","nerve"],1,"improve (v.) 改善；增進　He put forward a plan for improving the rate of production. 他提出了一個提高生產率的計劃。"],
+["improve 的中文是？",["莨菪（植物）","改善；增進","神經","染劑"],1,"improve (v.) 改善；增進　He put forward a plan for improving the rate of production. 他提出了一個提高生產率的計劃。"],
+["「文化」的英文是？",["improve","nerve","dye","culture"],3,"culture (n.) 文化　He has studied the cultures of various western countries. 他研究了各西方國家的文化。"],
+["culture 的中文是？",["文化","改善；增進","瞳孔","古老的；古舊的"],0,"culture (n.) 文化　He has studied the cultures of various western countries. 他研究了各西方國家的文化。"],
+["「粉末」的英文是？",["ancient","powder","improve","drop"],1,"powder (n.) 粉末　He crushed a piece of chalk to powder. 他將一支粉筆壓成粉末。"],
+["powder 的中文是？",["化妝品","古老的；古舊的","改善；增進","粉末"],3,"powder (n.) 粉末　He crushed a piece of chalk to powder. 他將一支粉筆壓成粉末。"],
+["「毒藥；毒物」的英文是？",["drop","poison","dye","pupil"],1,"poison (n.) 毒藥；毒物　Gas is a poison. 煤氣是有毒氣體。"],
+["poison 的中文是？",["毒藥；毒物","神經","瞳孔","染料"],0,"poison (n.) 毒藥；毒物　Gas is a poison. 煤氣是有毒氣體。"],
+["「滴」的英文是？",["nerve","Renaissance","drop","powder"],2,"drop (n.) 滴　The rain was leaking in large drops through the roof. 雨正大滴大滴地從屋頂漏下來。"],
+["drop 的中文是？",["文化","化妝墨","滴","染料"],2,"drop (n.) 滴　The rain was leaking in large drops through the roof. 雨正大滴大滴地從屋頂漏下來。"],
+["「古老的；古舊的」的英文是？",["ancient","chalk","nerve","wig"],0,"ancient (adj.) 古老的；古舊的　He drives an ancient car. 他開著一輛老式汽車。"],
+["ancient 的中文是？",["鉛","瞳孔","古老的；古舊的","文化"],2,"ancient (adj.) 古老的；古舊的　He drives an ancient car. 他開著一輛老式汽車。"],
+["「化妝品」的英文是？",["cosmetics","culture","chalk","drop"],0,"cosmetics (n.) 化妝品　Some of these cosmetics were used to improve one's appearance. 這些化妝品有些是用來改善一個人的外表。"],
+["cosmetics 的中文是？",["瞳孔","染料","改善；增進","化妝品"],3,"cosmetics (n.) 化妝品　Some of these cosmetics were used to improve one's appearance. 這些化妝品有些是用來改善一個人的外表。"],
+["「化妝墨」的英文是？",["improve","pupil","poison","kohl"],3,"kohl (n.) 化妝墨　Egyptians used black kohl around their eyes. 埃及人用黑色化妝墨塗在眼睛周圍。"],
+["kohl 的中文是？",["瞳孔","化妝墨","莨菪（植物）","毒藥；毒物"],1,"kohl (n.) 化妝墨　Egyptians used black kohl around their eyes. 埃及人用黑色化妝墨塗在眼睛周圍。"],
+["「白堊粉」的英文是？",["Renaissance","chalk","ancient","drop"],1,"chalk (n.) 白堊粉　Romans put white chalk on their faces. 羅馬人抹白堊粉在臉上。"],
+["chalk 的中文是？",["白堊粉","文化","滴","染劑"],0,"chalk (n.) 白堊粉　Romans put white chalk on their faces. 羅馬人抹白堊粉在臉上。"],
+["「染劑」的英文是？",["poison","belladonna","henna","powder"],2,"henna (n.) 染劑　Indians painted red henna on their bodies. 印度人塗紅染劑在身體上。"],
+["henna 的中文是？",["假髮","鉛","染劑","文化"],2,"henna (n.) 染劑　Indians painted red henna on their bodies. 印度人塗紅染劑在身體上。"],
+["「文藝復興」的英文是？",["ancient","henna","kohl","Renaissance"],3,"Renaissance (n.) 文藝復興　In the Renaissance, women wore white powder made of lead on their faces. 文藝復興時期，女人在臉上抹鉛製的白粉。"],
+["Renaissance 的中文是？",["莨菪（植物）","文藝復興","滴","白堊粉"],1,"Renaissance (n.) 文藝復興　In the Renaissance, women wore white powder made of lead on their faces. 文藝復興時期，女人在臉上抹鉛製的白粉。"],
+["「鉛」的英文是？",["dye","ancient","lead","pupil"],2,"lead (n.) 鉛　Lead is poisonous. 鉛是有毒的。"],
+["lead 的中文是？",["莨菪（植物）","文化","鉛","化妝品"],2,"lead (n.) 鉛　Lead is poisonous. 鉛是有毒的。"],
+["「莨菪（植物）」的英文是？",["henna","chalk","belladonna","lead"],2,"belladonna (n.) 莨菪（植物）　Around the time of the Renaissance, women in Italy put drops of belladonna in their eyes. 文藝復興時期，義大利的女人在眼睛塗幾滴莨菪。"],
+["belladonna 的中文是？",["古老的；古舊的","文化","毒藥；毒物","莨菪（植物）"],3,"belladonna (n.) 莨菪（植物）　Around the time of the Renaissance, women in Italy put drops of belladonna in their eyes. 文藝復興時期，義大利的女人在眼睛塗幾滴莨菪。"],
+["「神經」的英文是？",["improve","kohl","powder","nerve"],3,"nerve (n.) 神經　The poison of the plant affects the nerves in the body. 這植物的毒影響身體裡的神經。"],
+["nerve 的中文是？",["神經","化妝墨","白堊粉","文藝復興"],0,"nerve (n.) 神經　The poison of the plant affects the nerves in the body. 這植物的毒影響身體裡的神經。"],
+["「瞳孔」的英文是？",["improve","pupil","Renaissance","kohl"],1,"pupil (n.) 瞳孔　That woman's pupils became very large. 那女人的瞳孔變得很大。"],
+["pupil 的中文是？",["瞳孔","粉末","染料","莨菪（植物）"],0,"pupil (n.) 瞳孔　That woman's pupils became very large. 那女人的瞳孔變得很大。"],
+["「染料」的英文是？",["cosmetics","improve","powder","dye"],3,"dye (n.) 染料　This cloth takes dye well. 這種布容易染色。"],
+["dye 的中文是？",["改善；增進","毒藥；毒物","染料","文化"],2,"dye (n.) 染料　This cloth takes dye well. 這種布容易染色。"],
+["「假髮」的英文是？",["kohl","wig","nerve","culture"],1,"wig (n.) 假髮　She used to wear a wig. 她過去戴假髮。"],
+["wig 的中文是？",["染劑","毒藥；毒物","改善；增進","假髮"],3,"wig (n.) 假髮　She used to wear a wig. 她過去戴假髮。"]
+ ],
+ c:[
+["He put forward a plan for ____ the rate of production.",["henna","improving","powder","pupils"],1,"improve (v.) 改善；增進　He put forward a plan for improving the rate of production. 他提出了一個提高生產率的計劃。"],
+["He has studied the ____ of various western countries.",["cosmetics","drops","cultures","nerves"],2,"culture (n.) 文化　He has studied the cultures of various western countries. 他研究了各西方國家的文化。"],
+["He crushed a piece of chalk to ____.",["henna","powder","poison","wig"],1,"powder (n.) 粉末　He crushed a piece of chalk to powder. 他將一支粉筆壓成粉末。"],
+["Gas is a ____.",["poison","wig","chalk","dye"],0,"poison (n.) 毒藥；毒物　Gas is a poison. 煤氣是有毒氣體。"],
+["The rain was leaking in large ____ through the roof.",["pupils","cultures","nerves","drops"],3,"drop (n.) 滴　The rain was leaking in large drops through the roof. 雨正大滴大滴地從屋頂漏下來。"],
+["He drives an ____ car.",["chalk","henna","wig","ancient"],3,"ancient (adj.) 古老的；古舊的　He drives an ancient car. 他開著一輛老式汽車。"],
+["Some of these ____ were used to improve one's appearance.",["cosmetics","cultures","nerves","pupils"],0,"cosmetics (n.) 化妝品　Some of these cosmetics were used to improve one's appearance. 這些化妝品有些是用來改善一個人的外表。"],
+["Egyptians used black ____ around their eyes.",["Renaissance","Lead","kohl","powder"],2,"kohl (n.) 化妝墨　Egyptians used black kohl around their eyes. 埃及人用黑色化妝墨塗在眼睛周圍。"],
+["Romans put white ____ on their faces.",["ancient","chalk","henna","poison"],1,"chalk (n.) 白堊粉　Romans put white chalk on their faces. 羅馬人抹白堊粉在臉上。"],
+["Indians painted red ____ on their bodies.",["henna","poison","Lead","belladonna"],0,"henna (n.) 染劑　Indians painted red henna on their bodies. 印度人塗紅染劑在身體上。"],
+["In the ____, women wore white powder made of lead on their faces.",["Renaissance","powder","Lead","poison"],0,"Renaissance (n.) 文藝復興　In the Renaissance, women wore white powder made of lead on their faces. 文藝復興時期，女人在臉上抹鉛製的白粉。"],
+["____ is poisonous.",["Renaissance","dye","ancient","Lead"],3,"lead (n.) 鉛　Lead is poisonous. 鉛是有毒的。"],
+["Around the time of the Renaissance, women in Italy put drops of ____ in their eyes.",["kohl","wig","henna","belladonna"],3,"belladonna (n.) 莨菪（植物）　Around the time of the Renaissance, women in Italy put drops of belladonna in their eyes. 文藝復興時期，義大利的女人在眼睛塗幾滴莨菪。"],
+["The poison of the plant affects the ____ in the body.",["cultures","pupils","nerves","cosmetics"],2,"nerve (n.) 神經　The poison of the plant affects the nerves in the body. 這植物的毒影響身體裡的神經。"],
+["That woman's ____ became very large.",["drops","cultures","nerves","pupils"],3,"pupil (n.) 瞳孔　That woman's pupils became very large. 那女人的瞳孔變得很大。"],
+["This cloth takes ____ well.",["Renaissance","Lead","kohl","dye"],3,"dye (n.) 染料　This cloth takes dye well. 這種布容易染色。"],
+["She used to wear a ____.",["Lead","wig","Renaissance","kohl"],1,"wig (n.) 假髮　She used to wear a wig. 她過去戴假髮。"]
+ ]
 },
 {
- id:"R03", pub:"PW 200+", grade:"T1 W12", name:"R03　閱讀文章（化妝品・牙齒・火山・身體）", short:"R03 文章",
- src:{v:"T1 W12 閱讀文章",g:"T1 W12 閱讀文章",c:"T1 W12 閱讀文章：問答與句子填空"},
- v:[],
+ id:"V2", pub:"PW 200+", grade:"T1 W12", name:"V2　閱讀單字：各國的牙齒習俗（16 字）", short:"V2 牙齒",
+ src:{v:"T1 W12 閱讀單字：各國的牙齒習俗（中英互選）",g:"T1 W12 閱讀單字：各國的牙齒習俗",c:"T1 W12 閱讀單字：各國的牙齒習俗（例句填空）"},
  g:[],
+ v:[
+["「習俗」的英文是？",["custom","pillow","exchange","responsible"],0,"custom (n.) 習俗　The celebration of Christmas is a custom. 慶祝耶誕節是一種風俗。"],
+["custom 的中文是？",["守護天使","敬重；尊敬","習俗","屋頂"],2,"custom (n.) 習俗　The celebration of Christmas is a custom. 慶祝耶誕節是一種風俗。"],
+["「需負責任的」的英文是？",["magpie","century","responsible","exchange"],2,"responsible (adj.) 需負責任的　She is my child, and I am responsible for her. 她是我的孩子，我對她負責。"],
+["responsible 的中文是？",["而非","需負責任的","敬重；尊敬","屋頂"],1,"responsible (adj.) 需負責任的　She is my child, and I am responsible for her. 她是我的孩子，我對她負責。"],
+["「敬重；尊敬」的英文是？",["respect","magpie","present","century"],0,"respect (v.) 敬重；尊敬　I respected their moral standards. 我尊重他們的道德標準。"],
+["respect 的中文是？",["確切的；精確的","敬重；尊敬","小妖精；仙女","習俗"],1,"respect (v.) 敬重；尊敬　I respected their moral standards. 我尊重他們的道德標準。"],
+["「認為；把…視為」的英文是？",["responsible","instead","magpie","consider"],3,"consider (v.) 認為；把…視為　We consider that the defendant is not guilty. 我們認為被告無罪。"],
+["consider 的中文是？",["屋頂","禮物；贈品","守護天使","認為；把…視為"],3,"consider (v.) 認為；把…視為　We consider that the defendant is not guilty. 我們認為被告無罪。"],
+["「而非」的英文是？",["instead","guardian angel","exact","western"],0,"instead (adv.) 而非　Instead of disturbing her, the news had a strangely calming effect. 這消息非但沒有令她不安，反而產生了一種奇怪的鎮定效果。"],
+["instead 的中文是？",["而非","守護天使","屋頂","禮物；贈品"],0,"instead (adv.) 而非　Instead of disturbing her, the news had a strangely calming effect. 這消息非但沒有令她不安，反而產生了一種奇怪的鎮定效果。"],
+["「確切的；精確的」的英文是？",["exact","fat","present","pillow"],0,"exact (adj.) 確切的；精確的　It was difficult to tell her exact age. 很難說出她的確實年齡。"],
+["exact 的中文是？",["交易；交換","守護天使","枕頭","確切的；精確的"],3,"exact (adj.) 確切的；精確的　It was difficult to tell her exact age. 很難說出她的確實年齡。"],
+["「屋頂」的英文是？",["present","roof","consider","fairy"],1,"roof (n.) 屋頂　The rain's coming. We have to fix the roof. 雨水進來了，我們得把屋頂修理一下。"],
+["roof 的中文是？",["小妖精；仙女","屋頂","西方的","守護天使"],1,"roof (n.) 屋頂　The rain's coming. We have to fix the roof. 雨水進來了，我們得把屋頂修理一下。"],
+["「喜鵲」的英文是？",["instead","respect","century","magpie"],3,"magpie (n.) 喜鵲　According to tradition, a magpie will come and take the tooth. 根據傳統，喜鵲將會來拿牙齒。"],
+["magpie 的中文是？",["世紀；一百年","喜鵲","確切的；精確的","認為；把…視為"],1,"magpie (n.) 喜鵲　According to tradition, a magpie will come and take the tooth. 根據傳統，喜鵲將會來拿牙齒。"],
+["「守護天使」的英文是？",["guardian angel","fat","western","instead"],0,"guardian angel (ph.) 守護天使　Dogs are considered guardian angels of the people. 狗被視為人的守護天使。"],
+["guardian angel 的中文是？",["習俗","守護天使","需負責任的","敬重；尊敬"],1,"guardian angel (ph.) 守護天使　Dogs are considered guardian angels of the people. 狗被視為人的守護天使。"],
+["「油脂」的英文是？",["consider","fat","exchange","magpie"],1,"fat (n.) 油脂　I don't like food cooked in deep fat. 我不喜歡油炸的食品。"],
+["fat 的中文是？",["油脂","守護天使","枕頭","喜鵲"],0,"fat (n.) 油脂　I don't like food cooked in deep fat. 我不喜歡油炸的食品。"],
+["「小妖精；仙女」的英文是？",["fairy","exact","respect","custom"],0,"fairy (n.) 小妖精；仙女　To him, she is a fairy. 對他而言，她是一位仙女。"],
+["fairy 的中文是？",["禮物；贈品","枕頭","小妖精；仙女","認為；把…視為"],2,"fairy (n.) 小妖精；仙女　To him, she is a fairy. 對他而言，她是一位仙女。"],
+["「西方的」的英文是？",["exact","western","magpie","century"],1,"western (adj.) 西方的　I like to listen to western pop music. 我喜歡聽西方流行音樂。"],
+["western 的中文是？",["世紀；一百年","認為；把…視為","西方的","枕頭"],2,"western (adj.) 西方的　I like to listen to western pop music. 我喜歡聽西方流行音樂。"],
+["「禮物；贈品」的英文是？",["guardian angel","consider","present","roof"],2,"present (n.) 禮物；贈品　I got lots of presents on my birthday. 我生日時收到許多禮物。"],
+["present 的中文是？",["習俗","認為；把…視為","禮物；贈品","油脂"],2,"present (n.) 禮物；贈品　I got lots of presents on my birthday. 我生日時收到許多禮物。"],
+["「交易；交換」的英文是？",["exchange","respect","magpie","custom"],0,"exchange (n.) 交易；交換　An exchange of opinions is helpful. 相互交換意見是有益的。"],
+["exchange 的中文是？",["確切的；精確的","交易；交換","小妖精；仙女","禮物；贈品"],1,"exchange (n.) 交易；交換　An exchange of opinions is helpful. 相互交換意見是有益的。"],
+["「世紀；一百年」的英文是？",["century","present","consider","pillow"],0,"century (n.) 世紀；一百年　We live in the twenty first century. 我們生活在二十一世紀。"],
+["century 的中文是？",["交易；交換","枕頭","敬重；尊敬","世紀；一百年"],3,"century (n.) 世紀；一百年　We live in the twenty first century. 我們生活在二十一世紀。"],
+["「枕頭」的英文是？",["pillow","magpie","fat","roof"],0,"pillow (n.) 枕頭　In bed, I rest my head on a soft pillow filled with feathers. 在床上，我把頭擱在用羽毛作為枕心的軟枕頭上。"],
+["pillow 的中文是？",["枕頭","喜鵲","世紀；一百年","而非"],0,"pillow (n.) 枕頭　In bed, I rest my head on a soft pillow filled with feathers. 在床上，我把頭擱在用羽毛作為枕心的軟枕頭上。"]
+ ],
  c:[
-["【閱讀・化妝品】Why did the women in Italy put drops of belladonna in their eyes?",["To change the color of their eyes","To help them see in the dark","To make their pupils bigger and look more beautiful","To make their eyes healthier"],2,"belladonna 在義大利文是「美麗的女人」，能讓瞳孔(pupil)放大 —— 但它其實是一種毒(poison)。"],
-["【閱讀・化妝品】What color was Queen Elizabeth I's hair?",["Brown","Blond","Red","Black"],2,"伊麗莎白一世以一頭紅髮和塗得雪白的臉聞名。"],
-["【閱讀・化妝品】文章提到，古代用來化妝的東西有時候會怎麼樣？",["讓頭髮長得更快","越用越便宜","危險，甚至會致命","讓皮膚變厚"],2,"However, in some cases, things used for makeup were dangerous or even deadly!"],
-["【閱讀・化妝品】Egyptians used various powders on their skin. 這句話的意思是？",["埃及人把粉末吃下去","埃及人把各種粉末塗在皮膚上","埃及人用粉末做藥","埃及人用粉末洗澡"],1,"as well as other ancient cultures 其他古文明也一樣，都是為了美(for beauty)。"],
-["【閱讀・牙齒】According to Korean tradition, what kind of bird will come and collect teeth?",["An eagle","A crow","A pigeon","A magpie"],3,"韓國傳統是把掉下的牙齒丟到屋頂，讓喜鵲(magpie)帶走，換來一顆好牙。"],
-["【閱讀・牙齒】According to western tradition, when will the tooth fairy come and collect the lost teeth?",["Right after the tooth falls out","When the child is asleep at night","On the child's birthday","When the child goes to the dentist"],1,"牙仙(tooth fairy)會在孩子睡著時，把枕頭(pillow)下的牙齒換成錢。"],
-["【閱讀・牙齒】In Mexico and Spain, tradition says what takes a lost tooth and leaves some money?",["A dog","A mouse","A bird","A fairy"],1,"In Mexico and Spain, tradition says a mouse takes a lost tooth and leaves some money."],
-["【閱讀・牙齒】Why do parents in Mongolia feed the lost teeth to dogs?",["They believe dogs can bring money to the family","They want to keep the house clean","They hope the child will grow strong new teeth like a dog's","They think dogs like the taste of teeth"],2,"蒙古人認為狗是守護者，把牙齒餵給狗，孩子就能長出像狗一樣強壯的新牙。"],
-["【閱讀・火山】What is the Ring of Fire?",["An enormous chain of volcanoes all around the Pacific Ocean","A huge fire in the middle of the ocean","A ring made of melted rock","A famous volcano in Japan"],0,"The Ring of Fire is an enormous chain of volcanoes all around the Pacific Ocean."],
-["【閱讀・火山】Who came up with the first theory of land movement?",["Charles Darwin","Alfred Wegener","Albert Einstein","Isaac Newton"],1,"德國科學家 Wegener 提出大陸漂移說：所有大陸原本是連在一起的。"],
-["【閱讀・青春痘】What causes teenagers to develop pimples during puberty?",["Eating too much chocolate","The change in the levels of hormones in their bodies","Not drinking enough water","Washing their face too often"],1,"As the levels of hormones in teenagers' bodies change, teenagers frequently develop pimples."],
-["【閱讀・青春痘】文章提到，洗臉洗太多次會怎麼樣？",["完全不會有影響","痘痘馬上就會消失","皮膚會變白","更刺激皮膚，痘痘反而更嚴重"],3,"washing your face too much could irritate the skin more, making the pimples even worse."],
-["【閱讀・放屁】下列何者「不是」文章提到 passing gas 的說法？",["to toot","to blow the candle","to fart","to cut the cheese"],1,"文章提到的三種說法是 to toot、to cut the cheese、to fart。"],
-["【閱讀・放屁】哪一類食物會讓氣味更臭？",["含水量高的食物，例如西瓜","冰的食物，例如冰淇淋","含硫(sulfur)的食物，例如蛋、肉、花椰菜","含糖的食物，例如糖果"],2,"臭味來自硫(sulfur)；腸道裡的細菌(bacteria)分解這些食物時會產生含硫的氣體。"],
-["The Ring of Fire is an enormous ____ of volcanoes all around the Pacific Ocean.",["chain","change","charm","chair"],0,"a chain of… 一長串的、一連串的…。"],
-["To toot, to cut the cheese, or to fart are all funny ways to talk about something that everyone does: ____ gas!",["printing","pressing","pulling","passing"],3,"pass gas 排氣、放屁。"],
-["Gas is also produced from chemical reactions and ____ living in our intestines.",["pupils","customs","bacteria","fairies"],2,"bacteria 細菌，單數是 bacterium。"],
-["However, in some cases, things used for makeup were dangerous or even ____!",["friendly","deadly","lonely","lovely"],1,"deadly 致命的；-ly 結尾也可能是形容詞。"],
-["In Mexico and Spain, tradition says a ____ takes a lost tooth and leaves some money.",["mouse","horse","house","moose"],0,"西班牙和墨西哥的傳統是老鼠來換牙。"],
-["However, in Mongolia, instead of mice, ____ are responsible for taking teeth away.",["fish","dogs","cats","birds"],1,"be responsible for 負責…；instead of 而不是…。"],
-["Different cultures follow their own special ____ when a child's baby teeth fall out.",["costumes","cousins","customers","customs"],3,"custom 習俗；別跟 costume 服裝、customer 顧客搞混。"],
-["Washing your face too much could ____ the skin more, making the pimples even worse.",["irritate","imitate","invent","invite"],0,"irritate 刺激、使不適。"],
-["As the levels of ____ in teenagers' bodies change, teenagers frequently develop pimples.",["muscles","bacteria","vitamins","hormones"],3,"青春期荷爾蒙(hormone)改變，就容易長痘痘。"],
-["Gas in our intestines has to do with both the air we ____ and the gas molecules in our blood.",["swallow","borrow","follow","shallow"],0,"swallow 吞下；have to do with 與…有關。"],
-["A normal person passes about half a liter of gas a day, which equals about ____ farts per day.",["forty-four","four","forty","fourteen"],3,"大約半公升，等於一天大概 14 次。"]
+["The celebration of Christmas is a ____.",["century","custom","exchange","exact"],1,"custom (n.) 習俗　The celebration of Christmas is a custom. 慶祝耶誕節是一種風俗。"],
+["She is my child, and I am ____ for her.",["century","roof","western","responsible"],3,"responsible (adj.) 需負責任的　She is my child, and I am responsible for her. 她是我的孩子，我對她負責。"],
+["I ____ their moral standards.",["century","consider","respected","Instead"],2,"respect (v.) 敬重；尊敬　I respected their moral standards. 我尊重他們的道德標準。"],
+["We ____ that the defendant is not guilty.",["roof","exchange","consider","fat"],2,"consider (v.) 認為；把…視為　We consider that the defendant is not guilty. 我們認為被告無罪。"],
+["____ of disturbing her, the news had a strangely calming effect.",["responsible","magpie","Instead","custom"],2,"instead (adv.) 而非　Instead of disturbing her, the news had a strangely calming effect. 這消息非但沒有令她不安，反而產生了一種奇怪的鎮定效果。"],
+["It was difficult to tell her ____ age.",["fairy","exact","western","Instead"],1,"exact (adj.) 確切的；精確的　It was difficult to tell her exact age. 很難說出她的確實年齡。"],
+["The rain's coming. We have to fix the ____.",["roof","consider","western","magpie"],0,"roof (n.) 屋頂　The rain's coming. We have to fix the roof. 雨水進來了，我們得把屋頂修理一下。"],
+["According to tradition, a ____ will come and take the tooth.",["custom","magpie","fairy","fat"],1,"magpie (n.) 喜鵲　According to tradition, a magpie will come and take the tooth. 根據傳統，喜鵲將會來拿牙齒。"],
+["Dogs are considered ____ of the people.",["century","presents","guardian angels","Instead"],2,"guardian angel (ph.) 守護天使　Dogs are considered guardian angels of the people. 狗被視為人的守護天使。"],
+["I don't like food cooked in deep ____.",["western","fat","pillow","exact"],1,"fat (n.) 油脂　I don't like food cooked in deep fat. 我不喜歡油炸的食品。"],
+["To him, she is a ____.",["fairy","consider","magpie","western"],0,"fairy (n.) 小妖精；仙女　To him, she is a fairy. 對他而言，她是一位仙女。"],
+["I like to listen to ____ pop music.",["exchange","magpie","western","Instead"],2,"western (adj.) 西方的　I like to listen to western pop music. 我喜歡聽西方流行音樂。"],
+["I got lots of ____ on my birthday.",["guardian angels","presents","fairy","roof"],1,"present (n.) 禮物；贈品　I got lots of presents on my birthday. 我生日時收到許多禮物。"],
+["An ____ of opinions is helpful.",["roof","exchange","custom","Instead"],1,"exchange (n.) 交易；交換　An exchange of opinions is helpful. 相互交換意見是有益的。"],
+["We live in the twenty first ____.",["century","western","pillow","exchange"],0,"century (n.) 世紀；一百年　We live in the twenty first century. 我們生活在二十一世紀。"],
+["In bed, I rest my head on a soft ____ filled with feathers.",["roof","pillow","custom","century"],1,"pillow (n.) 枕頭　In bed, I rest my head on a soft pillow filled with feathers. 在床上，我把頭擱在用羽毛作為枕心的軟枕頭上。"]
+ ]
+},
+{
+ id:"V3", pub:"PW 200+", grade:"T1 W12", name:"V3　閱讀單字：火環帶與板塊（17 字）", short:"V3 火山",
+ src:{v:"T1 W12 閱讀單字：火環帶與板塊（中英互選）",g:"T1 W12 閱讀單字：火環帶與板塊",c:"T1 W12 閱讀單字：火環帶與板塊（例句填空）"},
+ g:[],
+ v:[
+["「頻繁地」的英文是？",["frequently","section","consist","melt"],0,"frequently (adv.) 頻繁地　This question is frequently asked. 這個問題屢次被提出。"],
+["frequently 的中文是？",["向南","陸地；大洲","比例；比率","頻繁地"],3,"frequently (adv.) 頻繁地　This question is frequently asked. 這個問題屢次被提出。"],
+["「理論；學理」的英文是？",["theory","ring","float","melt"],0,"theory (n.) 理論；學理　It seems good in theory, but it doesn't work in practice. 理論上它似乎很不錯，但實際上卻行不通。"],
+["theory 的中文是？",["輕微地","理論；學理","圈；環","組成；構成"],1,"theory (n.) 理論；學理　It seems good in theory, but it doesn't work in practice. 理論上它似乎很不錯，但實際上卻行不通。"],
+["「面；表面」的英文是？",["continent","southward","rate","surface"],3,"surface (n.) 面；表面　It has a rough surface. 它表面粗糙。"],
+["surface 的中文是？",["切下的部分；片","輕微地","比例；比率","面；表面"],3,"surface (n.) 面；表面　It has a rough surface. 它表面粗糙。"],
+["「上升；升起」的英文是？",["rise","section","frequently","flow"],0,"rise (v.) 上升；升起　The population of the city has risen to five million. 該市人口已增加到五百萬。"],
+["rise 的中文是？",["流動","過程；進程","上升；升起","向南"],2,"rise (v.) 上升；升起　The population of the city has risen to five million. 該市人口已增加到五百萬。"],
+["「過程；進程」的英文是？",["process","rate","theory","material"],0,"process (n.) 過程；進程　I will tell you, sooner or later, all the complicated process. 我早晚要將整個複雜過程告訴你。"],
+["process 的中文是？",["過程；進程","一連串","融化；熔化","輕微地"],0,"process (n.) 過程；進程　I will tell you, sooner or later, all the complicated process. 我早晚要將整個複雜過程告訴你。"],
+["「組成；構成」的英文是？",["section","theory","southward","consist"],3,"consist (v.) 組成；構成　The House of Commons consisted of 658 members. 下議院由六百五十八名議員組成。"],
+["consist 的中文是？",["上升；升起","流動","面；表面","組成；構成"],3,"consist (v.) 組成；構成　The House of Commons consisted of 658 members. 下議院由六百五十八名議員組成。"],
+["「圈；環」的英文是？",["melt","section","chain","ring"],3,"ring (n.) 圈；環　Fatigue brought on dark rings under her eyes. 勞累使她眼睛下部出現了黑圈。"],
+["ring 的中文是？",["圈；環","輕微地","切下的部分；片","比例；比率"],0,"ring (n.) 圈；環　Fatigue brought on dark rings under her eyes. 勞累使她眼睛下部出現了黑圈。"],
+["「一連串」的英文是？",["flow","chain","consist","frequently"],1,"chain (n.) 一連串　The traffic accident led to a chain of events. 交通事故引起了一連串的事件。"],
+["chain 的中文是？",["面；表面","陸地；大洲","一連串","理論；學理"],2,"chain (n.) 一連串　The traffic accident led to a chain of events. 交通事故引起了一連串的事件。"],
+["「向南」的英文是？",["continent","rate","slightly","southward"],3,"southward (adv.) 向南　We sailed southward. 我們向南航行。"],
+["southward 的中文是？",["向南","圈；環","過程；進程","融化；熔化"],0,"southward (adv.) 向南　We sailed southward. 我們向南航行。"],
+["「陸地；大洲」的英文是？",["ring","slightly","continent","material"],2,"continent (n.) 陸地；大洲　The biggest continent is Asia. 最大的陸地是亞洲。"],
+["continent 的中文是？",["頻繁地","一連串","切下的部分；片","陸地；大洲"],3,"continent (n.) 陸地；大洲　The biggest continent is Asia. 最大的陸地是亞洲。"],
+["「材料；原料」的英文是？",["surface","material","theory","melt"],1,"material (n.) 材料；原料　Wood and stone are the only raw materials on the island. 木材和石頭是這個島上僅有的原材料。"],
+["material 的中文是？",["面；表面","浮","材料；原料","流動"],2,"material (n.) 材料；原料　Wood and stone are the only raw materials on the island. 木材和石頭是這個島上僅有的原材料。"],
+["「輕微地」的英文是？",["frequently","slightly","surface","rate"],1,"slightly (adv.) 輕微地　White wine should be slightly chilled. 白葡萄酒應稍微冰一下。"],
+["slightly 的中文是？",["流動","輕微地","比例；比率","陸地；大洲"],1,"slightly (adv.) 輕微地　White wine should be slightly chilled. 白葡萄酒應稍微冰一下。"],
+["「切下的部分；片」的英文是？",["frequently","consist","theory","section"],3,"section (n.) 切下的部分；片　Mother cut the cake into six equal sections. 母親把蛋糕切成相等的六塊。"],
+["section 的中文是？",["輕微地","上升；升起","切下的部分；片","面；表面"],2,"section (n.) 切下的部分；片　Mother cut the cake into six equal sections. 母親把蛋糕切成相等的六塊。"],
+["「浮」的英文是？",["consist","chain","southward","float"],3,"float (v.) 浮　Wood floats on water. 木頭浮在水面上。"],
+["float 的中文是？",["過程；進程","流動","面；表面","浮"],3,"float (v.) 浮　Wood floats on water. 木頭浮在水面上。"],
+["「比例；比率」的英文是？",["process","theory","consist","rate"],3,"rate (n.) 比例；比率　The unemployment rate is rising in that country. 那個國家的失業率正在上升。"],
+["rate 的中文是？",["浮","比例；比率","頻繁地","理論；學理"],1,"rate (n.) 比例；比率　The unemployment rate is rising in that country. 那個國家的失業率正在上升。"],
+["「流動」的英文是？",["material","ring","continent","flow"],3,"flow (v.) 流動　The river Thames flows into the North Sea. 泰晤士河流入北海。"],
+["flow 的中文是？",["面；表面","理論；學理","材料；原料","流動"],3,"flow (v.) 流動　The river Thames flows into the North Sea. 泰晤士河流入北海。"],
+["「融化；熔化」的英文是？",["melt","southward","slightly","material"],0,"melt (v.) 融化；熔化　The snow has melted. 雪已融化了。"],
+["melt 的中文是？",["切下的部分；片","頻繁地","融化；熔化","輕微地"],2,"melt (v.) 融化；熔化　The snow has melted. 雪已融化了。"]
+ ],
+ c:[
+["This question is ____ asked.",["surface","rate","frequently","slightly"],2,"frequently (adv.) 頻繁地　This question is frequently asked. 這個問題屢次被提出。"],
+["It seems good in ____, but it doesn't work in practice.",["theory","surface","risen","continent"],0,"theory (n.) 理論；學理　It seems good in theory, but it doesn't work in practice. 理論上它似乎很不錯，但實際上卻行不通。"],
+["It has a rough ____.",["frequently","risen","southward","surface"],3,"surface (n.) 面；表面　It has a rough surface. 它表面粗糙。"],
+["The population of the city has ____ to five million.",["theory","southward","risen","frequently"],2,"rise (v.) 上升；升起　The population of the city has risen to five million. 該市人口已增加到五百萬。"],
+["I will tell you, sooner or later, all the complicated ____.",["flows","materials","sections","process"],3,"process (n.) 過程；進程　I will tell you, sooner or later, all the complicated process. 我早晚要將整個複雜過程告訴你。"],
+["The House of Commons ____ of 658 members.",["theory","process","consisted","rings"],2,"consist (v.) 組成；構成　The House of Commons consisted of 658 members. 下議院由六百五十八名議員組成。"],
+["Fatigue brought on dark ____ under her eyes.",["process","rings","materials","flows"],1,"ring (n.) 圈；環　Fatigue brought on dark rings under her eyes. 勞累使她眼睛下部出現了黑圈。"],
+["The traffic accident led to a ____ of events.",["frequently","chain","surface","southward"],1,"chain (n.) 一連串　The traffic accident led to a chain of events. 交通事故引起了一連串的事件。"],
+["We sailed ____.",["southward","frequently","slightly","continent"],0,"southward (adv.) 向南　We sailed southward. 我們向南航行。"],
+["The biggest ____ is Asia.",["surface","southward","slightly","continent"],3,"continent (n.) 陸地；大洲　The biggest continent is Asia. 最大的陸地是亞洲。"],
+["Wood and stone are the only raw ____ on the island.",["rings","process","materials","sections"],2,"material (n.) 材料；原料　Wood and stone are the only raw materials on the island. 木材和石頭是這個島上僅有的原材料。"],
+["White wine should be ____ chilled.",["theory","risen","slightly","chain"],2,"slightly (adv.) 輕微地　White wine should be slightly chilled. 白葡萄酒應稍微冰一下。"],
+["Mother cut the cake into six equal ____.",["sections","rings","process","floats"],0,"section (n.) 切下的部分；片　Mother cut the cake into six equal sections. 母親把蛋糕切成相等的六塊。"],
+["Wood ____ on water.",["floats","materials","sections","flows"],0,"float (v.) 浮　Wood floats on water. 木頭浮在水面上。"],
+["The unemployment ____ is rising in that country.",["theory","slightly","rate","chain"],2,"rate (n.) 比例；比率　The unemployment rate is rising in that country. 那個國家的失業率正在上升。"],
+["The river Thames ____ into the North Sea.",["sections","flows","rings","floats"],1,"flow (v.) 流動　The river Thames flows into the North Sea. 泰晤士河流入北海。"],
+["The snow has ____.",["melted","frequently","materials","rings"],0,"melt (v.) 融化；熔化　The snow has melted. 雪已融化了。"]
+ ]
+},
+{
+ id:"V4", pub:"PW 200+", grade:"T1 W12", name:"V4　閱讀單字：青春痘（15 字）", short:"V4 青春痘",
+ src:{v:"T1 W12 閱讀單字：青春痘（中英互選）",g:"T1 W12 閱讀單字：青春痘",c:"T1 W12 閱讀單字：青春痘（例句填空）"},
+ g:[],
+ v:[
+["「神話」的英文是？",["fatty","acne","myth","zit"],2,"myth (n.) 神話　The Greeks had many myths. 希臘人有許多神話。"],
+["myth 的中文是？",["治癒","神話","使過敏；使難受","發出砰的響聲"],1,"myth (n.) 神話　The Greeks had many myths. 希臘人有許多神話。"],
+["「傳染；侵染」的英文是？",["form","infection","pimple","germ"],1,"infection (n.) 傳染；侵染　Are you sure there is no danger of infection now? 你敢不敢肯定現在已經沒有傳染的危險了？"],
+["infection 的中文是？",["神話","發出砰的響聲","傳染；侵染","青春期；妙齡"],2,"infection (n.) 傳染；侵染　Are you sure there is no danger of infection now? 你敢不敢肯定現在已經沒有傳染的危險了？"],
+["「使過敏；使難受」的英文是？",["puberty","necessarily","irritate","hormone"],2,"irritate (v.) 使過敏；使難受　These tight shoes irritate my toes. 我的鞋太緊，夾痛我的腳趾。"],
+["irritate 的中文是？",["青春期；妙齡","鼓勵；慫恿","神話","使過敏；使難受"],3,"irritate (v.) 使過敏；使難受　These tight shoes irritate my toes. 我的鞋太緊，夾痛我的腳趾。"],
+["「鼓勵；慫恿」的英文是？",["myth","infection","pop","encourage"],3,"encourage (v.) 鼓勵；慫恿　She encouraged him to talk to her. 她鼓勵他與她交談。"],
+["encourage 的中文是？",["發出砰的響聲","面皰；疙瘩","鼓勵；慫恿","油膩的"],2,"encourage (v.) 鼓勵；慫恿　She encouraged him to talk to her. 她鼓勵他與她交談。"],
+["「種類；類型」的英文是？",["myth","form","hormone","infection"],1,"form (n.) 種類；類型　It was a form of blackmail. 那是一種訛詐。"],
+["form 的中文是？",["種類；類型","發出砰的響聲","痤瘡；粉刺","使過敏；使難受"],0,"form (n.) 種類；類型　It was a form of blackmail. 那是一種訛詐。"],
+["「必定；必然地」的英文是？",["necessarily","puberty","infection","hormone"],0,"necessarily (adv.) 必定；必然地　War necessarily causes misery and waste. 戰爭必然造成痛苦和破壞。"],
+["necessarily 的中文是？",["青春痘；面皰","面皰；疙瘩","必定；必然地","使過敏；使難受"],2,"necessarily (adv.) 必定；必然地　War necessarily causes misery and waste. 戰爭必然造成痛苦和破壞。"],
+["「痤瘡；粉刺」的英文是？",["irritate","acne","germ","form"],1,"acne (n.) 痤瘡；粉刺　Almost everybody has had acne. 幾乎每個人曾經長過粉刺。"],
+["acne 的中文是？",["痤瘡；粉刺","種類；類型","治癒","使過敏；使難受"],0,"acne (n.) 痤瘡；粉刺　Almost everybody has had acne. 幾乎每個人曾經長過粉刺。"],
+["「面皰；疙瘩」的英文是？",["hormone","encourage","pimple","irritate"],2,"pimple (n.) 面皰；疙瘩　Acne, also known as pimples, is a normal part of growing up. 粉刺也被稱為面皰，是成長中正常的部分。"],
+["pimple 的中文是？",["油膩的","面皰；疙瘩","種類；類型","使過敏；使難受"],1,"pimple (n.) 面皰；疙瘩　Acne, also known as pimples, is a normal part of growing up. 粉刺也被稱為面皰，是成長中正常的部分。"],
+["「青春痘；面皰」的英文是？",["form","irritate","fatty","zit"],3,"zit (n.) 青春痘；面皰　My teenaged nephew's face is covered with zits. 我那正值青春期的姪子臉上長滿青春痘。"],
+["zit 的中文是？",["油膩的","使過敏；使難受","青春痘；面皰","種類；類型"],2,"zit (n.) 青春痘；面皰　My teenaged nephew's face is covered with zits. 我那正值青春期的姪子臉上長滿青春痘。"],
+["「青春期；妙齡」的英文是？",["hormone","cure","puberty","fatty"],2,"puberty (n.) 青春期；妙齡　When kids reach puberty, their bodies experience many changes. 當小孩到了青春期，身體經歷許多改變。"],
+["puberty 的中文是？",["微生物；病菌","必定；必然地","神話","青春期；妙齡"],3,"puberty (n.) 青春期；妙齡　When kids reach puberty, their bodies experience many changes. 當小孩到了青春期，身體經歷許多改變。"],
+["「荷爾蒙」的英文是？",["necessarily","hormone","zit","acne"],1,"hormone (n.) 荷爾蒙　Hunger hormone could hold key to dieting. 引發飢餓的荷爾蒙可能是節食的關鍵。"],
+["hormone 的中文是？",["油膩的","荷爾蒙","鼓勵；慫恿","青春痘；面皰"],1,"hormone (n.) 荷爾蒙　Hunger hormone could hold key to dieting. 引發飢餓的荷爾蒙可能是節食的關鍵。"],
+["「治癒」的英文是？",["fatty","cure","acne","germ"],1,"cure (v.) 治癒　Antibiotics help to cure many diseases that were formerly fatal. 抗生素有助於治療許多以前會是致命的疾病。"],
+["cure 的中文是？",["微生物；病菌","荷爾蒙","治癒","痤瘡；粉刺"],2,"cure (v.) 治癒　Antibiotics help to cure many diseases that were formerly fatal. 抗生素有助於治療許多以前會是致命的疾病。"],
+["「發出砰的響聲」的英文是？",["hormone","fatty","pop","myth"],2,"pop (v.) 發出砰的響聲　The bottle popped when I opened it. 我打開瓶子時，瓶口發出砰的一聲。"],
+["pop 的中文是？",["傳染；侵染","發出砰的響聲","使過敏；使難受","種類；類型"],1,"pop (v.) 發出砰的響聲　The bottle popped when I opened it. 我打開瓶子時，瓶口發出砰的一聲。"],
+["「微生物；病菌」的英文是？",["form","irritate","germ","puberty"],2,"germ (n.) 微生物；病菌　Disease is usually caused by germs. 疾病常由病菌造成。"],
+["germ 的中文是？",["痤瘡；粉刺","微生物；病菌","治癒","油膩的"],1,"germ (n.) 微生物；病菌　Disease is usually caused by germs. 疾病常由病菌造成。"],
+["「油膩的」的英文是？",["fatty","zit","pimple","germ"],0,"fatty (adj.) 油膩的　Stay healthy and cut back fatty food. 要保持健康，那麼就要少吃油膩食物。"],
+["fatty 的中文是？",["青春痘；面皰","傳染；侵染","油膩的","必定；必然地"],2,"fatty (adj.) 油膩的　Stay healthy and cut back fatty food. 要保持健康，那麼就要少吃油膩食物。"]
+ ],
+ c:[
+["The Greeks had many ____.",["pimples","myths","germs","zits"],1,"myth (n.) 神話　The Greeks had many myths. 希臘人有許多神話。"],
+["Are you sure there is no danger of ____ now?",["puberty","form","infection","acne"],2,"infection (n.) 傳染；侵染　Are you sure there is no danger of infection now? 你敢不敢肯定現在已經沒有傳染的危險了？"],
+["These tight shoes ____ my toes.",["infection","cure","irritate","necessarily"],2,"irritate (v.) 使過敏；使難受　These tight shoes irritate my toes. 我的鞋太緊，夾痛我的腳趾。"],
+["She ____ him to talk to her.",["germs","encouraged","pimples","cure"],1,"encourage (v.) 鼓勵；慫恿　She encouraged him to talk to her. 她鼓勵他與她交談。"],
+["It was a ____ of blackmail.",["form","acne","necessarily","puberty"],0,"form (n.) 種類；類型　It was a form of blackmail. 那是一種訛詐。"],
+["War ____ causes misery and waste.",["form","cure","puberty","necessarily"],3,"necessarily (adv.) 必定；必然地　War necessarily causes misery and waste. 戰爭必然造成痛苦和破壞。"],
+["Almost everybody has had ____.",["acne","puberty","form","fatty"],0,"acne (n.) 痤瘡；粉刺　Almost everybody has had acne. 幾乎每個人曾經長過粉刺。"],
+["Acne, also known as ____, is a normal part of growing up.",["form","irritate","infection","pimples"],3,"pimple (n.) 面皰；疙瘩　Acne, also known as pimples, is a normal part of growing up. 粉刺也被稱為面皰，是成長中正常的部分。"],
+["My teenaged nephew's face is covered with ____.",["popped","cure","zits","irritate"],2,"zit (n.) 青春痘；面皰　My teenaged nephew's face is covered with zits. 我那正值青春期的姪子臉上長滿青春痘。"],
+["When kids reach ____, their bodies experience many changes.",["hormone","fatty","acne","puberty"],3,"puberty (n.) 青春期；妙齡　When kids reach puberty, their bodies experience many changes. 當小孩到了青春期，身體經歷許多改變。"],
+["Hunger ____ could hold key to dieting.",["hormone","fatty","irritate","infection"],0,"hormone (n.) 荷爾蒙　Hunger hormone could hold key to dieting. 引發飢餓的荷爾蒙可能是節食的關鍵。"],
+["Antibiotics help to ____ many diseases that were formerly fatal.",["acne","puberty","infection","cure"],3,"cure (v.) 治癒　Antibiotics help to cure many diseases that were formerly fatal. 抗生素有助於治療許多以前會是致命的疾病。"],
+["The bottle ____ when I opened it.",["myths","popped","form","acne"],1,"pop (v.) 發出砰的響聲　The bottle popped when I opened it. 我打開瓶子時，瓶口發出砰的一聲。"],
+["Disease is usually caused by ____.",["myths","zits","germs","pimples"],2,"germ (n.) 微生物；病菌　Disease is usually caused by germs. 疾病常由病菌造成。"],
+["Stay healthy and cut back ____ food.",["fatty","irritate","puberty","cure"],0,"fatty (adj.) 油膩的　Stay healthy and cut back fatty food. 要保持健康，那麼就要少吃油膩食物。"]
+ ]
+},
+{
+ id:"V5", pub:"PW 200+", grade:"T1 W12", name:"V5　閱讀單字：腸道與氣體（15 字）", short:"V5 氣體",
+ src:{v:"T1 W12 閱讀單字：腸道與氣體（中英互選）",g:"T1 W12 閱讀單字：腸道與氣體",c:"T1 W12 閱讀單字：腸道與氣體（例句填空）"},
+ g:[],
+ v:[
+["「承認」的英文是？",["release","intestine","sulfur","admit"],3,"admit (v.) 承認　You must admit the task to be difficult. 你得承認這個任務是艱鉅的。"],
+["admit 的中文是？",["吞下；嚥下","氧氣","放鬆；鬆開","承認"],3,"admit (v.) 承認　You must admit the task to be difficult. 你得承認這個任務是艱鉅的。"],
+["「壓力；壓迫」的英文是？",["stinkiness","delay","admit","pressure"],3,"pressure (n.) 壓力；壓迫　The small box was flattened by the pressure of the heavy book on it. 小盒子被這本厚厚的書壓扁了。"],
+["pressure 的中文是？",["消化的；助消化的","壓力；壓迫","腸","拖延；耽擱"],1,"pressure (n.) 壓力；壓迫　The small box was flattened by the pressure of the heavy book on it. 小盒子被這本厚厚的書壓扁了。"],
+["「吸收」的英文是？",["swallow","absorb","bacterium","digestive"],1,"absorb (v.) 吸收　Cotton gloves absorb sweat. 棉手套吸汗。"],
+["absorb 的中文是？",["放鬆；鬆開","吸收","拖延；耽擱","有害的"],1,"absorb (v.) 吸收　Cotton gloves absorb sweat. 棉手套吸汗。"],
+["「有害的」的英文是？",["swallow","absorb","delay","harmful"],3,"harmful (adj.) 有害的　Smoking is harmful to health. 吸煙有害健康。"],
+["harmful 的中文是？",["有害的","拖延；耽擱","化學的","腸"],0,"harmful (adj.) 有害的　Smoking is harmful to health. 吸煙有害健康。"],
+["「放鬆；鬆開」的英文是？",["absorb","admit","pressure","release"],3,"release (v.) 放鬆；鬆開　He quickly released her hand. 他很快地放開了她的手。"],
+["release 的中文是？",["壓力；壓迫","血；血液","臭味程度","放鬆；鬆開"],3,"release (v.) 放鬆；鬆開　He quickly released her hand. 他很快地放開了她的手。"],
+["「拖延；耽擱」的英文是？",["harmful","sulfur","oxygen","delay"],3,"delay (v.) 拖延；耽擱　I'm sorry that I've delayed so long. 我很抱歉拖了這麼久。"],
+["delay 的中文是？",["腸","承認","消化的；助消化的","拖延；耽擱"],3,"delay (v.) 拖延；耽擱　I'm sorry that I've delayed so long. 我很抱歉拖了這麼久。"],
+["「腸」的英文是？",["intestine","digestive","pressure","sulfur"],0,"intestine (n.) 腸　You have to cure your intestine problem. 你必須治療你腸道的問題。"],
+["intestine 的中文是？",["承認","放鬆；鬆開","硫磺","腸"],3,"intestine (n.) 腸　You have to cure your intestine problem. 你必須治療你腸道的問題。"],
+["「吞下；嚥下」的英文是？",["digestive","admit","swallow","bacterium"],2,"swallow (v.) 吞下；嚥下　Don't swallow food right away. 不要馬上吞下食物。"],
+["swallow 的中文是？",["有害的","硫磺","吞下；嚥下","消化的；助消化的"],2,"swallow (v.) 吞下；嚥下　Don't swallow food right away. 不要馬上吞下食物。"],
+["「血；血液」的英文是？",["harmful","chemical","digestive","blood"],3,"blood (n.) 血；血液　Lots of people donated blood. 許多人捐血。"],
+["blood 的中文是？",["壓力；壓迫","吸收","吞下；嚥下","血；血液"],3,"blood (n.) 血；血液　Lots of people donated blood. 許多人捐血。"],
+["「化學的」的英文是？",["chemical","admit","digestive","bacterium"],0,"chemical (adj.) 化學的　He devoted his life to chemical research. 他一生從事化學研究。"],
+["chemical 的中文是？",["放鬆；鬆開","拖延；耽擱","化學的","硫磺"],2,"chemical (adj.) 化學的　He devoted his life to chemical research. 他一生從事化學研究。"],
+["「細菌」的英文是？",["absorb","chemical","bacterium","delay"],2,"bacterium (n.) 細菌　There are bacteria everywhere. 到處都有細菌。"],
+["bacterium 的中文是？",["細菌","氧氣","有害的","吞下；嚥下"],0,"bacterium (n.) 細菌　There are bacteria everywhere. 到處都有細菌。"],
+["「消化的；助消化的」的英文是？",["chemical","digestive","intestine","oxygen"],1,"digestive (adj.) 消化的；助消化的　Check the digestive system of your body. 檢查你身體的消化系統。"],
+["digestive 的中文是？",["消化的；助消化的","放鬆；鬆開","承認","拖延；耽擱"],0,"digestive (adj.) 消化的；助消化的　Check the digestive system of your body. 檢查你身體的消化系統。"],
+["「氧氣」的英文是？",["swallow","sulfur","oxygen","blood"],2,"oxygen (n.) 氧氣　Animals must need oxygen. 動物一定需要氧氣。"],
+["oxygen 的中文是？",["放鬆；鬆開","氧氣","消化的；助消化的","血；血液"],1,"oxygen (n.) 氧氣　Animals must need oxygen. 動物一定需要氧氣。"],
+["「臭味程度」的英文是？",["harmful","intestine","pressure","stinkiness"],3,"stinkiness (n.) 臭味程度　A person's diet affects the stinkiness of one's gas. 人的飲食影響氣體的臭味程度。"],
+["stinkiness 的中文是？",["消化的；助消化的","血；血液","臭味程度","腸"],2,"stinkiness (n.) 臭味程度　A person's diet affects the stinkiness of one's gas. 人的飲食影響氣體的臭味程度。"],
+["「硫磺」的英文是？",["blood","sulfur","pressure","harmful"],1,"sulfur (n.) 硫磺　Sulfur is found abundantly in volcanic regions. 硫磺在火山地區大量存在。"],
+["sulfur 的中文是？",["有害的","硫磺","承認","吞下；嚥下"],1,"sulfur (n.) 硫磺　Sulfur is found abundantly in volcanic regions. 硫磺在火山地區大量存在。"]
+ ],
+ c:[
+["You must ____ the task to be difficult.",["Sulfur","absorb","admit","oxygen"],2,"admit (v.) 承認　You must admit the task to be difficult. 你得承認這個任務是艱鉅的。"],
+["The small box was flattened by the ____ of the heavy book on it.",["Sulfur","blood","pressure","oxygen"],2,"pressure (n.) 壓力；壓迫　The small box was flattened by the pressure of the heavy book on it. 小盒子被這本厚厚的書壓扁了。"],
+["Cotton gloves ____ sweat.",["Sulfur","intestine","bacteria","absorb"],3,"absorb (v.) 吸收　Cotton gloves absorb sweat. 棉手套吸汗。"],
+["Smoking is ____ to health.",["Sulfur","harmful","swallow","digestive"],1,"harmful (adj.) 有害的　Smoking is harmful to health. 吸煙有害健康。"],
+["He quickly ____ her hand.",["released","delayed","blood","harmful"],0,"release (v.) 放鬆；鬆開　He quickly released her hand. 他很快地放開了她的手。"],
+["I'm sorry that I've ____ so long.",["admit","released","delayed","digestive"],2,"delay (v.) 拖延；耽擱　I'm sorry that I've delayed so long. 我很抱歉拖了這麼久。"],
+["You have to cure your ____ problem.",["intestine","absorb","harmful","chemical"],0,"intestine (n.) 腸　You have to cure your intestine problem. 你必須治療你腸道的問題。"],
+["Don't ____ food right away.",["harmful","absorb","swallow","pressure"],2,"swallow (v.) 吞下；嚥下　Don't swallow food right away. 不要馬上吞下食物。"],
+["Lots of people donated ____.",["blood","chemical","Sulfur","pressure"],0,"blood (n.) 血；血液　Lots of people donated blood. 許多人捐血。"],
+["He devoted his life to ____ research.",["chemical","pressure","digestive","bacteria"],0,"chemical (adj.) 化學的　He devoted his life to chemical research. 他一生從事化學研究。"],
+["There are ____ everywhere.",["Sulfur","harmful","pressure","bacteria"],3,"bacterium (n.) 細菌　There are bacteria everywhere. 到處都有細菌。"],
+["Check the ____ system of your body.",["Sulfur","digestive","pressure","chemical"],1,"digestive (adj.) 消化的；助消化的　Check the digestive system of your body. 檢查你身體的消化系統。"],
+["Animals must need ____.",["oxygen","Sulfur","digestive","pressure"],0,"oxygen (n.) 氧氣　Animals must need oxygen. 動物一定需要氧氣。"],
+["A person's diet affects the ____ of one's gas.",["stinkiness","released","pressure","intestine"],0,"stinkiness (n.) 臭味程度　A person's diet affects the stinkiness of one's gas. 人的飲食影響氣體的臭味程度。"],
+["____ is found abundantly in volcanic regions.",["blood","Sulfur","bacteria","swallow"],1,"sulfur (n.) 硫磺　Sulfur is found abundantly in volcanic regions. 硫磺在火山地區大量存在。"]
  ]
 }];
 
@@ -514,15 +698,15 @@ const UNITS=[
    所以可以先把段考範圍寫好放著，等 B3L2、B3L3 的題庫加進 UNITS 之後，
    「第一次段考範圍」那顆按鈕就會自動冒出來，不用再改程式。 */
 const PRESETS=[
- {name:"T1 W12 全範圍", ids:["R01","R02","R03"]},
- {name:"閱讀：單字＋文章", ids:["R02","R03"]},
- {name:"對話＋單字", ids:["R01","R02"]}
+ {name:"T1 W12 全範圍", ids:["R01","V1","V2","V3","V4","V5"]},
+ {name:"只考閱讀單字", ids:["V1","V2","V3","V4","V5"]},
+ {name:"科學三篇（火山・青春痘・氣體）", ids:["V3","V4","V5"]}
 ];
 
-const TAGNAME={v:"單字",g:"片語",c:"閱讀"};
+const TAGNAME={v:"單字",g:"片語",c:"例句"};
 
 /* 被選中的課（buildBank 會把它們合併成 BANK） */
-let SELECTED=["R01","R02","R03"], BANK={v:[],g:[],c:[]};
+let SELECTED=["R01","V1","V2","V3","V4","V5"], BANK={v:[],g:[],c:[]};
 function buildBank(ids){
   const valid=UNITS.filter(u=>ids.includes(u.id)).map(u=>u.id);
   SELECTED=valid.length?valid:[UNITS[0].id];
@@ -592,10 +776,10 @@ const LEVELS=[
   "空的。但你聽見樓上有腳步聲…","一本筆記寫著：All you have to do is find the key.",
   "一堆發霉的餅乾。","一支壞掉的手電筒。","紙條：I was about to run, but she was already behind me.",
   "紙條：Much to my regret, this door is locked.","一把生鏽的湯匙，沒用。",
-  "阿嬤的毛線球，還有一根長針…","一張課表：本週五考 T1 W12 閱讀（情境對話＋單字）。","紙條：You had better not wake her up."],
+  "阿嬤的毛線球，還有一根長針…","一張課表：本週五考 T1 W12 情境對話與閱讀單字。","紙條：You had better not wake her up."],
  finalQ:{type:"g",text:"大門的第三道鎖上刻著一句話：It's easier said than done.（這句話的意思是？）",
    opts:["說到做到","說得比唱得好聽","說比做容易（知易行難）","一說出口就做到了"],ans:2,
-   exp:"知易行難。阿嬤說：背單字誰都會講，真的背完的才走得出這扇門。"},
+   exp:"知易行難 —— 阿嬤說：逃出去這種事，說比做容易。"},
  intro:"你在臥室醒來。先翻家具找道具吧！"
 },
 {
@@ -650,9 +834,9 @@ const LEVELS=[
   "紙條：Doing so might pass on germs to them.","一支壞掉的手電筒。",
   "今晚的值班表上只有一個名字：阿嬤。","一顆掉在地上的糖果。",
   "一本童書，書名是 The Day I Broke the Rules。","紙條：I had no choice… but I hugged him."],
- finalQ:{type:"v",text:"電梯門上貼著一張檢驗報告：Gas is also produced from chemical reactions and ____ living in our intestines.",
-   opts:["fairies","bacteria","customs","pupils"],ans:1,
-   exp:"bacteria 細菌（單數是 bacterium），住在我們的腸道裡。"},
+ finalQ:{type:"v",text:"電梯門上貼著一張檢驗報告：There are ____ everywhere.（到處都有細菌）",
+   opts:["oxygen","bacteria","blood","pressure"],ans:1,
+   exp:"bacterium (n.) 細菌，複數是 bacteria。（V5）"},
  intro:"你在值班室的床上醒來。走廊盡頭有電梯，先找道具！"
 },
 {
@@ -716,9 +900,9 @@ const LEVELS=[
   "校刑單：未繳交單字，罰寫一百遍。",
   "廣播稿：本校今晚不開放離校。",
   "一張毕業照，所有人的臉都被塔掉了。"],
- finalQ:{type:"c",text:"校門上用粉筆寫著最後一題：The Ring of Fire is an enormous ____ of volcanoes all around the Pacific Ocean.",
-   opts:["chain","chair","change","charm"],ans:0,
-   exp:"a chain of… 一長串的…；火環帶是環太平洋的一長串火山。"},
+ finalQ:{type:"c",text:"校門上用粉筆寫著最後一題：The traffic accident led to a ____ of events.",
+   opts:["ring","chain","section","surface"],ans:1,
+   exp:"a chain of events 一連串的事件。（V3）"},
  intro:"你在教室趤著睡著了…醒來時全校只剩你和阿嫄。先翻找道具！"
 },
 {
@@ -775,9 +959,9 @@ const LEVELS=[
   "一支被試用過的口紅。","收據背面寫著：No refund without receipt.","一台沒電的遙控玩具車。",
   "廣播稿：本館即將打烊，請盡速離開。","一包試吃用的餅乾。","貨架上的標籤：Out of stock.",
   "員工排班表上，今晚值班的只有一個名字：阿嬤。"],
- finalQ:{type:"v",text:"化妝品專櫃的立牌上寫著：In some cases, things used for makeup were dangerous or even ____!",
-   opts:["lovely","friendly","lonely","deadly"],ans:3,
-   exp:"deadly 致命的。古代的化妝品有些真的有毒 —— 阿嬤的口紅也是。"},
+ finalQ:{type:"v",text:"化妝品專櫃的立牌上寫著：Egyptians used black ____ around their eyes.",
+   opts:["chalk","henna","kohl","powder"],ans:2,
+   exp:"kohl (n.) 化妝墨，古埃及人塗在眼睛周圍。（V1）"},
  intro:"你躲在倉儲區的紙箱後面…百貨公司已經打烊了。先找道具！"
 },
 {
@@ -930,7 +1114,7 @@ function resumeGame(){
   clearInterval(qInt); quizOpen=false; qAfter=null; finalStep=0;
   $("quiz").classList.remove("on");
   easy=!!d.easy; G=d.g;
-  buildBank(d.units&&d.units.length?d.units:["R01","R02","R03"]);
+  buildBank(d.units&&d.units.length?d.units:["R01","V1","V2","V3","V4","V5"]);
   loadLevel(G.lv);
   G.over=false; G.inv=0; G.grace=2.2; G.saveT=4;
   G.p.hiding=false; G.g.stun=0; G.g.path=[]; G.g.target=null; G.g.state="patrol";
@@ -1642,7 +1826,7 @@ function moveP(dx,dy){
 /* ============================================================
    選擇題庫範圍
    ============================================================ */
-let pickSet=new Set(["R01","R02","R03"]), pickEasy=false;
+let pickSet=new Set(["R01","V1","V2","V3","V4","V5"]), pickEasy=false;
 const PICKF_KEY="granny_pw200_w12_pickfilter_v1";
 const PUBS=["PW 200+"];
 const GRADES=["T1 W12"];
