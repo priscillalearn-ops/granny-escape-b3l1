@@ -9,9 +9,14 @@
 | 版本 | 網址 | 內容 |
 |---|---|---|
 | 主站 | https://priscillalearn-ops.github.io/granny-escape-b3l1/ | 課本、學測、多益等所有題庫 |
-| WEEK 12 週評量 | https://priscillalearn-ops.github.io/granny-escape-b3l1/week12/ | 只有 A01～A05 文法總評鑑（50 題） |
+| PW 100+ WEEK 12 | https://priscillalearn-ops.github.io/granny-escape-b3l1/week12/ | A01～A05 文法總評鑑（50 題） |
+| PW 300+ T1 W12 | https://priscillalearn-ops.github.io/granny-escape-b3l1/t1w12-300/ | E01～E04 期末文法評鑑（40 題） |
+| PW 200+ T1 W12 | https://priscillalearn-ops.github.io/granny-escape-b3l1/t1w12-200/ | 情境對話 U6–U15・閱讀單字・閱讀文章（135 題，待老師重新整理範圍） |
 
-`week12/index.html` 是**完全獨立的一個檔案**，用同一套恐怖阿嬤的遊戲範本做的：
+每一份都是**完全獨立的一個檔案**，用同一套恐怖阿嬤的遊戲範本做的，彼此和主站都不共用題庫：
+
+### `week12/`（PW 100+ WEEK 12 週評量）
+
 
 - 題庫只有 PW 100+ 第一期 WEEK 12 週評量的範圍：
   A01 五大句型和五大動詞・A02 代名詞・A03 動詞的問句與答句・A04 名詞與計量詞・A05 現在簡單式，
@@ -22,7 +27,26 @@
 - **不記錄成績**：`BOARD_URL` 留空，所以不用輸入名字、不上傳、也不顯示排行榜，純練習用。
   想改成會上傳，把主站 `index.html` 裡那串 Apps Script 網址貼進 `week12/index.html` 的 `BOARD_URL` 即可。
 
-要再做一份新的週評量，就把 `week12/` 複製成新資料夾，改掉裡面的 `UNITS`、`PRESETS`、
+### `t1w12-300/`（PW 300+ 第一期 WEEK 12 期末文法評鑑）
+
+- 範圍 E01～E04，每個單元 10 題、共 **40 題**，題目與答案取自 `300+ ans T1W12` 的參考答案檔。
+  - E01 簡單式・未來式・進行式
+  - E02 完成式（現在／過去／未來）
+  - E03 動名詞與不定詞（regret／try／forget／remember）
+  - E04 不定詞・感官動詞・被動
+- 原卷的「圈出正確答案」保留兩個選項，畫面會自動排成兩顆按鈕；「填入正確答案」改寫成四選一。
+- 一樣不記錄成績，存檔 key 是 `granny_pw300_w12_*`。
+
+### `t1w12-200/`（PW 200+ 第一期 T1 W12 閱讀）
+
+- 題目取自 `T1W12_200-Reading.pptx`：情境對話 U6–U15（片語 22 題＋閱讀理解 28 題）、
+  閱讀單字 30 字中英互選（60 題）、閱讀文章問答與句子填空（25 題），共 **135 題**。
+- 選擇題的選項順序與答案照投影片上標示的正解。
+- **這一份的範圍老師要重新整理**，整理好之後直接改 `t1w12-200/index.html` 裡的 `UNITS` 就好。
+
+## 要再做一份新的評量
+
+把 `week12/` 或 `t1w12-300/` 複製成新資料夾，改掉裡面的 `UNITS`、`PRESETS`、
 `SAVE_KEY`／`PICKF_KEY`（記得改成不一樣的字串，否則存檔會互相覆蓋）和標題文字即可。
 
 
