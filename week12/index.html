@@ -1671,7 +1671,9 @@ function openPick(isEasy){
    老師：把部署好的網頁應用程式網址貼在下面這一行的引號中間就會啟用。
    留空＝關閉排行榜，遊戲其餘功能完全不受影響。
    ============================================================ */
-const BOARD_URL = "https://script.google.com/macros/s/AKfycbybO1krxWU5fjcITjfYIakTpdnAypeJIWM4JILW7jgJ3ro-uE4lnNb2OVx7bHiWYrohJw/exec";
+/* 這份週評量不記錄成績：留空＝不上傳、不顯示排行榜、不用輸入名字。
+   之後想開啟班級排行榜，把主站 index.html 那串 Apps Script 網址貼進來就好。 */
+const BOARD_URL = "";
 
 const ME_KEY = "granny_b3l1_me_v1";
 let ME = { name: "", cls: "" };
