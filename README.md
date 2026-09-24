@@ -3,6 +3,7 @@
 高中英文單字／文法／克漏字的 2D 逃脫遊戲。單一 `index.html`，沒有任何外部相依，手機／平板／電腦直接開就能玩。
 
 **遊戲網址**：https://priscillalearn-ops.github.io/granny-escape-b3l1/
+**小遊戲（單字跑酷）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/parkour/
 
 ## 獨立的週評量版本（不跟上面的題庫混在一起）
 
@@ -127,6 +128,23 @@
 - 🔥 **連對獎勵**：連續答對 3 題 → 阿嬤愣 3 秒、小弟全部震住 4 秒（`answer()` 裡的 `G.streak`）。
 - 🤡 紅鼻子無敵道具：8 秒無敵，撞到阿嬤讓她愣 4 秒；每答對 5 題充能一次
 - 自動存檔（存在玩家自己的瀏覽器），結束後有錯題複習
+
+## 🏃 單字跑酷（parkour/）
+
+橫向跑酷小遊戲，和主遊戲用**同一份題庫**：`tools/build_units.py` 會把 `index.html` 裡的 `UNITS`／`PRESETS`
+原封不動抽出來寫成 `parkour/units.js`（跑酷頁用 `<script src="units.js">` 讀）。
+**主遊戲加新課或改題目之後，要重跑一次：**
+
+```bash
+python3 tools/build_units.py
+```
+
+- 三條跑道，題目出現時前方會有三道門（正解＋兩個誘答），衝進正確的那道。
+- 答對 → 甩開阿嬤（距離條 +11）；答錯 −16；撞障礙 −11～15；歸零就被追上。
+- 連對 5 題送 4 秒無敵；📖 單字書加分、🤡 紅鼻子無敵 5 秒、📦 箱子要跳、🌂 雨傘要換道。
+- 只收選項長度 ≤ 26 字的題目（跑酷看不完長句），所以每課可用題數會比主遊戲少一些。
+- 最佳分數存在 `localStorage` 的 `parkour_best_v1`，選的範圍存在 `parkour_pick_v1`。
+- 結束後一樣有錯題複習。
 
 ## 操作
 
