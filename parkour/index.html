@@ -30,10 +30,18 @@ body{
 #barlab{font-weight:700;color:var(--dim);font-size:12px}
 
 #qbar{position:relative;z-index:3;padding:9px 12px;background:#120e18;border-bottom:1px solid var(--line);
-  font-size:15px;line-height:1.5;min-height:44px;display:flex;align-items:center;gap:8px}
+  font-size:15px;line-height:1.5;min-height:44px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+@media (max-width:620px){ #qbar{font-size:14px;padding:7px 10px} #qbar #qtext{flex:1 1 100%;-webkit-line-clamp:3} }
 #qsrc{font-size:11px;color:var(--dim);border:1px solid var(--line);border-radius:999px;padding:2px 8px;white-space:nowrap}
-#qtext{flex:1}
+#qtext{flex:1;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
 #qtext b{color:var(--amber)}
+#qopts{display:none;gap:6px;padding:6px 10px 8px;background:#120e18;border-bottom:1px solid var(--line);
+  font-size:13px;flex-wrap:wrap;justify-content:center;z-index:3;position:relative}
+#qopts.on{display:flex}
+#qopts span{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:4px 9px;white-space:nowrap}
+#qopts span i{font-style:normal;color:var(--dim);margin-right:4px}
+#qopts span.right{border-color:var(--green);color:#bff3d0}
+#qopts span.wrongpick{border-color:var(--red);color:#ffc9d2}
 
 #stage{position:relative;flex:1;min-height:0;display:grid;place-items:center;background:#050409}
 canvas{display:block;touch-action:none;background:#050409}
@@ -90,6 +98,7 @@ canvas{display:block;touch-action:none;background:#050409}
     <div id="barwrap"><div id="bar"></div></div>
   </div>
   <div id="qbar"><span id="qsrc">準備</span><span id="qtext">按下方開始，看題目選對的門衝過去！</span></div>
+  <div id="qopts"></div>
   <div id="stage">
     <canvas id="cv"></canvas>
     <div id="toast"></div>
@@ -159,7 +168,12 @@ const PICK_KEY="parkour_pick_v1", BEST_KEY="parkour_best_v1";
 
 /* ---------- 題庫 ---------- */
 let BANK={v:[],g:[],c:[]}, SELECTED=["B3L1"];
-const shortOpts=q=>q[1].every(o=>o.length<=26);   // 跑酷要快，選項太長看不完
+const STEM_MAX=120, OPT_MAX=26;
+const shortOpts=q=>q[1].every(o=>o.length<=OPT_MAX) && stemLen(q[0])<=STEM_MAX;   // 跑酷要快，看不完的題目就不收
+function stemLen(t){          // 中文字算兩個寬度
+  let n=0; for(const ch of String(t)) n+=(ch.charCodeAt(0)>0x2e80)?2:1;
+  return n;
+}
 function buildBank(ids){
   BANK={v:[],g:[],c:[]};
   const us=UNITS.filter(u=>ids.includes(u.id));
@@ -216,7 +230,7 @@ function fit(){
   cv.width=W*DPR; cv.height=H*DPR; cv.style.width=W+"px"; cv.style.height=H+"px";
   ctx.setTransform(DPR,0,0,DPR,0,0);
 }
-addEventListener("resize",fit);
+addEventListener("resize",()=>{fit(); if(S&&S.gate) showOpts(S.gate.q);});
 
 function toast(html,ms=1800,kind=""){
   const t=$("toast"); t.innerHTML=html; t.className="show "+kind;
@@ -226,13 +240,14 @@ function toast(html,ms=1800,kind=""){
 /* ---------- 遊戲狀態 ---------- */
 let S=null, raf=null, last=0;
 const LANES=3;
+const GATE_LEAD=3.8;      // 基本思考秒數（題目越長會再加一點）
 const laneY=i=>H*0.42+i*(H*0.17);     // 三條跑道的 y
 const PX=()=>Math.max(70,W*0.22);      // 玩家固定在畫面這個 x
 
 function newRun(){
   asked={v:[],g:[],c:[]};
   return {
-    t:0, dist:0, speed:300, lane:1, ly:laneY(1), jy:0, jv:0, jumping:false,
+    t:0, dist:0, speed:195, lane:1, ly:laneY(1), jy:0, jv:0, jumping:false,
     obs:[], gate:null, nextGate:0, nextObs:0,
     gran:70, inv:0, score:0, ok:0, ng:0, combo:0, best:0,
     wrong:[], over:false, hitT:0, shake:0, run:0
@@ -252,9 +267,26 @@ function jump(){
 function spawnGate(){
   const q=pickQ();
   if(!q) return;
-  S.gate={x:W+120, q, done:false, flash:0};
+  // 門出現的位置＝「玩家還要跑幾秒才會撞到」，這樣手機螢幕比較窄也有一樣的思考時間
+  const think=GATE_LEAD+Math.min(2.2, stemLen(q.text)*0.02);   // 題目長一點就多給一點時間
+  const lead=Math.max(W+100, PX()+S.speed*think);
+  S.gate={x:lead, q, done:false, flash:0};
   $("qsrc").textContent=q.src||"題目";
   $("qtext").innerHTML=q.text;
+  showOpts(q);
+}
+const LANEMARK=["⬆ 上","➡ 中","⬇ 下"];
+function showOpts(q){
+  const box=$("qopts");
+  box.innerHTML=q?q.opts.map((o,i)=>"<span data-l='"+i+"'><i>"+LANEMARK[i]+"</i>"+o+"</span>").join(""):"";
+  box.classList.toggle("on", !!q && W<620);     // 窄螢幕（手機）才顯示，免得畫面上的門來不及看
+}
+function markOpts(ansLane,pickLane){
+  const box=$("qopts");
+  [...box.children].forEach((el,i)=>{
+    if(i===ansLane) el.className="right";
+    else if(i===pickLane) el.className="wrongpick";
+  });
 }
 function spawnObs(){
   const r=Math.random();
@@ -286,6 +318,7 @@ function judge(){
   const g=S.gate; if(!g||g.done) return;
   g.done=true;
   const q=g.q;
+  markOpts(q.ans,S.lane);
   if(S.lane===q.ans){
     S.ok++; S.combo++; S.bestCombo=Math.max(S.bestCombo||0,S.combo);
     S.score+=100+S.combo*20; reward(11); sGood();
@@ -307,13 +340,13 @@ function step(ts){
   if(!S){ draw(); return; }
   if(!S.over){
     S.t+=dt; S.run+=dt;
-    S.speed=Math.min(560,300+S.t*7);
-    S.dist+=S.speed*dt/40;
+    S.speed=Math.min(330,195+S.t*2.6);   // 慢慢加速，上限比原本低很多
+    S.dist+=S.speed*dt/26;
     if(S.inv>0) S.inv=Math.max(0,S.inv-dt);
     if(S.hitT>0) S.hitT-=dt;
     if(S.shake>0) S.shake=Math.max(0,S.shake-dt*2);
     S.gran=Math.min(100,S.gran+dt*0.55);           // 平常只回一點點
-    S.score+=S.speed*dt/40;
+    S.score+=S.speed*dt/26;
 
     // 跑道位移 + 跳躍
     const ty=laneY(S.lane);
@@ -349,9 +382,9 @@ function step(ts){
 
     // 產生新的東西
     S.nextGate-=dt; S.nextObs-=dt;
-    if(!S.gate && S.nextGate<=0){ spawnGate(); S.nextGate=3.2+Math.random()*1.2; }
+    if(!S.gate && S.nextGate<=0){ spawnGate(); S.nextGate=3.6+Math.random()*1.4; }
     if(S.nextObs<=0 && (!S.gate || S.gate.x>W*0.8 || S.gate.done)){
-      spawnObs(); S.nextObs=Math.max(0.42,0.8-S.t*0.006)+Math.random()*0.6;
+      spawnObs(); S.nextObs=Math.max(0.75,1.25-S.t*0.004)+Math.random()*0.7;
     }
     syncHUD();
   }
@@ -618,9 +651,9 @@ function startRun(){
   ["scTitle","scPick","scEnd"].forEach(id=>$(id).classList.remove("on"));
   audioInit(); fit();
   S=newRun();
-  S.nextGate=1.2; S.nextObs=1.6;
+  S.nextGate=1.6; S.nextObs=2.2;
   $("okN").textContent="0"; $("ngN").textContent="0";
-  $("qsrc").textContent="準備"; $("qtext").textContent="衝啊！題目馬上來。";
+  $("qsrc").textContent="準備"; $("qtext").textContent="衝啊！題目馬上來。"; showOpts(null);
   syncHUD();
   if(!raf){ last=performance.now(); raf=requestAnimationFrame(step); }
 }
