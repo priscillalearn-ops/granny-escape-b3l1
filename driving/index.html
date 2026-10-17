@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<title>駕照ヨシ！</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Noto+Sans+TC:wght@400;700;900&display=swap">
+<style>
+/* Layout: one narrow column like a phone game — HUD, illustrated scene strip, character + speech bubble, then the question card. */
+:root{
+  --bg:#edf3f8; --card:#ffffff; --ink:#3b302b; --sub:#7d6f67; --line:#e2dad3;
+  --tint:#fff3cf; --maru:#e5483c; --batsu:#2d6fd2; --good:#2f9e55; --bad:#d8433a;
+  --leafG:#35a852; --leafY:#f5c62b; --btn:#f7f2ec; --btnh:#efe6dc; --shadow:0 3px 0 #d8cfc6;
+  --display:"Dela Gothic One","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#18202b; --card:#232d3b; --ink:#f3eee8; --sub:#a9b3c0; --line:#364353;
+  --tint:#3a3524; --maru:#ff6a5c; --batsu:#5f9bf2; --good:#4cc277; --bad:#ff6a5c;
+  --btn:#2c3848; --btnh:#354356; --shadow:0 3px 0 #111821; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#18202b; --card:#232d3b; --ink:#f3eee8; --sub:#a9b3c0; --line:#364353;
+  --tint:#3a3524; --maru:#ff6a5c; --batsu:#5f9bf2; --good:#4cc277; --bad:#ff6a5c;
+  --btn:#2c3848; --btnh:#354356; --shadow:0 3px 0 #111821; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 28px}
+#app{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--batsu);outline-offset:2px}
+
+.hud{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.chip{background:var(--card);border:2px solid var(--line);border-radius:999px;padding:2px 12px;font-weight:700;font-size:14px;white-space:nowrap}
+.lives{display:flex;gap:4px;align-items:center}
+.lives svg{width:20px;height:26px;transition:opacity .3s,filter .3s}
+.lives svg.lost{opacity:.25;filter:grayscale(1)}
+.score{margin-left:auto;font-family:var(--display);font-size:18px;font-variant-numeric:tabular-nums}
+.icon-btn{background:var(--card);border:2px solid var(--line);border-radius:10px;padding:2px 8px;font-size:13px;font-weight:700}
+
+.scene{border-radius:18px;overflow:hidden;border:3px solid var(--line);background:#cfe9f7;line-height:0}
+.scene svg{width:100%;height:auto;display:block}
+.dash{animation:roll .6s linear infinite}
+@keyframes roll{to{stroke-dashoffset:-40}}
+.bob{animation:bob .5s ease-in-out infinite alternate;transform-box:fill-box}
+@keyframes bob{to{transform:translateY(-2px)}}
+
+.talk{display:flex;align-items:flex-end;gap:10px}
+.who{flex:0 0 92px;width:92px}
+.who svg{width:100%;height:auto;display:block}
+.bubble{flex:1;min-width:0;position:relative;background:var(--tint);border:2px solid var(--line);border-radius:16px;padding:8px 14px;margin-bottom:14px}
+.bubble::before{content:"";position:absolute;left:-10px;bottom:18px;border:8px solid transparent;border-right-color:var(--line);border-left:0}
+.bubble .jp{font-family:var(--display);font-size:24px;line-height:1.25;display:block;text-wrap:balance}
+.bubble .zh{font-size:13px;color:var(--sub)}
+.pop{animation:pop .35s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{from{transform:scale(.6);opacity:.3}}
+.shake{animation:shake .4s}
+@keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+
+.card{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.meta{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--sub);font-weight:700;letter-spacing:.04em}
+.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--leafY),var(--leafG));transition:width .4s}
+.fig{display:flex;justify-content:center}
+.fig svg{width:min(150px,44vw);height:auto}
+.fig.wide svg{width:min(260px,70vw)}
+.q{font-size:19px;font-weight:700;line-height:1.55;text-wrap:pretty;margin:0}
+
+.ox{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ox button{background:var(--btn);border:2px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;font-weight:700;font-size:14px}
+.ox .g{font-family:var(--display);font-size:52px;line-height:1.1}
+.ox .m .g{color:var(--maru)} .ox .b .g{color:var(--batsu)}
+.mc{display:flex;flex-direction:column;gap:10px}
+.mc button{background:var(--btn);border:2px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:12px 14px;text-align:left;display:flex;gap:12px;align-items:center;font-size:16px;font-weight:700;line-height:1.45}
+.mc .n{flex:0 0 30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--card);border:2px solid var(--line);font-family:var(--display);font-size:15px}
+.ox button:hover:not(:disabled),.mc button:hover:not(:disabled){background:var(--btnh)}
+.ox button:active:not(:disabled),.mc button:active:not(:disabled){transform:translateY(2px);box-shadow:none}
+button.right{border-color:var(--good)!important;background:color-mix(in srgb,var(--good) 16%,var(--card))!important}
+button.wrong{border-color:var(--bad)!important;background:color-mix(in srgb,var(--bad) 14%,var(--card))!important}
+button:disabled{cursor:default}
+button.dim{opacity:.5}
+
+.fb{border-top:2px dashed var(--line);padding-top:12px;display:flex;flex-direction:column;gap:8px}
+.verdict{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.verdict b{font-family:var(--display);font-size:30px;line-height:1.1;font-weight:400}
+.verdict.ok b{color:var(--good)} .verdict.ng b{color:var(--bad)}
+.verdict span{font-weight:700;color:var(--sub)}
+.exp{margin:0;font-size:15px}
+.combo{font-family:var(--display);color:var(--maru);font-size:15px}
+
+.big{appearance:none;border:0;border-radius:14px;background:var(--maru);color:#fff;font-weight:900;font-size:18px;padding:12px 18px;box-shadow:0 4px 0 color-mix(in srgb,var(--maru) 60%,#000)}
+.big:active{transform:translateY(3px);box-shadow:none}
+.big.sec{background:var(--btn);color:var(--ink);border:2px solid var(--line);box-shadow:var(--shadow)}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row .big{flex:1 1 160px}
+
+.hero{text-align:center;display:flex;flex-direction:column;gap:6px;align-items:center}
+.hero h1{font-family:var(--display);font-weight:400;font-size:clamp(40px,12vw,60px);line-height:1.05;margin:0;letter-spacing:.02em}
+.hero h1 em{font-style:normal;color:var(--maru)}
+.hero p{margin:0;color:var(--sub);font-weight:700}
+.rules{margin:0;padding:0;list-style:none;display:grid;gap:6px;font-size:15px}
+.rules li{display:flex;gap:10px;align-items:baseline}
+.rules li b{font-family:var(--display);font-weight:400;color:var(--batsu);flex:0 0 auto;min-width:3.2em}
+.map{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.map span{font-size:13px;font-weight:700;border:2px solid var(--line);border-radius:10px;padding:2px 8px;background:var(--btn)}
+.map span.on{border-color:var(--leafG);background:color-mix(in srgb,var(--leafG) 18%,var(--card))}
+.small{font-size:13px;color:var(--sub);margin:0}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.stats div{border:2px solid var(--line);border-radius:12px;padding:6px 4px}
+.stats b{display:block;font-family:var(--display);font-weight:400;font-size:24px;font-variant-numeric:tabular-nums}
+.stats span{font-size:12px;color:var(--sub);font-weight:700}
+.review{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.review li{border:2px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px}
+.review .rq{font-weight:700;margin-bottom:4px}
+.review .ra{color:var(--good);font-weight:700}
+.review .ry{color:var(--bad)}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="hud" id="hud"></div>
+  <div class="scene" id="scene"></div>
+  <div class="talk"><div class="who" id="who"></div><div class="bubble" id="bubble"></div></div>
+  <div id="view"></div>
+</div>
+
+<script>
+/* ============ 題庫：c=關卡(1~5) ／ ox:a=true 代表○ ／ 選擇題 o[0] 一律是正解，出題時再洗牌 ============ */
+const Q=[
+/* ---- 第1關 駕訓班：標誌・標線・號誌 ---- */
+{c:1,s:'stop',q:'看到這個紅色八角形標誌，應該怎麼做？',o:['停車再開：完全停住，確認安全再走','前方有停車場','減速慢行即可，不必停'],e:'紅色八角形「停」是「停車再開」標誌，車輪要完全停止，看清楚左右來車再通行。'},
+{c:1,s:'yield',q:'這個倒三角形標誌的意思是？',o:['讓路：讓幹道或其他方向車輛先行','前方道路變窄','注意落石'],e:'倒三角形「讓」是讓路標誌，要減速或停車，讓另一方向的車先走。'},
+{c:1,s:'noentry',q:'這個標誌的意思是？',o:['禁止車輛進入','前方施工','前方有單行道入口'],e:'紅色圓形中間一條白色橫槓是「禁止進入」，常見在單行道的出口端。'},
+{c:1,s:'nopark',q:'藍底、紅框、一條斜線的標誌是？',o:['禁止停車（可以臨時停車）','禁止臨時停車','停車場'],e:'一條斜線＝禁止停車；畫成叉叉才是禁止臨時停車。'},
+{c:1,s:'nostop',q:'藍底、紅框、打一個叉的標誌是？',o:['禁止臨時停車','禁止停車但可臨時停車','禁止迴車'],e:'叉叉＝連臨時停車（上下客貨）都不行。'},
+{c:1,s:'speed50',q:'紅圈中間寫 50 的標誌是？',o:['最高速限每小時 50 公里','最低速限每小時 50 公里','建議時速 50 公里'],e:'紅圈數字是最高速限，車速不可超過標示的數字。'},
+{c:1,s:'noleft',q:'這個標誌的意思是？',o:['禁止左轉','注意左彎','左側車道縮減'],e:'紅圈裡的左轉箭頭被紅色斜線劃掉，就是禁止左轉。'},
+{c:1,s:'nouturn',q:'這個標誌的意思是？',o:['禁止迴車','前方有迴轉道','注意連續彎路'],e:'迴轉箭頭被劃掉＝禁止迴車。'},
+{c:1,s:'warn',q:'正三角形、紅色外框的標誌，屬於哪一類？',o:['警告標誌','禁制標誌','指示標誌'],e:'台灣的警告標誌是正三角形紅框，提醒前方有危險或狀況（如彎路、學校、落石）。'},
+{c:1,s:'straight',q:'藍底圓形、白色向上箭頭的標誌是？',o:['遵行方向：只准直行','建議直行','直行車道已滿'],e:'藍底圓形的是「遵行標誌」，一定要照箭頭方向走。'},
+{c:1,s:'dblyellow',q:'道路中央畫了雙黃實線，代表？',o:['雙向禁止超車，不可跨越','可以安全超車','機車專用道'],e:'雙黃實線是雙向禁止超車線，兩個方向的車都不能跨越。'},
+{c:1,s:'mixyellow',q:'中央分向線一邊實線、一邊虛線，哪一側的車不能跨越超車？',o:['靠實線那一側','靠虛線那一側','兩側都可以超車'],e:'單向禁止超車線：靠實線的那一側禁止跨越，靠虛線的一側可以在安全時超車。'},
+{c:1,s:'redcurb',q:'路邊畫紅色實線，代表？',o:['禁止臨時停車','禁止停車，但可以臨時停車','計程車招呼站'],e:'紅線＝禁止臨時停車（停一下下也不行）。'},
+{c:1,s:'yellowcurb',q:'路邊畫黃色實線，代表？',o:['禁止停車，但可以臨時停車','禁止臨時停車','可以停車'],e:'黃線＝禁止停車，但上下客貨、3 分鐘內能立刻開走的臨時停車可以。'},
+{c:1,s:'whitesolid',q:'同向車道之間畫白色實線，代表？',o:['禁止變換車道','可以變換車道','機慢車專用'],e:'白實線是禁止變換車道線，常見在路口前和隧道內。'},
+{c:1,t:'ox',s:'whitedash',q:'同向車道之間是白色虛線，可以在安全時打方向燈後變換車道。',a:true,e:'白虛線是車道線，確認安全、先打方向燈就能變換車道。'},
+{c:1,s:'chevron',q:'路面畫了白色斜紋的槽化線，正確做法是？',o:['不可跨越行駛或停車','可以在上面臨時停車','塞車時可以開上去'],e:'槽化線用來引導車流，禁止跨越行駛。'},
+{c:1,t:'ox',s:'flashyellow',q:'閃光黃燈表示：減速接近，注意安全，小心通過。',a:true,e:'閃光黃燈是警告號誌，不用停，但要減速注意。'},
+{c:1,t:'ox',s:'flashred',q:'閃光紅燈表示減速即可通過，不必停車。',a:false,e:'閃光紅燈＝停車再開，要先停下來確認安全才走。'},
+{c:1,t:'ox',s:'redlight',q:'在台灣，圓形紅燈亮時，只要沒有來車就可以直接右轉。',a:false,e:'台灣沒有「紅燈可右轉」的通則，除非該路口有標誌或右轉綠色箭頭允許。'},
+{c:1,q:'黃燈亮起時，正確做法是？',o:['減速停在停止線前；若已太接近無法安全停下，才小心通過','趕快加速衝過去','原地緊急煞車'],e:'黃燈是要變紅燈的警告，原則上要停；已逼近停止線、急煞反而危險時才通過。'},
+
+/* ---- 第2關 市區道路：行車規則・讓路・停車 ---- */
+{c:2,q:'一般道路沒有速限標誌，也沒畫車道線和分向線時，最高時速是？',o:['30 公里','40 公里','50 公里'],e:'未劃設車道線、行車分向線或分向限制線的道路，時速不得超過 30 公里。'},
+{c:2,q:'一般道路沒有速限標誌（有劃設車道線），汽車最高時速是？',o:['50 公里','60 公里','70 公里'],e:'沒有速限標誌或標線時，時速不得超過 50 公里。'},
+{c:2,q:'汽車右轉時，應在距交岔路口多少公尺前打方向燈？',o:['30 公尺','10 公尺','5 公尺'],e:'轉彎要在距路口 30 公尺前就顯示方向燈。'},
+{c:2,q:'準備右轉，應該先換到哪一個車道？',o:['外側（最右邊）車道','內側車道','任何車道都可以'],e:'右轉先換入外側車道、左轉先換入內側車道，不要在路口才硬切。'},
+{c:2,q:'要超越前車，應從前車的哪一側超過？',o:['左側','右側','左右都可以'],e:'超車一律從左側，不可從右側超車。'},
+{c:2,t:'ox',q:'超車時應顯示左方向燈，並與前車保持半公尺以上的間隔。',a:true,e:'超車要打左方向燈，與前車左側保持半公尺以上間隔，超過後保持安全距離再打右燈駛回。'},
+{c:2,q:'無號誌路口，支線道車與幹線道車相遇時？',o:['支線道車讓幹線道車先行','幹線道車讓支線道車','誰先到誰先走'],e:'支線道讓幹線道、少線道讓多線道。'},
+{c:2,q:'無號誌路口，兩車同為幹線道（或同為支線道）時？',o:['左方車讓右方車先行','右方車讓左方車先行','車子大的先走'],e:'同級道路相遇時，左方車讓右方車。'},
+{c:2,q:'同一路口，轉彎車與直行車相遇時？',o:['轉彎車讓直行車先行','直行車讓轉彎車','按喇叭的先走'],e:'轉彎車要讓直行車先行。'},
+{c:2,q:'駛入圓環時，應該？',o:['讓已在圓環內的車先行','圓環外的車優先','按喇叭搶先進入'],e:'進入圓環要讓已在環內行駛的車輛先行。'},
+{c:2,t:'ox',q:'行人穿越道上有行人通行時，汽車應暫停讓行人先通過。',a:true,e:'行人優先！不停讓行人會被開罰並記點。'},
+{c:2,t:'ox',q:'遇到持白手杖或有導盲犬引導的視障者，應暫停讓他先行。',a:true,e:'看到白手杖或導盲犬，一定要停車禮讓。'},
+{c:2,q:'綠燈亮了，但路口另一頭車子塞住出不去，應該？',o:['停在停止線前等待，不要進入路口','先開進路口卡位','一直按喇叭'],e:'前方壅塞時不得進入路口，避免卡在路口阻擋橫向車流。'},
+{c:2,q:'「臨時停車」的定義是？',o:['因上下客貨等原因暫停，未滿 3 分鐘且能立即開走','停車未滿 10 分鐘','只要引擎沒熄火都算'],e:'臨時停車：未滿 3 分鐘、駕駛人在車上能立即行駛。超過就是停車。'},
+{c:2,q:'交岔路口幾公尺內不得臨時停車？',o:['10 公尺','5 公尺','3 公尺'],e:'交岔路口、公車招呼站 10 公尺內都不能臨時停車。'},
+{c:2,q:'消防車出入口幾公尺內不得停車？',o:['5 公尺','1 公尺','20 公尺'],e:'消防車出入口 5 公尺內不得停車，消防栓前面也不行。'},
+{c:2,t:'ox',q:'開車門前應先注意後方來車，確認安全才開門。',a:true,e:'建議用「荷蘭式開門」：用離門較遠的那隻手開門，身體自然轉向後方看。'},
+{c:2,t:'ox',q:'汽車可以在單行道上倒車。',a:false,e:'單行道、交岔路口、隧道、橋樑、圓環、平交道都不得倒車。'},
+{c:2,q:'下列哪一個地方不得迴車？',o:['橋樑上','寬敞、無禁止迴車標誌的雙向道路','停車場內'],e:'橋樑、隧道、圓環、彎道、坡道、單行道、平交道等處都不得迴車。'},
+{c:2,q:'聽到救護車、消防車的警號，應該？',o:['立即減速靠邊或暫停避讓','跟在後面就能一路綠燈','加速開走'],e:'聽到緊急車輛警號要立即避讓，不可跟隨或搶道。'},
+{c:2,q:'大型車右轉時，為什麼要遠離它的右側？',o:['大車有內輪差，後輪會往內切','大車有外輪差','大車煞車距離比較短'],e:'大型車轉彎時後輪軌跡比前輪更靠內側，站在右側很容易被捲入。'},
+{c:2,t:'ox',q:'公車專用道上沒有公車時，小客車可以開進去。',a:false,e:'公車專用道只准公車行駛，其他車輛開進去會被開罰。'},
+
+/* ---- 第3關 山路・天候・緊急狀況 ---- */
+{c:3,q:'行駛中突然爆胎，應該？',o:['握緊方向盤、放鬆油門，逐漸減速靠邊','立刻用力踩死煞車','猛打方向盤到路邊'],e:'爆胎時急煞或急打方向容易翻車，先穩住方向，讓車慢慢減速。'},
+{c:3,q:'雨天高速行駛時輪胎打滑（水漂），應該？',o:['放鬆油門、握穩方向盤，不要急煞','立刻急煞車','猛打方向盤修正'],e:'水漂時輪胎離開地面，急煞或猛轉都會失控，放油門讓車速降下來。'},
+{c:3,q:'走長下坡路段，正確做法是？',o:['換低速檔，利用引擎煞車','打空檔滑行比較省油','一路踩著煞車'],e:'一直踩煞車會讓煞車過熱失靈，要用低速檔的引擎煞車輔助。'},
+{c:3,t:'ox',q:'下坡時打空檔滑行，既省油又安全。',a:false,e:'空檔滑行失去引擎煞車，車速會越來越快，非常危險。'},
+{c:3,q:'起濃霧時，應該？',o:['開霧燈或近光燈，並減速','開遠光燈看得比較遠','跟緊前車的尾燈'],e:'遠光燈在霧中會反射，反而看不清楚，要用霧燈或近光燈並減速。'},
+{c:3,q:'夜間會車時，應該使用？',o:['近光燈','遠光燈','關掉大燈'],e:'會車改用近光燈，避免對向駕駛被強光照到看不見。'},
+{c:3,t:'ox',q:'車子涉水之後，應輕踩煞車數次，讓煞車恢復效能。',a:true,e:'煞車碟盤泡水後摩擦力下降，輕踩幾次可以把水分烘乾。'},
+{c:3,q:'剛開始下雨時，路面狀況是？',o:['最滑','最不滑','和平常一樣'],e:'雨剛下時路上的油污和灰塵浮起來，是路面最滑的時候。'},
+{c:3,q:'引擎水溫過高時，應該？',o:['停車讓引擎冷卻後，再打開水箱蓋','馬上打開水箱蓋加冷水','不理它繼續開'],e:'熱的時候打開水箱蓋，高溫冷卻水會噴出燙傷人。'},
+{c:3,q:'輪胎胎紋深度低於多少公釐時應該更換？',o:['1.6 公釐','5 公釐','0.5 公釐'],e:'胎紋低於 1.6 公釐排水能力不足，雨天容易打滑。'},
+{c:3,q:'發生交通事故、沒有人受傷且車還能開時，應該？',o:['標繪車輛位置後，把車移到路邊','原地不動等警察來','雙方沒事就直接離開'],e:'無人傷亡且車能行駛時，要先拍照標記位置，再把車移到路邊，避免造成回堵或二次事故。'},
+{c:3,t:'ox',q:'發生交通事故有人受傷時，應先救護傷者並報警，不能離開現場。',a:true,e:'肇事後離開現場就是肇事逃逸，會面臨吊銷駕照與刑事責任。'},
+{c:3,q:'在一般道路上車輛故障，故障標誌應放在車後方多遠？',o:['30～100 公尺','緊貼車尾 5 公尺內','不需要放'],e:'一般道路在車後方 30 到 100 公尺處放故障標誌，讓後車有時間反應。'},
+{c:3,q:'有 ABS 的車緊急煞車時，應該？',o:['用力踩到底並保持','快速一踩一放','拉手煞車'],e:'ABS 會自動防止輪胎鎖死，駕駛人只要踩到底、專心控制方向盤。'},
+{c:3,t:'ox',q:'開車時用手拿著手機講電話是違規的。',a:true,e:'開車不得以手持方式使用手機，要用免持裝置。'},
+{c:3,q:'長途開車覺得很想睡，應該？',o:['找安全的地方停下休息','開窗大聲唱歌撐過去','加速早點到家'],e:'疲勞駕駛的反應力跟酒駕差不多，撐不住就要休息。'},
+{c:3,t:'ox',q:'6 歲以下的兒童不可以單獨留在車內。',a:true,e:'車內溫度上升很快，兒少法也規定不得讓 6 歲以下兒童獨處。'},
+{c:3,t:'ox',q:'4 歲以下且體重 18 公斤以下的幼童，乘車應使用兒童安全座椅。',a:true,e:'幼童要依年齡與體重使用合適的安全座椅，並安置在後座。'},
+{c:3,t:'ox',q:'坐在後座的乘客也必須繫安全帶。',a:true,e:'前後座都要繫安全帶，發生撞擊時後座乘客也會被拋出。'},
+{c:3,q:'要避免前車急煞時追撞，平常最重要的是？',o:['保持安全距離','緊跟前車免得被插隊','一直按喇叭提醒'],e:'足夠的跟車距離才有反應時間。'},
+{c:3,t:'ox',q:'從路邊起步前，應打方向燈，並回頭確認後照鏡看不到的死角。',a:true,e:'後照鏡有盲點，起步或變換車道前要轉頭確認。'},
+{c:3,q:'在有路緣石的上坡路邊停車，前輪應該轉向哪邊？',o:['向左（遠離路緣）','向右（朝向路緣）','保持正直'],e:'上坡停車前輪向外轉，萬一車往後溜，後退時輪胎會抵住路緣石。'},
+{c:3,t:'ox',q:'鐵路平交道警鈴響、柵欄放下時，應在停止線前停車等候。',a:true,e:'平交道「停、看、聽」，不可搶越柵欄。'},
+{c:3,q:'車子在鐵路平交道上拋錨，應該？',o:['立刻讓乘客下車，按緊急按鈕通知，並設法移車','留在車上等拖吊','按喇叭請火車停下'],e:'先確保人員安全離開，再用平交道的緊急按鈕或撥電話通知鐵路單位。'},
+
+/* ---- 第4關 高速公路 ---- */
+{c:4,q:'高速公路的最低速限，原則上是每小時？',o:['60 公里','40 公里','80 公里'],e:'高速公路最低速限不得低於每小時 60 公里（塞車時除外）。'},
+{c:4,q:'高速公路的最高速限不得超過每小時？',o:['110 公里','120 公里','130 公里'],e:'高速公路最高速限不得超過每小時 110 公里，實際以各路段標誌為準。'},
+{c:4,q:'小型車在高速公路以時速 100 公里行駛，安全距離至少要？',o:['50 公尺','20 公尺','100 公尺'],e:'小型車安全距離＝時速的一半（公尺），時速 100 就是 50 公尺。'},
+{c:4,q:'小型車在高速公路以時速 80 公里行駛，安全距離至少要？',o:['40 公尺','10 公尺','80 公尺'],e:'時速的一半：80 ÷ 2 ＝ 40 公尺。'},
+{c:4,q:'在高速公路上錯過要下的交流道，應該？',o:['繼續往前，到下一個交流道再下','在路肩倒車回去','找空檔迴轉'],e:'高速公路上絕對不能倒車或迴轉，錯過就開到下一個交流道。'},
+{c:4,t:'ox',q:'高速公路塞車時，可以開上路肩超車。',a:false,e:'路肩是給故障車和緊急車輛用的，除非有開放路肩的標誌，不可行駛。'},
+{c:4,t:'ox',q:'在高速公路上，可以把車停在路肩接電話。',a:false,e:'路肩只能在車輛故障或緊急狀況時停車。'},
+{c:4,q:'在高速公路上車輛故障，故障標誌應放在車後方多遠？',o:['100 公尺以上','10 公尺','30 公尺'],e:'高速公路車速快，故障標誌要放在車後 100 公尺以上。'},
+{c:4,t:'ox',q:'在高速公路上車輛故障時，人員應離開車輛，到護欄外安全處等待救援。',a:true,e:'留在車內或站在車旁很容易被後車撞到，要躲到護欄外。'},
+{c:4,q:'在高速公路上超車，應該？',o:['從前車左側超越','從前車右側超越','從路肩超越'],e:'高速公路一樣只能從左側超車。'},
+{c:4,t:'ox',q:'在高速公路上可以迴轉或倒車。',a:false,e:'高速公路嚴禁迴轉和倒車。'},
+{c:4,q:'從加速車道駛入高速公路，正確做法是？',o:['加速到接近主線車速，打方向燈確認安全後匯入','停在加速車道盡頭等空檔','不打方向燈直接切入'],e:'加速車道就是用來把車速拉上來的，停在盡頭反而危險。'},
+{c:4,q:'準備駛離高速公路，正確做法是？',o:['提早換到外側車道，進入減速車道後再減速','在主線上急煞減速','從內側車道直接切出去'],e:'提早靠外側，在減速車道裡減速，不要在主線上急煞。'},
+{c:4,t:'ox',q:'在高速公路上，全車乘客都要繫安全帶。',a:true,e:'高速公路未繫安全帶罰得更重，前後座都要繫。'},
+{c:4,t:'ox',q:'在高速公路上應依速限行駛，沒有塞車時不可低於最低速限。',a:true,e:'開太慢也會造成危險，不得低於最低速限。'},
+{c:4,q:'在高速公路上遇到大雨，應該？',o:['減速、加大安全距離並開頭燈','維持原速限行駛','開遠光燈緊跟前車'],e:'雨天視線差、煞車距離變長，要降速並拉開距離。'},
+{c:4,q:'在高速公路上發現前方回堵，應該？',o:['減速並開警示燈提醒後車','開上路肩繞過去','等到前車很近才急煞'],e:'開警示燈可以提醒後方車輛前面塞住了，避免追撞。'},
+{c:4,t:'ox',q:'高速公路的匝道上可以停車休息。',a:false,e:'匝道不能停車，想休息要開到服務區或休息站。'},
+{c:4,q:'在高速公路上開長途覺得累了，應該？',o:['開到服務區休息','停在路肩小睡','繼續硬撐'],e:'利用服務區或休息站休息，路肩不是休息的地方。'},
+{c:4,t:'ox',q:'行經隧道時，應該開啟頭燈。',a:true,e:'隧道內光線暗，開頭燈讓別人看得到你。'},
+{c:4,t:'ox',q:'隧道內的車道線是白色實線時，不可以變換車道。',a:true,e:'隧道內多為禁止變換車道的白實線，要保持在原車道。'},
+
+/* ---- 第5關 監理站魔王：酒駕・罰則・證照・保養 ---- */
+{c:5,q:'汽車駕駛人吐氣酒精濃度達每公升多少毫克以上，就不得駕車？',o:['0.15 毫克','0.25 毫克','0.5 毫克'],e:'吐氣酒精濃度 0.15 mg/L（或血液 0.03%）以上就不得駕車。'},
+{c:5,q:'吐氣酒精濃度達每公升多少毫克以上，會涉及刑法的公共危險罪？',o:['0.25 毫克','0.15 毫克','0.05 毫克'],e:'0.25 mg/L 以上就不只是罰款，還會移送法辦。'},
+{c:5,q:'汽車駕駛人拒絕酒測，罰鍰是多少？',o:['18 萬元','1 萬元','3,000 元'],e:'拒測罰 18 萬元，當場移置保管車輛、吊銷駕照，3 年內不得再考。'},
+{c:5,t:'ox',q:'晚上喝酒，隔天睡醒就一定可以開車。',a:false,e:'酒精代謝需要時間，喝多了隔天早上仍可能超標。'},
+{c:5,t:'ox',q:'汽車駕駛人酒駕，同車 18 歲以上的乘客也可能被罰。',a:true,e:'明知駕駛酒駕還坐上去的成年乘客也會被罰。'},
+{c:5,q:'喝了酒要回家，最好的做法是？',o:['找代駕、搭計程車或大眾運輸','慢慢開回家就好','喝杯咖啡醒酒再開'],e:'咖啡不能降低酒精濃度。喝酒不開車，開車不喝酒。'},
+{c:5,t:'ox',q:'吃了含有抗組織胺的感冒藥覺得想睡時，應避免開車。',a:true,e:'某些感冒藥、安眠藥會讓人嗜睡，影響反應。'},
+{c:5,q:'考普通小型車駕照，至少要年滿幾歲？',o:['18 歲','16 歲','20 歲'],e:'普通小型車駕照要年滿 18 歲；職業駕照要年滿 20 歲。'},
+{c:5,q:'6 個月內違規記點達幾點，會被吊扣駕照 1 個月？',o:['6 點','3 點','12 點'],e:'6 個月內記點共達 6 點以上，吊扣駕照 1 個月。'},
+{c:5,t:'ox',q:'開車時應隨身攜帶駕照和行照。',a:true,e:'駕照、行照都要帶著，警察臨檢時要出示。'},
+{c:5,q:'自用小客車出廠幾年內免定期檢驗？',o:['5 年','1 年','10 年'],e:'出廠未滿 5 年免驗，5～10 年每年驗 1 次，10 年以上每年驗 2 次。'},
+{c:5,q:'自用小客車出廠超過 10 年，每年要驗車幾次？',o:['2 次','1 次','4 次'],e:'車齡越老檢驗越頻繁：10 年以上每年 2 次。'},
+{c:5,t:'ox',q:'汽車一定要投保強制汽車責任保險。',a:true,e:'強制險沒保會被開罰，發生事故時也是保障受害人的基本保險。'},
+{c:5,t:'ox',q:'普通駕照原則上免換照，但年滿 75 歲的駕駛人須定期體檢換照。',a:true,e:'高齡駕駛人年滿 75 歲須通過體檢與認知測驗，每 3 年換照一次。'},
+{c:5,q:'檢查輪胎胎壓的最佳時機是？',o:['冷胎時（還沒開或停放一段時間）','剛跑完高速公路時','什麼時候都一樣'],e:'輪胎熱了胎壓會升高，冷胎時量才準。'},
+{c:5,q:'檢查機油量的正確方法是？',o:['停在平地，熄火稍等幾分鐘後檢查','引擎運轉時檢查','停在斜坡上檢查'],e:'熄火後讓機油流回油底殼，在平地上看量尺才準。'},
+{c:5,t:'ox',q:'加油時應熄火並禁止吸菸。',a:true,e:'油氣遇到火源會爆燃，加油一定熄火、禁菸。'},
+{c:5,t:'ox',q:'停車後應拉起手煞車，自排車要打到 P 檔。',a:true,e:'避免車輛滑動，特別是在坡道上。'},
+{c:5,q:'駕駛人用手勢表示方向時，左手向外水平伸直表示？',o:['左轉','右轉','停車'],e:'左手平伸＝左轉；左手向上彎＝右轉；左手向下斜伸＝減速或停車。'},
+{c:5,q:'駕駛人用手勢時，左手向下斜伸表示？',o:['減速或停車','左轉','準備超車'],e:'左手向下斜伸＝減速或停車。'},
+{c:5,q:'駕駛人用手勢時，左手向上彎曲表示？',o:['右轉','左轉','請後車超車'],e:'左手手肘向上彎曲＝右轉。'},
+{c:5,q:'身心障礙專用停車位，一般車輛可以停嗎？',o:['不可以，沒有身障停車證就不能停','停一下下可以','晚上沒人用可以停'],e:'身障專用車位只能給持有身障停車證的車輛使用。'},
+{c:5,t:'ox',q:'酒駕肇事致人死亡，駕駛人會面臨刑事責任。',a:true,e:'酒駕致死最重可處無期徒刑，千萬不要酒駕。'}
+];
+
+/* ============ 關卡 ============ */
+const STAGES=[
+ null,
+ {name:'駕訓班',jp:'教習所でヨシ！',sub:'標誌・標線・號誌'},
+ {name:'市區道路',jp:'街へGO！',sub:'讓路・轉彎・停車'},
+ {name:'山路與暴雨',jp:'峠を攻めろ',sub:'天候・緊急狀況'},
+ {name:'高速公路',jp:'高速道路デビュー',sub:'國道規則'},
+ {name:'監理站魔王',jp:'ラスボス降臨',sub:'酒駕・罰則・證照'}
+];
+const PER=8, LIVES=3;
+const OK_LINES=[['ヨシ！','指差し確認，完美'],['完全に理解した','我懂了（這次是真的）'],['計画通り','一切都在計畫之中'],['天才か？','你是天才嗎'],['えらい！','好棒棒'],['余裕です','輕鬆啦']];
+const NG_LINES=[['やらかした…','闖禍了…'],['なんでや！','為什麼啦！'],['ぴえん','嗚嗚'],['は？','蛤？'],['罰金です','罰單來了'],['ちょっと何言ってるか分からない','完全聽不懂']];
+const rand=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+
+/* ============ 圖：標誌・標線・號誌 ============ */
+const R='#d9302a', BLU='#1f5fbf', INK='#2a2a2a';
+const ring=(fill='#fff')=>`<circle cx="50" cy="50" r="44" fill="${fill}" stroke="${R}" stroke-width="10"/>`;
+const slash=`<line x1="20" y1="20" x2="80" y2="80" stroke="${R}" stroke-width="9"/>`;
+const sg=(inner,vb='0 0 100 100')=>`<svg viewBox="${vb}" role="img" aria-label="交通標誌圖">${inner}</svg>`;
+const road=(inner)=>sg(`<rect width="200" height="110" rx="10" fill="#8b8e98"/><rect y="0" width="200" height="6" fill="#c9c3b6"/><rect y="104" width="200" height="6" fill="#c9c3b6"/>${inner}`,'0 0 200 110');
+const carTop=(x,y,c='#ff8f7a',flip)=>`<g transform="translate(${x} ${y})${flip?' rotate(180 18 10)':''}"><rect width="36" height="20" rx="7" fill="${c}" stroke="#5b4b43" stroke-width="2"/><rect x="22" y="3" width="8" height="14" rx="3" fill="#bfe3f5"/></g>`;
+const lamp=(on)=>{const c={r:'#ff4b3e',y:'#ffc62b',g:'#3fd27a'};return['r','y','g'].map((k,i)=>`<circle cx="${30+i*40}" cy="50" r="15" fill="${on[k]?c[k]:'#3a3a3a'}"${on[k]==='blink'?' class="blink"':''}/>`).join('')};
+const signal=(on,extra='')=>sg(`<style>.blink{animation:bl 1s steps(1) infinite}@keyframes bl{50%{opacity:.15}}</style><rect x="4" y="22" width="132" height="56" rx="14" fill="#2b2b2b"/>${lamp(on)}${extra}`,'0 0 140 100');
+const SIGNS={
+ stop:sg(`<polygon points="31,4 69,4 96,31 96,69 69,96 31,96 4,69 4,31" fill="${R}" stroke="#fff" stroke-width="4"/><text x="50" y="66" text-anchor="middle" font-size="46" font-weight="900" fill="#fff" font-family="Noto Sans TC,sans-serif">停</text>`),
+ yield:sg(`<polygon points="6,10 94,10 50,92" fill="#fff" stroke="${R}" stroke-width="9" stroke-linejoin="round"/><text x="50" y="52" text-anchor="middle" font-size="28" font-weight="900" fill="${INK}" font-family="Noto Sans TC,sans-serif">讓</text>`),
+ noentry:sg(`<circle cx="50" cy="50" r="46" fill="${R}"/><rect x="18" y="41" width="64" height="18" rx="3" fill="#fff"/>`),
+ nopark:sg(ring(BLU)+slash),
+ nostop:sg(ring(BLU)+slash+`<line x1="80" y1="20" x2="20" y2="80" stroke="${R}" stroke-width="9"/>`),
+ speed50:sg(ring()+`<text x="50" y="64" text-anchor="middle" font-size="40" font-weight="900" fill="${INK}" font-family="Noto Sans TC,sans-serif">50</text>`),
+ noleft:sg(ring()+`<path d="M58 80 V46 H38" fill="none" stroke="${INK}" stroke-width="8"/><polygon points="26,46 40,35 40,57" fill="${INK}"/>`+slash),
+ nouturn:sg(ring()+`<path d="M62 80 V46 a12 12 0 0 0 -24 0 V58" fill="none" stroke="${INK}" stroke-width="8"/><polygon points="38,72 27,56 49,56" fill="${INK}"/>`+slash),
+ warn:sg(`<polygon points="50,8 95,88 5,88" fill="#fff" stroke="${R}" stroke-width="8" stroke-linejoin="round"/><rect x="45" y="34" width="10" height="30" rx="4" fill="${INK}"/><circle cx="50" cy="74" r="6" fill="${INK}"/>`),
+ straight:sg(`<circle cx="50" cy="50" r="46" fill="${BLU}"/><rect x="44" y="40" width="12" height="42" fill="#fff"/><polygon points="50,14 70,44 30,44" fill="#fff"/>`),
+ dblyellow:road(`<rect y="48" width="200" height="4" fill="#f5c62b"/><rect y="58" width="200" height="4" fill="#f5c62b"/>`+carTop(30,18)+carTop(130,78,'#7cc4e8',1)),
+ mixyellow:road(`<rect y="48" width="200" height="4" fill="#f5c62b"/><line x1="0" y1="60" x2="200" y2="60" stroke="#f5c62b" stroke-width="4" stroke-dasharray="18 12"/><text x="8" y="44" font-size="11" fill="#fff" font-family="Noto Sans TC,sans-serif" font-weight="700">↑ 實線側</text><text x="8" y="76" font-size="11" fill="#fff" font-family="Noto Sans TC,sans-serif" font-weight="700">↓ 虛線側</text>`+carTop(120,16)+carTop(60,80,'#7cc4e8',1)),
+ redcurb:road(`<rect y="98" width="200" height="6" fill="${R}"/><line x1="0" y1="52" x2="200" y2="52" stroke="#f5c62b" stroke-width="4" stroke-dasharray="18 12"/>`+carTop(80,70)),
+ yellowcurb:road(`<rect y="98" width="200" height="6" fill="#f5c62b"/><line x1="0" y1="52" x2="200" y2="52" stroke="#f5c62b" stroke-width="4" stroke-dasharray="18 12"/>`+carTop(80,70)),
+ whitesolid:road(`<rect y="52" width="200" height="5" fill="#fff"/>`+carTop(30,20)+carTop(110,72,'#7cc4e8')),
+ whitedash:road(`<line x1="0" y1="55" x2="200" y2="55" stroke="#fff" stroke-width="5" stroke-dasharray="20 14"/>`+carTop(30,20)+carTop(110,72,'#7cc4e8')),
+ chevron:road(`<g stroke="#fff" stroke-width="4" fill="none"><polygon points="40,30 180,30 180,80"/><line x1="70" y1="30" x2="76" y2="40"/><line x1="100" y1="30" x2="112" y2="50"/><line x1="130" y1="30" x2="148" y2="61"/><line x1="160" y1="30" x2="180" y2="64"/></g>`),
+ flashyellow:signal({y:'blink'}),
+ flashred:signal({r:'blink'}),
+ redlight:signal({r:1})
+};
+const WIDE=new Set(['dblyellow','mixyellow','redcurb','yellowcurb','whitesolid','whitedash','chevron']);
+
+/* ============ 圖：いらすとや風キャラ ============ */
+const wakaba=(x,y,s=1)=>`<g transform="translate(${x} ${y}) scale(${s})"><path d="M10 5 L10 25 L1 18 L1 0 Z" fill="#f5c62b" stroke="#5b4b43" stroke-width="1.6" stroke-linejoin="round"/><path d="M10 5 L19 0 L19 18 L10 25 Z" fill="#35a852" stroke="#5b4b43" stroke-width="1.6" stroke-linejoin="round"/></g>`;
+function chara(mood){
+  const L='#5b4b43';
+  let eyes,mouth,extra='',arm='';
+  switch(mood){
+    case 'ok': eyes=`<path d="M41 60 q6 -7 12 0 M67 60 q6 -7 12 0" fill="none" stroke="${L}" stroke-width="3" stroke-linecap="round"/>`;
+      mouth=`<path d="M50 70 q10 13 20 0 z" fill="#e8706a" stroke="${L}" stroke-width="2.4" stroke-linejoin="round"/>`;
+      arm=`<path d="M92 112 L112 78" stroke="${L}" stroke-width="12" stroke-linecap="round"/><path d="M92 112 L112 78" stroke="#ffe3cc" stroke-width="7" stroke-linecap="round"/><path d="M112 78 L118 64" stroke="${L}" stroke-width="5" stroke-linecap="round"/><path d="M112 78 L118 64" stroke="#ffe3cc" stroke-width="2" stroke-linecap="round"/>`;
+      extra=`<g fill="#f5c62b"><path d="M104 30 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3z"/></g>`;break;
+    case 'ng': eyes=`<path d="M42 56 l10 5 -10 5 M78 56 l-10 5 10 5" fill="none" stroke="${L}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+      mouth=`<path d="M50 78 q5 -6 10 0 q5 6 10 0" fill="none" stroke="${L}" stroke-width="3" stroke-linecap="round"/>`;
+      extra=`<path d="M40 68 q-3 10 0 14 q3 -4 0 -14z M80 68 q-3 10 0 14 q3 -4 0 -14z" fill="#7cc4f0"/><path d="M20 30 l8 8 M16 42 l10 2 M100 26 l-6 9" stroke="#7cc4f0" stroke-width="3" stroke-linecap="round"/>`;break;
+    case 'shock': eyes=`<circle cx="47" cy="59" r="7" fill="#fff" stroke="${L}" stroke-width="2.4"/><circle cx="73" cy="59" r="7" fill="#fff" stroke="${L}" stroke-width="2.4"/><circle cx="47" cy="60" r="2.5" fill="${L}"/><circle cx="73" cy="60" r="2.5" fill="${L}"/>`;
+      mouth=`<ellipse cx="60" cy="78" rx="6" ry="7" fill="#e8706a" stroke="${L}" stroke-width="2.4"/>`;
+      extra=`<path d="M96 36 q-6 10 0 14 q6 -4 0 -14z" fill="#7cc4f0" stroke="${L}" stroke-width="1.6"/>`;break;
+    case 'dead': eyes=`<path d="M42 54 l10 10 M52 54 l-10 10 M68 54 l10 10 M78 54 l-10 10" stroke="${L}" stroke-width="3" stroke-linecap="round"/>`;
+      mouth=`<path d="M52 76 h16" stroke="${L}" stroke-width="3" stroke-linecap="round"/>`;
+      extra=`<path d="M60 8 q8 -6 10 2 q-2 6 -8 4" fill="none" stroke="#9aa6b8" stroke-width="2.4"/><ellipse cx="60" cy="16" rx="15" ry="4" fill="none" stroke="#f5c62b" stroke-width="2.4"/>`;break;
+    case 'cool': eyes=`<path d="M36 54 h48 v4 q-2 10 -12 10 q-9 0 -10 -8 h-4 q-1 8 -10 8 q-10 0 -12 -10 z" fill="#2b2b2b"/>`;
+      mouth=`<path d="M52 74 q8 6 16 -2" fill="none" stroke="${L}" stroke-width="3" stroke-linecap="round"/>`;
+      extra=`<path d="M36 22 l6 -14 l9 9 l9 -12 l9 12 l9 -9 l6 14 z" fill="#f5c62b" stroke="${L}" stroke-width="2.4" stroke-linejoin="round"/>`;break;
+    default: eyes=`<ellipse cx="47" cy="60" rx="3.6" ry="4.6" fill="${L}"/><ellipse cx="73" cy="60" rx="3.6" ry="4.6" fill="${L}"/>`;
+      mouth=`<path d="M53 72 q7 6 14 0" fill="none" stroke="${L}" stroke-width="3" stroke-linecap="round"/>`;
+  }
+  return `<svg viewBox="0 0 120 124" role="img" aria-label="新手駕駛">
+   <path d="M18 124 q0 -30 42 -30 q42 0 42 30 z" fill="#7cc4e8" stroke="${L}" stroke-width="3"/>
+   ${wakaba(30,100,.9)}
+   ${arm}
+   <circle cx="60" cy="58" r="35" fill="#ffe3cc" stroke="${L}" stroke-width="3"/>
+   <path d="M25 58 q-2 -38 35 -38 q37 0 35 38 q-6 -18 -20 -20 q-10 10 -30 8 q-14 2 -20 12 z" fill="#6b4a3a" stroke="${L}" stroke-width="3" stroke-linejoin="round"/>
+   <ellipse cx="38" cy="70" rx="6.5" ry="3.8" fill="#ffadad" opacity=".85"/><ellipse cx="82" cy="70" rx="6.5" ry="3.8" fill="#ffadad" opacity=".85"/>
+   ${eyes}${mouth}${extra}</svg>`;
+}
+
+/* ============ 圖：關卡背景 ============ */
+function scene(st){
+  const sky=['#cfe9f7','#d4ecd2','#cfe3f7','#ffc9a8','#bfe0fb','#e3d6f5'][st];
+  const g=['#a8d88a','#a8d88a','#c9c9cf','#8cc47a','#a9cf8e','#b9d79a'][st];
+  let p='';
+  if(st===0||st===1){p=`<g>${[30,70,110].map(x=>`<path d="M${x} 120 l7 -20 l7 20 z" fill="#ff9a3c" stroke="#5b4b43" stroke-width="2"/><rect x="${x+2}" y="110" width="10" height="3" fill="#fff"/>`).join('')}<rect x="300" y="44" width="80" height="34" rx="6" fill="#fff" stroke="#5b4b43" stroke-width="2.4"/><text x="340" y="67" text-anchor="middle" font-size="16" font-weight="900" fill="#3b302b" font-family="Noto Sans TC,sans-serif">駕訓場</text><rect x="336" y="78" width="6" height="40" fill="#8a7a70"/></g>`}
+  if(st===2){p=[[20,40,50,'#f7b7a3'],[78,20,44,'#fde29a'],[130,52,40,'#b7d3f7'],[300,30,46,'#c7e8b5'],[352,46,40,'#f7c6dd']].map(([x,y,w,c])=>`<rect x="${x}" y="${y}" width="${w}" height="${120-y}" fill="${c}" stroke="#5b4b43" stroke-width="2.4"/>`+[0,1,2].map(r=>`<rect x="${x+8}" y="${y+10+r*20}" width="10" height="10" fill="#fff" opacity=".8"/><rect x="${x+w-18}" y="${y+10+r*20}" width="10" height="10" fill="#fff" opacity=".8"/>`).join('')).join('')+`<rect x="262" y="40" width="5" height="80" fill="#6d6d6d"/><rect x="248" y="30" width="34" height="14" rx="5" fill="#2b2b2b"/><circle cx="256" cy="37" r="4" fill="#3fd27a"/><circle cx="265" cy="37" r="4" fill="#444"/><circle cx="274" cy="37" r="4" fill="#444"/>`}
+  if(st===3){p=`<circle cx="330" cy="40" r="18" fill="#fff1b8"/><path d="M-10 120 L70 40 L130 100 L190 30 L270 120 Z" fill="#8a9fb8" stroke="#5b4b43" stroke-width="2.4" stroke-linejoin="round"/><path d="M58 52 l12 -12 l12 12 l-6 4 l-6 -4 l-6 4z M178 42 l12 -12 l12 12 l-6 4 l-6 -4 l-6 4z" fill="#fff"/><g stroke="#7aa8e0" stroke-width="2" stroke-linecap="round">${Array.from({length:14},(_,i)=>`<line x1="${(i*31)%400}" y1="${(i*17)%60+6}" x2="${(i*31)%400-6}" y2="${(i*17)%60+20}"/>`).join('')}</g>`}
+  if(st===4){p=`<rect x="70" y="18" width="150" height="46" rx="6" fill="#1f8a4c" stroke="#fff" stroke-width="3"/><text x="145" y="40" text-anchor="middle" font-size="15" font-weight="900" fill="#fff" font-family="Noto Sans TC,sans-serif">國道 ⇧ 北上</text><text x="145" y="58" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="Noto Sans TC,sans-serif">交流道 2 km</text><rect x="90" y="64" width="5" height="56" fill="#888"/><rect x="195" y="64" width="5" height="56" fill="#888"/><rect x="0" y="116" width="400" height="4" fill="#cfd3d8"/>`}
+  if(st===5){p=`<rect x="250" y="34" width="130" height="86" fill="#fff" stroke="#5b4b43" stroke-width="2.4"/><rect x="262" y="42" width="106" height="22" rx="4" fill="#2d6fd2"/><text x="315" y="59" text-anchor="middle" font-size="14" font-weight="900" fill="#fff" font-family="Noto Sans TC,sans-serif">監理站</text>${[0,1,2].map(i=>`<rect x="${266+i*36}" y="74" width="26" height="20" fill="#cfe9f7" stroke="#5b4b43" stroke-width="1.6"/>`).join('')}<rect x="303" y="98" width="24" height="22" fill="#a07a5a"/><rect x="200" y="20" width="3" height="100" fill="#888"/><path d="M203 22 h30 v18 h-30 z" fill="#e5483c"/><text x="40" y="52" font-size="22" fill="#9b6bd6" font-family="Dela Gothic One,sans-serif">ゴゴゴゴ…</text>`}
+  const car=`<g class="bob"><g transform="translate(150 98)"><path d="M0 22 q0 -12 12 -14 l14 -14 q4 -4 10 -4 h34 q6 0 10 5 l12 13 q16 2 16 14 v8 h-108 z" fill="#ff8f7a" stroke="#5b4b43" stroke-width="2.6" stroke-linejoin="round"/><path d="M30 6 l10 -10 h14 v10 z M60 6 v-10 h12 l10 10 z" fill="#cfefff" stroke="#5b4b43" stroke-width="2"/>${wakaba(2,10,.55)}<circle cx="24" cy="30" r="9" fill="#444" stroke="#5b4b43" stroke-width="2.4"/><circle cx="84" cy="30" r="9" fill="#444" stroke="#5b4b43" stroke-width="2.4"/><circle cx="24" cy="30" r="3" fill="#ddd"/><circle cx="84" cy="30" r="3" fill="#ddd"/></g></g>`;
+  return `<svg viewBox="0 0 400 150" role="img" aria-label="${st?STAGES[st].name:'駕照ヨシ'} 場景"><rect width="400" height="150" fill="${sky}"/><rect y="104" width="400" height="16" fill="${g}"/><rect y="120" width="400" height="30" fill="#8b8e98"/><line class="dash" x1="0" y1="138" x2="400" y2="138" stroke="#fff" stroke-width="3" stroke-dasharray="22 18"/>${p}${car}</svg>`;
+}
+
+/* ============ 音效 ============ */
+let actx=null, muted=false;
+try{muted=localStorage.getItem('drvq_mute')==='1'}catch(e){}
+function beep(seq){
+  if(muted)return;
+  try{
+    actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+    let t=actx.currentTime;
+    seq.forEach(([f,d,type='square'])=>{const o=actx.createOscillator(),g=actx.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(.08,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g).connect(actx.destination);o.start(t);o.stop(t+d);t+=d*.85});
+  }catch(e){}
+}
+const SFX={ok:()=>beep([[880,.09],[1320,.16]]),ng:()=>beep([[220,.18,'sawtooth'],[160,.28,'sawtooth']]),clear:()=>beep([[523,.1],[659,.1],[784,.1],[1047,.3]]),over:()=>beep([[392,.2,'triangle'],[330,.2,'triangle'],[262,.5,'triangle']])};
+
+/* ============ 狀態 ============ */
+let S=null, best=0;
+try{best=+localStorage.getItem('drvq_best')||0}catch(e){}
+const $=id=>document.getElementById(id);
+
+function newRun(){
+  const qs=[];
+  for(let st=1;st<=5;st++){
+    shuffle(Q.map((q,i)=>i).filter(i=>Q[i].c===st)).slice(0,PER).forEach(i=>{
+      const q=Q[i];
+      if(q.t==='ox')qs.push({i,opts:['○','✕'],ans:q.a?0:1});
+      else{const ord=shuffle([0,1,2].slice(0,q.o.length));qs.push({i,opts:ord.map(k=>q.o[k]),ans:ord.indexOf(0)})}
+    });
+  }
+  return {mode:'q',qs,n:0,lives:LIVES,score:0,combo:0,maxCombo:0,right:0,wrong:[],picked:null};
+}
+const stageOf=n=>Math.floor(n/PER)+1;
+
+/* ============ 畫面 ============ */
+function hud(){
+  const st=S&&S.mode!=='title'?Math.min(stageOf(S.n),5):0;
+  const lives=Array.from({length:LIVES},(_,k)=>`<svg viewBox="0 0 20 26" class="${S&&k>=S.lives?'lost':''}" aria-hidden="true">${wakaba(0,0,1)}</svg>`).join('');
+  $('hud').innerHTML=`<span class="chip">${st?`${st}/5・${STAGES[st].name}`:'駕照ヨシ！'}</span>`+
+   (S?`<span class="lives" aria-label="剩下 ${S.lives} 條命">${lives}</span><span class="score" aria-label="分數">${S.score}</span>`:`<span class="score" aria-label="最高分">BEST ${best}</span>`)+
+   `<button class="icon-btn" id="mute" aria-label="音效" aria-pressed="${muted}">${muted?'🔇':'🔊'}</button>`;
+  $('mute').onclick=()=>{muted=!muted;try{localStorage.setItem('drvq_mute',muted?'1':'0')}catch(e){}hud()};
+}
+let lastScene=-1;
+function setScene(st){if(st!==lastScene){$('scene').innerHTML=scene(st);lastScene=st}}
+function say(mood,jp,zh,anim){
+  $('who').innerHTML=chara(mood);
+  const b=$('bubble');b.innerHTML=`<span class="jp">${jp}</span><span class="zh">${zh}</span>`;
+  b.classList.remove('pop','shake');void b.offsetWidth;if(anim)b.classList.add(anim);
+}
+
+function title(){
+  S=null;hud();setScene(0);
+  say('normal','運転、ヨシ！','新手駕駛，準備上路！');
+  $('view').innerHTML=`<div class="card">
+   <div class="hero"><h1>駕照<em>ヨシ</em>！</h1><p>台灣小型車筆試・闖關生存</p></div>
+   <ul class="rules">
+    <li><b>5 關</b><span>駕訓班 → 市區 → 山路 → 高速公路 → 監理站魔王，每關 ${PER} 題</span></li>
+    <li><b>3 命</b><span>答錯一題掉一片若葉マーク，掉光就 GAME OVER</span></li>
+    <li><b>連擊</b><span>連續答對有加分，每題都有解析</span></li>
+   </ul>
+   <div class="map">${STAGES.slice(1).map(s=>`<span>${s.name}</span>`).join('')}</div>
+   <button class="big" id="go">開始考試（スタート）</button>
+   <p class="small">題庫 ${Q.length} 題，依監理站汽車筆試常見考點整理（標誌、號誌、行車規則、高速公路、酒駕罰則）。法規以監理服務網最新公告為準。最高分 ${best}。</p>
+  </div>`;
+  $('go').onclick=()=>{S=newRun();stageIntro()};
+  $('go').focus();
+}
+
+function stageIntro(){
+  const st=stageOf(S.n);S.mode='stage';hud();setScene(st);
+  if(st>1)SFX.clear();
+  say(st===5?'shock':'normal',STAGES[st].jp,`第 ${st} 關：${STAGES[st].name}`,'pop');
+  $('view').innerHTML=`<div class="card">
+   <div class="hero"><p>STAGE ${st} / 5</p><h1>${STAGES[st].name}</h1><p>${STAGES[st].sub}・${PER} 題</p></div>
+   <div class="map">${STAGES.slice(1).map((s,k)=>`<span class="${k+1<=st?'on':''}">${s.name}</span>`).join('')}</div>
+   <button class="big" id="go">出發！</button></div>`;
+  $('go').onclick=()=>{S.mode='q';question()};
+  $('go').focus();
+}
+
+function question(){
+  const it=S.qs[S.n], q=Q[it.i], st=stageOf(S.n), k=S.n%PER;
+  hud();setScene(st);
+  if(S.picked===null)say('normal',rand(['どっちだ…？','落ち着いて','ここ、テストに出ます']),rand(['冷靜作答','想清楚再按','這題監理站很愛考']));
+  const isOx=q.t==='ox';
+  const opts=isOx
+   ?`<div class="ox">${it.opts.map((o,j)=>`<button data-j="${j}" class="${j?'b':'m'}"><span class="g">${o}</span>${j?'錯誤':'正確'}</button>`).join('')}</div>`
+   :`<div class="mc">${it.opts.map((o,j)=>`<button data-j="${j}"><span class="n">${j+1}</span><span>${o}</span></button>`).join('')}</div>`;
+  $('view').innerHTML=`<div class="card" id="qc">
+   <div class="meta"><span>第 ${k+1} / ${PER} 題・${isOx?'是非題':'選擇題'}</span><span>${STAGES[st].sub}</span></div>
+   <div class="bar"><i style="width:${(S.n/(PER*5))*100}%"></i></div>
+   ${q.s?`<div class="fig${WIDE.has(q.s)?' wide':''}">${SIGNS[q.s]}</div>`:''}
+   <p class="q">${q.q}</p>${opts}<div id="fb"></div></div>`;
+  document.querySelectorAll('#qc [data-j]').forEach(b=>b.onclick=()=>answer(+b.dataset.j));
+  if(S.picked!==null)showResult(true);
+}
+
+function answer(j){
+  if(S.picked!==null)return;
+  S.picked=j;
+  const it=S.qs[S.n], ok=j===it.ans;
+  if(ok){S.right++;S.combo++;S.maxCombo=Math.max(S.maxCombo,S.combo);S.score+=100+Math.min(S.combo-1,5)*20;SFX.ok()}
+  else{S.lives--;S.combo=0;S.wrong.push({i:it.i,you:it.opts[j],ans:it.opts[it.ans]});SFX.ng()}
+  showResult(false);
+}
+
+function showResult(restored){
+  const it=S.qs[S.n], q=Q[it.i], ok=S.picked===it.ans;
+  document.querySelectorAll('#qc [data-j]').forEach(b=>{const j=+b.dataset.j;b.disabled=true;
+    if(j===it.ans)b.classList.add('right');else if(j===S.picked)b.classList.add('wrong');else b.classList.add('dim')});
+  const line=ok?rand(OK_LINES):rand(NG_LINES);
+  if(!restored){
+    if(ok)say('ok',line[0],line[1],'pop');
+    else say(S.lives<=0?'dead':'ng',line[0],S.lives<=0?'若葉マーク全滅…':line[1],'shake');
+  }
+  hud();
+  const last=S.lives<=0, endStage=(S.n+1)%PER===0;
+  $('fb').innerHTML=`<div class="fb">
+   <div class="verdict ${ok?'ok':'ng'}"><b>${ok?'○ 正解':'✕ 不正解'}</b><span>${ok?'答對了':'正確答案：'+it.opts[it.ans]}</span>${ok&&S.combo>=3?`<span class="combo">${S.combo} COMBO!!</span>`:''}</div>
+   <p class="exp">${q.e}</p>
+   <button class="big" id="next">${last?'看結果…':S.n+1>=S.qs.length?'領駕照！':endStage?'過關！下一關 →':'下一題 →'}</button></div>`;
+  $('next').onclick=next;
+  $('next').focus({preventScroll:true});
+  $('fb').scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function next(){
+  S.picked=null;
+  if(S.lives<=0)return result(false);
+  S.n++;
+  if(S.n>=S.qs.length)return result(true);
+  if(S.n%PER===0)return stageIntro();
+  question();
+}
+
+function result(cleared){
+  S.mode=cleared?'clear':'over';
+  if(cleared&&!S.bonus){S.score+=S.lives*300;S.bonus=1}
+  const nb=S.score>best;if(nb){best=S.score;try{localStorage.setItem('drvq_best',best)}catch(e){}}
+  hud();setScene(cleared?5:Math.min(stageOf(S.n),5));
+  if(cleared){SFX.clear();say('cool','計画通り','駕照 GET！所有路段制霸','pop')}
+  else{SFX.over();say('dead','人生オワタ＼(^o^)／','在第 '+stageOf(S.n)+' 關翻車了…','shake')}
+  const rev=S.wrong.map(w=>`<li><div class="rq">${Q[w.i].q}</div><div class="ry">你的答案：${w.you}</div><div class="ra">正確答案：${w.ans}</div><div>${Q[w.i].e}</div></li>`).join('');
+  $('view').innerHTML=`<div class="card">
+   <div class="hero"><p>${cleared?'ALL CLEAR':'GAME OVER'}</p><h1>${cleared?'駕照<em>GET</em>！':'吊銷<em>駕照</em>'}</h1><p>${cleared?'剩餘若葉マーク每片 +300 分':'到達第 '+stageOf(S.n)+' 關・'+STAGES[stageOf(S.n)].name}</p></div>
+   <div class="stats"><div><b>${S.score}</b><span>${nb?'新紀錄！':'分數'}</span></div><div><b>${S.right}</b><span>答對題數</span></div><div><b>${S.maxCombo}</b><span>最大連擊</span></div></div>
+   <div class="row"><button class="big" id="again">再挑戰（リトライ）</button><button class="big sec" id="home">回標題</button></div>
+   ${rev?`<h2 class="small" style="font-weight:700">錯題複習（${S.wrong.length} 題）</h2><ul class="review">${rev}</ul>`:'<p class="small">全對！一題都沒錯，監理站考官也只能說ヨシ。</p>'}
+  </div>`;
+  $('again').onclick=()=>{S=newRun();stageIntro()};
+  $('home').onclick=title;
+  $('again').focus();
+}
+
+document.addEventListener('keydown',e=>{
+  if(!S||S.mode!=='q'||S.picked!==null)return;
+  const it=S.qs[S.n];const k=e.key.toLowerCase();
+  let j=-1;
+  if(Q[it.i].t==='ox'){if(k==='o')j=0;if(k==='x')j=1}
+  if(/^[1-3]$/.test(k))j=+k-1;
+  if(j>=0&&j<it.opts.length)answer(j);
+});
+
+/* 更新頁面時保留進行中的這一局 */
+function start(data){
+  if(data&&data.S&&data.S.qs){S=data.S;S.mode==='stage'?stageIntro():S.mode==='q'?question():result(S.mode==='clear')}
+  else title();
+}
+try{window.claude?.hot?.snapshot?.(()=>({S}))}catch(e){}
+const hot=window.claude?.hot;
+hot?.ready?hot.ready(start):start(hot?.data??{});
+</script>
+</body>
+</html>

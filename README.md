@@ -4,6 +4,7 @@
 
 **遊戲網址**：https://priscillalearn-ops.github.io/granny-escape-b3l1/
 **小遊戲（單字跑酷）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/parkour/
+**小遊戲（駕照ヨシ！汽車筆試）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/driving/
 
 ## 獨立的週評量版本（不跟上面的題庫混在一起）
 
@@ -278,3 +279,14 @@ git add -A && git commit -m "更新題庫" && git push
 ```
 
 GitHub Pages 會自動重建，**網址不變**，學生重新整理就是新版。
+
+## 🚗 駕照ヨシ！（driving/）
+
+台灣普通小型車駕照筆試的闖關小遊戲，日本小遊戲梗＋いらすとや風原創插圖，單一 `driving/index.html`，不和英文題庫共用。
+
+- 五關：駕訓班（標誌・標線・號誌）→ 市區道路 → 山路與暴雨 → 高速公路 → 監理站魔王（酒駕・罰則・證照），每關從該關題庫隨機抽 8 題。
+- 3 條命（若葉マーク），答錯掉一片，掉光 GAME OVER；全破後剩下的每片 +300 分。
+- 題庫 111 題（是非＋三選一），每題附解析；選擇題 `o[0]` 一律寫正解，出題時才洗牌。
+- 最高分存在 `localStorage` 的 `drvq_best`。結束後有錯題複習。
+- 鍵盤：O／X 回答是非題，1～3 回答選擇題。
+
