@@ -107,6 +107,12 @@ button.dim{opacity:.5}
 .map{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
 .map span{font-size:13px;font-weight:700;border:2px solid var(--line);border-radius:10px;padding:2px 8px;background:var(--btn)}
 .map span.on{border-color:var(--leafG);background:color-mix(in srgb,var(--leafG) 18%,var(--card))}
+.prac{display:flex;flex-direction:column;gap:8px;border-top:2px dashed var(--line);padding-top:12px}
+.prac h2{margin:0;font-size:16px;font-weight:900}
+.pbtns{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.pbtns button{background:var(--btn);border:2px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:8px 10px;font-weight:700;font-size:14px;display:flex;justify-content:space-between;gap:6px}
+.pbtns button span{color:var(--sub);font-variant-numeric:tabular-nums}
+.quit{background:none;border:0;padding:0;color:var(--sub);font-size:13px;font-weight:700;text-decoration:underline}
 .small{font-size:13px;color:var(--sub);margin:0}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
 .stats div{border:2px solid var(--line);border-radius:12px;padding:6px 4px}
@@ -251,7 +257,148 @@ const Q=[
 {c:5,q:'駕駛人用手勢時，左手向下斜伸表示？',o:['減速或停車','左轉','準備超車'],e:'左手向下斜伸＝減速或停車。'},
 {c:5,q:'駕駛人用手勢時，左手向上彎曲表示？',o:['右轉','左轉','請後車超車'],e:'左手手肘向上彎曲＝右轉。'},
 {c:5,q:'身心障礙專用停車位，一般車輛可以停嗎？',o:['不可以，沒有身障停車證就不能停','停一下下可以','晚上沒人用可以停'],e:'身障專用車位只能給持有身障停車證的車輛使用。'},
-{c:5,t:'ox',q:'酒駕肇事致人死亡，駕駛人會面臨刑事責任。',a:true,e:'酒駕致死最重可處無期徒刑，千萬不要酒駕。'}
+{c:5,t:'ox',q:'酒駕肇事致人死亡，駕駛人會面臨刑事責任。',a:true,e:'酒駕致死最重可處無期徒刑，千萬不要酒駕。'},
+/* ---- 第1關 追加 ---- */
+{c:1,s:'noright',q:'這個標誌的意思是？',o:['禁止右轉','注意右彎','右側車道縮減'],e:'紅圈裡的右轉箭頭被斜線劃掉，就是禁止右轉。'},
+{c:1,s:'nohonk',q:'這個標誌的意思是？',o:['禁止鳴按喇叭','前方有廣播站','注意噪音管制區可以加速'],e:'喇叭圖案被劃掉＝禁止按喇叭，常見在醫院、學校附近。'},
+{c:1,s:'noovertake',q:'紅圈中一台紅車、一台黑車並排的標誌是？',o:['禁止超車','注意車禍','雙向道路'],e:'紅黑兩台車並排是禁止超車標誌。'},
+{c:1,s:'curve',q:'這個警告標誌提醒你？',o:['前方道路向右彎，要減速','前方可以右轉','右側車道封閉'],e:'彎路警告標誌：前方有彎道，提早減速、不要超車。'},
+{c:1,s:'oneway',q:'藍底、白色箭頭寫著「單行道」的標誌，代表？',o:['只能依箭頭方向行駛','建議依箭頭方向行駛','前方有雙向道'],e:'單行道只能照箭頭方向開，不可逆向，也不得在單行道上倒車或迴車。'},
+{c:1,s:'parking',q:'藍底白色「P」的標誌是？',o:['停車場','禁止停車','警察局'],e:'P 是 Parking，表示附近有停車場。'},
+{c:1,s:'train',q:'三角形紅框、裡面畫著火車的標誌，提醒你？',o:['前方有鐵路平交道','前方有火車站可以停車','前方有遊樂園'],e:'鐵路平交道警告標誌，接近時要減速，準備停車。'},
+{c:1,s:'signalwarn',q:'三角形紅框、裡面畫著紅黃綠燈的標誌，提醒你？',o:['前方有交通號誌','前方號誌故障','前方是紅綠燈停車場'],e:'「注意號誌」警告標誌，前面有紅綠燈，要準備減速。'},
+{c:1,s:'zebra',q:'路面上的白色斑馬紋代表？',o:['行人穿越道，有行人要停讓','可以臨時停車的區域','機車待轉區'],e:'斑馬線是行人穿越道，有行人通行時汽車要暫停讓行人先走。'},
+{c:1,s:'stopline',q:'路口前橫跨車道的白色粗實線是？',o:['停止線：紅燈時車頭不可超過','行人穿越道','減速帶'],e:'停止線是停車等候的位置，紅燈時車頭要停在線前。'},
+{c:1,s:'greenleft',q:'圓形紅燈亮，同時下方亮著綠色左轉箭頭，代表？',o:['只能左轉，直行和右轉都不行','全部方向都可以走','只能直行'],e:'箭頭綠燈只開放箭頭指的方向，其他方向仍是紅燈。'},
+{c:1,t:'ox',s:'greenlight',q:'綠燈亮時可以通行，但轉彎仍要讓直行車與行人先行。',a:true,e:'綠燈代表可以走，不代表可以不讓人；轉彎車讓直行車與行人。'},
+{c:1,q:'分隔對向車流的「行車分向線」是什麼顏色？',o:['黃色','白色','紅色'],e:'黃色線分隔對向車流；白色線分隔同向車道。'},
+{c:1,q:'同方向車道之間的車道線是什麼顏色？',o:['白色','黃色','藍色'],e:'同向車道用白色線，對向分隔用黃色線。'},
+{c:1,q:'路口有交通警察指揮，但指揮手勢和紅綠燈不同時，應該？',o:['依照交通警察的指揮','依照紅綠燈','自己判斷哪個比較快'],e:'交通指揮人員的指揮優先於號誌、標誌和標線。'},
+{c:1,q:'紅色八角形、藍底圓形、正三角形紅框，分別屬於？',o:['停車再開・遵行標誌・警告標誌','警告・停車再開・遵行','指示・警告・禁制'],e:'八角形是停車再開、藍底圓形是遵行、正三角形紅框是警告。'},
+{c:1,t:'ox',q:'禁制標誌是用來告示道路使用人遵守禁止、限制或遵行的事項。',a:true,e:'禁止停車、速限、禁止左轉、遵行方向等都屬於禁制標誌。'},
+{c:1,t:'ox',q:'指示標誌用來告示路名、地名、方向、里程等資訊。',a:true,e:'例如綠底的地名方向牌、藍底的停車場標誌。'},
+{c:1,t:'ox',q:'路面寫著大大的「慢」字，表示要減速慢行。',a:true,e:'「慢」是路面標字，常在學校、彎道、路口前面。'},
+{c:1,q:'鐵路平交道的紅色閃光號誌交互閃爍時，應該？',o:['在停止線前停車，火車即將通過','加速通過','減速慢慢通過'],e:'平交道紅燈閃爍代表火車要來了，一定要停。'},
+{c:1,q:'路口前方畫給機車的「機車停等區」，汽車應該？',o:['停在停等區後方的停止線前','可以停進去','只要沒有機車就能停'],e:'機車停等區只給機車停，汽車要停在它後面的停止線。'},
+{c:1,t:'ox',q:'汽車可以停在路口的機車待轉區等紅燈。',a:false,e:'機車待轉區是給兩段式左轉的機車用的，汽車不能停。'},
+{c:1,q:'看到箭頭綠燈時，應該？',o:['只能依箭頭方向行駛','任何方向都能走','只有大型車可以走'],e:'箭頭綠燈只准箭頭指的方向通行。'},
+
+/* ---- 第2關 追加 ---- */
+{c:2,q:'準備左轉，應該先換到哪一個車道？',o:['內側（最左邊）車道','外側車道','任何車道都可以'],e:'左轉先換入內側車道，並在路口前 30 公尺打左方向燈。'},
+{c:2,t:'ox',q:'轉彎時應該讓行人先行。',a:true,e:'轉彎經過行人穿越道，有行人就要停讓。'},
+{c:2,q:'準備迴車時，應該？',o:['打左方向燈，確認前後左右沒有來車再迴轉','直接迴轉不用打燈','按喇叭後立刻迴轉'],e:'迴車要先打左方向燈，看清楚前後來車，確認安全才迴轉。'},
+{c:2,t:'ox',q:'在交岔路口可以倒車。',a:false,e:'交岔路口車流複雜，不得倒車。'},
+{c:2,t:'ox',q:'在隧道裡可以迴車。',a:false,e:'隧道、橋樑、彎道、坡道都不得迴車。'},
+{c:2,t:'ox',q:'在圓環內可以臨時停車讓人下車。',a:false,e:'圓環內不得臨時停車，更不能停車。'},
+{c:2,t:'ox',q:'在人行道上可以臨時停車上下客。',a:false,e:'人行道是給行人走的，不得臨時停車或停車。'},
+{c:2,t:'ox',q:'在行人穿越道上不得臨時停車。',a:true,e:'停在斑馬線上會擋住行人，不得臨時停車。'},
+{c:2,t:'ox',q:'公車招呼站 10 公尺內不得臨時停車。',a:true,e:'公車要靠站，10 公尺內都不能臨時停車。'},
+{c:2,t:'ox',q:'在橋樑上可以臨時停車看風景。',a:false,e:'橋樑上不得臨時停車。'},
+{c:2,t:'ox',q:'快車道上不得臨時停車。',a:true,e:'快車道車速快，停在上面很容易被追撞。'},
+{c:2,q:'把車並排停在路邊車輛的外側，算是？',o:['違規並排停車','合法臨時停車','只要開警示燈就合法'],e:'並排停車會擋住車道，會被開罰。開警示燈也一樣違規。'},
+{c:2,t:'ox',q:'路邊停車應順著行車方向，緊靠道路邊緣停放。',a:true,e:'停車要順向靠邊，不可逆向停車。'},
+{c:2,q:'設有快慢車道分隔線的慢車道，沒有速限標誌時最高時速是？',o:['40 公里','50 公里','30 公里'],e:'慢車道時速不得超過 40 公里。'},
+{c:2,q:'行經學校、醫院附近，應該？',o:['減速慢行，注意行人','按喇叭提醒行人讓路','加速通過避免塞車'],e:'學校、醫院附近行人多，要減速，也不要亂按喇叭。'},
+{c:2,q:'需要按喇叭時，原則上應該？',o:['單響，而且不超過半秒','連按三聲','長按到對方讓開'],e:'按喇叭以單響為原則，不超過半秒，只用來提醒，不是罵人。'},
+{c:2,t:'ox',q:'前車開太慢時，可以閃大燈、連按喇叭逼它讓路。',a:false,e:'逼車屬於危險駕駛，會被重罰並吊扣駕照。'},
+{c:2,t:'ox',q:'汽車在路口右轉時，要特別注意右後方直行的機車和自行車。',a:true,e:'右轉前看右後照鏡並回頭確認，避免和直行機車擦撞。'},
+{c:2,q:'行人正在沒有斑馬線的路段穿越馬路，應該？',o:['減速，必要時停車讓他通過','按喇叭叫他快走','繞過他加速通過'],e:'不管有沒有斑馬線，行人在你前面都要減速讓行。'},
+{c:2,q:'路口紅綠燈故障全暗時，應該？',o:['減速並依無號誌路口的規則讓行','照原速度直接通過','停下來等燈修好'],e:'號誌故障就當成無號誌路口：減速、支線讓幹線、左方讓右方。'},
+{c:2,q:'超車完成後，應該怎麼駛回原車道？',o:['與被超的車保持安全距離，打右方向燈再駛回','超過車頭就立刻切回','不用打燈直接切回'],e:'超過後要拉開距離再打右燈駛回，不要切太近。'},
+{c:2,t:'ox',q:'後車要超車時，前車應減速靠右讓路，不得加速競駛。',a:true,e:'被超車時不能跟對方飆車，要讓他安全超過。'},
+{c:2,t:'ox',q:'行經交岔路口時不得超車。',a:true,e:'路口有橫向來車和轉彎車，超車非常危險。'},
+{c:2,t:'ox',q:'前車正在超車時，可以跟著一起超越它。',a:false,e:'前車正在超車時不得再超車。'},
+{c:2,t:'ox',q:'在彎道、坡道、狹橋上可以超車。',a:false,e:'這些地方視線不好或空間不夠，禁止超車。'},
+{c:2,q:'前方車道變換時，正確的順序是？',o:['看後照鏡 → 打方向燈 → 回頭確認死角 → 變換車道','先變換車道再打方向燈','不用打燈，快速切過去'],e:'先看、再打燈、再確認死角，最後才平順地切過去。'},
+{c:2,q:'右轉時，遇到行人穿越道上有行人，應該？',o:['在行人穿越道前停車讓行人通過','從行人前面快速轉過','按喇叭請行人讓開'],e:'行人優先，未停讓行人會被開罰並記點。'},
+{c:2,t:'ox',q:'在單行道上可以迴車。',a:false,e:'單行道不得迴車，也不得倒車。'},
+
+/* ---- 第3關 追加 ---- */
+{c:3,q:'在陡又窄的坡路上兩車會車，應該？',o:['下坡車停車，讓上坡車先行','上坡車讓下坡車','誰喇叭大聲誰先走'],e:'上坡車起步困難，所以下坡車要停車讓上坡車先通過。'},
+{c:3,q:'山路彎道視線不好時，應該？',o:['減速靠右行駛','開到道路中間比較好閃','加速過彎'],e:'彎道視線差，要減速並靠右，避免和對向車撞上。'},
+{c:3,q:'在上坡路段起步，怕車子往後溜，應該？',o:['配合手煞車（或坡道起步輔助）再慢慢起步','打空檔讓車滑一下','猛踩油門'],e:'坡道起步要配合手煞車，避免後溜撞到後車。'},
+{c:3,q:'行駛中發現煞車踩下去軟軟的、煞不住，應該？',o:['連續踩煞車、降低檔位，再慢慢拉手煞車減速','直接熄火','急拉手煞車到底'],e:'先試著連踩煞車建立油壓，利用低檔減速，手煞車要慢慢拉，避免打滑。'},
+{c:3,q:'什麼時候適合使用遠光燈？',o:['夜間郊區道路，沒有對向車和前車時','市區跟車時','和對向車會車時'],e:'遠光燈會讓別人刺眼，只在前方沒有車時使用。'},
+{c:3,t:'ox',q:'夜間跟在前車後面時，應使用近光燈。',a:true,e:'用遠光燈照前車，前車駕駛會被後照鏡反射的光照到看不清楚。'},
+{c:3,t:'ox',q:'日落後到日出前開車，應該開啟頭燈。',a:true,e:'天暗了就開燈，讓自己看得到路，也讓別人看得到你。'},
+{c:3,q:'夜間被對向車的遠光燈照得看不清楚，應該？',o:['減速，視線看向右前方的路邊','也開遠光燈照回去','閉眼一下'],e:'不要盯著強光，看著右側路緣維持方向，並減速。'},
+{c:3,t:'ox',q:'白天下大雨、視線不好時，也應該開頭燈。',a:true,e:'雨天開燈是為了讓其他車看到你。'},
+{c:3,q:'車窗起霧看不清楚，應該？',o:['開除霧功能（冷氣、外循環）','用手一直擦','不理它繼續開'],e:'冷氣可以除濕，外循環讓車內外溫差變小，霧就會散掉。'},
+{c:3,t:'ox',q:'颱風天開車要減速、注意側風，並遠離大型車。',a:true,e:'強風會讓車子偏移，大型車受風面積大更容易晃動。'},
+{c:3,q:'車子冒煙或起火，應該？',o:['立即靠邊停車熄火，人員下車遠離並打 119','打開引擎蓋查看','繼續開到修車廠'],e:'先保命：停車、熄火、下車遠離，再打 119。突然打開引擎蓋可能讓火勢變大。'},
+{c:3,q:'車子陷入泥地或沙地，應該？',o:['輕踩油門慢慢脫困','用力猛踩油門','一直左右猛打方向盤'],e:'猛踩油門輪子會空轉，越陷越深。'},
+{c:3,q:'車子不慎落水，應該？',o:['解開安全帶，趁水還沒淹上來立刻開窗逃生','待在車上等救援','先打電話報警再說'],e:'水壓升高後車門很難打開，要把握時間開窗逃出。'},
+{c:3,q:'開車時遇到大地震，應該？',o:['減速靠邊停車，避開橋樑、隧道和高架橋','加速趕快開回家','停在橋上等地震結束'],e:'地震時車子會晃動難控制，先靠邊停，遠離可能崩塌的地方。'},
+{c:3,q:'「防禦駕駛」的意思是？',o:['預想其他用路人可能犯錯，提早防範','開車要很兇，別人才會讓','遇到違規車就跟他理論'],e:'防禦駕駛就是隨時預留空間和時間，避免被別人的錯誤波及。'},
+{c:3,t:'ox',q:'如果你從大車的後照鏡看不到它的駕駛，大車駕駛也看不到你。',a:true,e:'這就是大車的視線死角，要避免長時間停留在大車旁邊或後方太近。'},
+{c:3,t:'ox',q:'座椅頭枕的高度應該調到大約和頭部後方齊高。',a:true,e:'頭枕太低在追撞時無法保護頸部，容易造成揮鞭症。'},
+{c:3,q:'安全帶的正確繫法是？',o:['肩帶跨過肩膀中間，腰帶貼在骨盆位置','肩帶繞到腋下','腰帶繫在肚子上'],e:'安全帶要靠骨盆和肩膀這些硬的骨頭承受衝擊。'},
+{c:3,t:'ox',q:'孕婦繫安全帶時，腰帶應放在腹部下方。',a:true,e:'腰帶放在肚子下方、骨盆的位置，避免撞擊時壓迫胎兒。'},
+{c:3,t:'ox',q:'兒童應該坐在後座，不要坐在有安全氣囊的前座。',a:true,e:'安全氣囊爆開的力道很大，可能傷害兒童。'},
+{c:3,q:'長途開車，建議大約每隔多久休息一次？',o:['約 2 小時','約 6 小時','開到目的地再休息'],e:'連續開車 2 小時左右注意力就會下降，要停下來休息。'},
+{c:3,q:'夜間車子拋錨停在路邊，應該？',o:['開危險警告燈，並在車後方放故障標誌','把車燈全關掉省電','人坐在車上等就好'],e:'警示燈＋故障標誌讓後車提早看到你。'},
+{c:3,t:'ox',q:'救護傷者時，如果沒有起火等立即危險，不要隨意移動頸部可能受傷的人。',a:true,e:'隨便搬動可能讓脊椎傷勢更嚴重，等救護人員處理。'},
+{c:3,q:'平交道對面塞車，你的車可能無法完全通過時，應該？',o:['在平交道前停車等待，確認對面有空間再通過','先開進去再說','停在軌道上等'],e:'千萬不要停在軌道上，確定對面有足夠空間才通過。'},
+{c:3,t:'ox',q:'在鐵路平交道上不得超車、迴車、倒車或臨時停車。',a:true,e:'平交道上只能一口氣安全通過。'},
+{c:3,q:'通過沒有人看守的鐵路平交道，應該？',o:['停、看、聽，確認沒有火車再通過','鳴喇叭後直接通過','加速衝過去'],e:'停車、左右看、聽聲音，確定沒有火車才通過。'},
+{c:3,q:'遇到路面積水，應該？',o:['低速穩定地通過','高速衝過去','停在水中等水退'],e:'高速衝水容易水漂，也可能讓引擎吸水熄火。'},
+
+/* ---- 第4關 追加 ---- */
+{c:4,t:'ox',q:'高速公路的最內側車道是超車道。',a:true,e:'內側車道是給超車用的，超車後如果安全就回到中間或外側車道。'},
+{c:4,t:'ox',q:'在高速公路上應一次只變換一個車道，不要一口氣橫跨好幾個車道。',a:true,e:'連續切好幾個車道，旁邊車道的車很難反應。'},
+{c:4,t:'ox',q:'在高速公路主線上可以停車拍照。',a:false,e:'高速公路上除了故障或緊急狀況，不得停車。'},
+{c:4,t:'ox',q:'在高速公路的路肩上不可以上下乘客。',a:true,e:'路肩不是停車場，上下客非常危險。'},
+{c:4,q:'在高速公路上車子出狀況但還能開，應該？',o:['開危險警告燈，盡量開到路肩或下一個出口','停在原車道上檢查','繼續開到目的地'],e:'先離開主線車道，避免被後車追撞。'},
+{c:4,q:'想查詢高速公路即時路況，可以撥打哪支專線？',o:['1968','1999','165'],e:'1968 是高速公路局的路況專線，也有同名的 App。'},
+{c:4,q:'小型車在高速公路以時速 110 公里行駛，安全距離至少要？',o:['55 公尺','30 公尺','110 公尺'],e:'時速的一半：110 ÷ 2 ＝ 55 公尺。'},
+{c:4,q:'小型車以時速 60 公里行駛，安全距離至少要？',o:['30 公尺','10 公尺','60 公尺'],e:'時速的一半：60 ÷ 2 ＝ 30 公尺。'},
+{c:4,q:'大型車在高速公路以時速 90 公里行駛，安全距離至少要？',o:['70 公尺','45 公尺','90 公尺'],e:'大型車的安全距離是時速減 20：90 − 20 ＝ 70 公尺。'},
+{c:4,t:'ox',q:'在高速公路上遇到濃霧，應開霧燈、減速並加大安全距離。',a:true,e:'霧中視線差，降速、拉開距離才來得及反應。'},
+{c:4,q:'從主線駛入匝道時，應該？',o:['依匝道的速限標誌減速','維持主線速度','加速衝過彎道'],e:'匝道通常有彎道，速限比主線低。'},
+{c:4,t:'ox',q:'在高速公路上不得向車外丟棄物品。',a:true,e:'丟出的物品可能打到後車，造成事故。'},
+{c:4,q:'高速公路前方施工、車道縮減，應該？',o:['提早依指示變換車道並減速','開到最後一刻才硬切','開上路肩繞過'],e:'看到施工預告就提早換道，不要在最後才插隊。'},
+{c:4,t:'ox',q:'高速公路的緊急停車帶可以用來停車休息。',a:false,e:'緊急停車帶只給故障或緊急狀況使用。'},
+{c:4,q:'國道計程收費需要車上裝有什麼？',o:['eTag','悠遊卡','行車紀錄器'],e:'國道採 ETC 計程收費，車上貼 eTag 自動扣款；沒裝的會寄繳費通知。'},
+{c:4,q:'高速公路前方有掉落物，應該？',o:['減速，確認安全後再變換車道閃避','急打方向盤閃開','直接急煞停在車道上'],e:'急打方向容易失控或撞到旁邊的車，先減速、看後照鏡再閃。'},
+{c:4,t:'ox',q:'快錯過出口時，可以從內側車道直接斜切到出口匝道。',a:false,e:'一次橫跨多個車道非常危險，錯過就開到下一個交流道。'},
+{c:4,q:'危險警告燈（雙黃燈）應該在什麼時候用？',o:['車輛故障或緊急停車時','違規臨停時當作免罰符號','在隧道裡一路開著'],e:'警示燈是用來告訴別人「我有狀況」，不是違規停車的護身符。'},
+{c:4,t:'ox',q:'在高速公路上開車，要經常注意後照鏡掌握後方車況。',a:true,e:'隨時掌握周圍車況，變換車道或減速時才不會嚇到別人。'},
+{c:4,t:'ox',q:'高速公路塞車時，即使沒有開放路肩的標誌，也可以走路肩下交流道。',a:false,e:'只有標誌開放路肩的時段和路段才能行駛路肩。'},
+{c:4,t:'ox',q:'在高速公路上被超車時，前車不應加速和後車競速。',a:true,e:'被超車時保持速度或稍微減速，讓對方安全超過。'},
+{c:4,q:'高速公路上前方車輛突然減速亮煞車燈，你應該？',o:['鬆油門、準備煞車，並看後照鏡注意後車','切到路肩閃避','按喇叭催他'],e:'先減速，同時留意後車，避免連環追撞。'},
+{c:4,t:'ox',q:'在高速公路上可以使用手持手機看導航。',a:false,e:'開車不能手持手機，導航要先設定好，放在手機架上。'},
+
+/* ---- 第5關 追加 ---- */
+{c:5,q:'汽車駕駛人酒駕（未肇事、初犯），罰鍰是多少？',o:['3 萬到 12 萬元','600 到 1,800 元','1 萬元'],e:'汽車酒駕罰 3 萬到 12 萬元，並當場移置保管車輛、吊扣駕照。'},
+{c:5,t:'ox',q:'酒駕被查獲時，車輛會被當場移置保管。',a:true,e:'酒駕的車會當場被拖走。'},
+{c:5,t:'ox',q:'酒駕除了罰錢，還會被吊扣或吊銷駕照。',a:true,e:'酒駕會吊扣駕照，肇事致人重傷或死亡會吊銷駕照。'},
+{c:5,t:'ox',q:'酒駕累犯要重新考領駕照，可能須在車上加裝酒精鎖。',a:true,e:'累犯再考照後，要裝酒精鎖才能開車，吹氣合格車子才發得動。'},
+{c:5,t:'ox',q:'酒駕被查獲的人須參加道路交通安全講習。',a:true,e:'酒駕除了罰款，還要上道安講習。'},
+{c:5,t:'ox',q:'吸毒或使用迷幻藥後開車，和酒駕一樣會被處罰。',a:true,e:'服用毒品、麻醉藥品或類似管制藥品後駕車，一樣違法。'},
+{c:5,q:'酒精對駕駛的影響是？',o:['反應變慢、視野變窄、判斷力下降','反應變快','沒有影響'],e:'就算覺得自己很清醒，酒精已經讓反應和判斷變差。'},
+{c:5,t:'ox',q:'只喝一點點酒不會影響開車。',a:false,e:'少量酒精就會影響反應，喝酒就不要開車。'},
+{c:5,t:'ox',q:'無照駕駛會被罰款，並當場禁止駕駛。',a:true,e:'沒有駕照開車違法，車子也可能被移置保管。'},
+{c:5,t:'ox',q:'把車借給沒有駕照的人開，車主也會被處罰。',a:true,e:'汽車所有人允許無照的人駕駛，也要受罰，還可能被吊扣牌照。'},
+{c:5,t:'ox',q:'闖紅燈除了罰款，還會被記違規點數。',a:true,e:'闖紅燈是嚴重違規，會罰款並記點。'},
+{c:5,q:'超速多少以上會被吊扣駕照？',o:['超過速限 60 公里以上','超過速限 10 公里','超過速限 20 公里'],e:'超速 60 公里以上屬於嚴重超速，會被重罰並吊扣駕照。'},
+{c:5,t:'ox',q:'開車不禮讓行人，會被罰款並記違規點數。',a:true,e:'近年修法加重處罰，不禮讓行人罰得更重。'},
+{c:5,t:'ox',q:'汽車前座乘客沒有繫安全帶，會處罰駕駛人。',a:true,e:'駕駛人要負責提醒乘客繫安全帶。'},
+{c:5,t:'ox',q:'肇事逃逸致人受傷，會被吊銷駕照，還要負刑事責任。',a:true,e:'發生事故一定要停下來救護、報警。'},
+{c:5,t:'ox',q:'開車時可以用手機看影片，只要眼睛有看路。',a:false,e:'開車時不得使用手機看影片或操作手機。'},
+{c:5,q:'普通小型車駕照可以駕駛哪一種車？',o:['自用小客車','大客車','聯結車'],e:'普通小型車駕照能開小客車、小貨車等小型車；大客車和聯結車要另外考。'},
+{c:5,t:'ox',q:'持有普通小型車駕照就可以騎重型機車。',a:false,e:'汽車駕照和機車駕照是分開的，要騎機車得另外考機車駕照。'},
+{c:5,t:'ox',q:'只有普通小型車駕照的人，不能開計程車營業載客。',a:true,e:'營業載客要職業駕照，計程車還要另外有執業登記證。'},
+{c:5,q:'汽車駕照筆試要幾分才及格？',o:['85 分','60 分','100 分'],e:'筆試 85 分及格，所以題庫要多練幾次！'},
+{c:5,t:'ox',q:'汽車要繳使用牌照稅，也要繳汽車燃料使用費。',a:true,e:'牌照稅是地方稅，燃料費由公路監理機關收取，兩種都要繳。'},
+{c:5,q:'引擎機油的主要作用是？',o:['潤滑、冷卻、清潔引擎','讓車子變輕','增加輪胎抓地力'],e:'機油在引擎裡潤滑零件，也帶走熱量和髒污，要定期更換。'},
+{c:5,t:'ox',q:'煞車油應定期檢查和更換。',a:true,e:'煞車油會吸水變質，太久不換煞車效能會變差。'},
+{c:5,t:'ox',q:'水箱的冷卻水量應該在上下刻度線之間。',a:true,e:'冷卻水不足引擎容易過熱，檢查要在引擎冷的時候。'},
+{c:5,q:'行駛中儀表板的紅色機油警示燈亮起，應該？',o:['盡快找安全地方停車熄火檢查','不理它繼續開','加速開到目的地再說'],e:'機油壓力不足繼續開，引擎可能嚴重損壞。'},
+{c:5,q:'輪胎胎壓不足會造成？',o:['比較耗油、胎溫升高、容易爆胎','比較省油','完全沒影響'],e:'胎壓不足會讓輪胎變形發熱，高速時容易爆胎。'},
+{c:5,t:'ox',q:'輪胎側面鼓起一個包，還可以安心繼續用。',a:false,e:'胎壁鼓包代表內部結構受損，隨時可能爆胎，要盡快更換。'},
+{c:5,t:'ox',q:'車輛改裝要依規定申請變更登記。',a:true,e:'未經核准的改裝可能無法通過檢驗，還會被開罰。'},
+{c:5,t:'ox',q:'汽車可以裝會讓人刺眼的爆閃燈或改裝強光燈。',a:false,e:'違規燈光會讓其他駕駛看不清楚，會被開罰並責令改正。'},
+{c:5,t:'ox',q:'考領汽車駕照後要保管好駕照，遺失時應申請補發。',a:true,e:'駕照遺失可以到監理站或線上申請補發。'}
 ];
 
 /* ============ 關卡 ============ */
@@ -263,7 +410,7 @@ const STAGES=[
  {name:'高速公路',jp:'高速道路デビュー',sub:'國道規則'},
  {name:'監理站魔王',jp:'ラスボス降臨',sub:'酒駕・罰則・證照'}
 ];
-const PER=8, LIVES=3;
+const PER=10, LIVES=3;
 const OK_LINES=[['ヨシ！','指差し確認，完美'],['完全に理解した','我懂了（這次是真的）'],['計画通り','一切都在計畫之中'],['天才か？','你是天才嗎'],['えらい！','好棒棒'],['余裕です','輕鬆啦']];
 const NG_LINES=[['やらかした…','闖禍了…'],['なんでや！','為什麼啦！'],['ぴえん','嗚嗚'],['は？','蛤？'],['罰金です','罰單來了'],['ちょっと何言ってるか分からない','完全聽不懂']];
 const rand=a=>a[Math.floor(Math.random()*a.length)];
@@ -298,9 +445,21 @@ const SIGNS={
  chevron:road(`<g stroke="#fff" stroke-width="4" fill="none"><polygon points="40,30 180,30 180,80"/><line x1="70" y1="30" x2="76" y2="40"/><line x1="100" y1="30" x2="112" y2="50"/><line x1="130" y1="30" x2="148" y2="61"/><line x1="160" y1="30" x2="180" y2="64"/></g>`),
  flashyellow:signal({y:'blink'}),
  flashred:signal({r:'blink'}),
- redlight:signal({r:1})
+ redlight:signal({r:1}),
+ greenlight:signal({g:1}),
+ greenleft:sg(`<rect x="4" y="4" width="132" height="56" rx="14" fill="#2b2b2b"/>${lamp({r:1}).replace(/cy="50"/g,'cy="32"')}<rect x="92" y="64" width="44" height="44" rx="12" fill="#2b2b2b"/><circle cx="114" cy="86" r="15" fill="#3fd27a"/><path d="M123 86 H108" stroke="${INK}" stroke-width="4"/><polygon points="102,86 110,79 110,93" fill="${INK}"/>`,'0 0 140 112'),
+ noright:sg(ring()+`<path d="M42 80 V46 H62" fill="none" stroke="${INK}" stroke-width="8"/><polygon points="74,46 60,35 60,57" fill="${INK}"/>`+slash),
+ nohonk:sg(ring()+`<path d="M26 42 h10 l20 -13 v42 l-20 -13 h-10 z" fill="${INK}"/><path d="M62 38 q8 12 0 24 M70 32 q12 18 0 36" fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>`+slash),
+ noovertake:sg(ring()+`<rect x="24" y="36" width="22" height="34" rx="6" fill="${R}"/><rect x="54" y="36" width="22" height="34" rx="6" fill="${INK}"/><rect x="28" y="42" width="14" height="8" rx="2" fill="#fff"/><rect x="58" y="42" width="14" height="8" rx="2" fill="#fff"/>`),
+ curve:sg(`<polygon points="50,8 95,88 5,88" fill="#fff" stroke="${R}" stroke-width="8" stroke-linejoin="round"/><path d="M42 82 C42 64 58 62 58 46" fill="none" stroke="${INK}" stroke-width="8"/><polygon points="58,32 47,48 69,48" fill="${INK}"/>`),
+ oneway:sg(`<rect x="2" y="2" width="116" height="66" rx="8" fill="${BLU}" stroke="#fff" stroke-width="3"/><rect x="16" y="20" width="66" height="12" fill="#fff"/><polygon points="82,12 104,26 82,40" fill="#fff"/><text x="60" y="60" text-anchor="middle" font-size="16" font-weight="900" fill="#fff" font-family="Noto Sans TC,sans-serif">單行道</text>`,'0 0 120 70'),
+ parking:sg(`<rect x="4" y="4" width="92" height="92" rx="12" fill="${BLU}" stroke="#fff" stroke-width="3"/><text x="50" y="76" text-anchor="middle" font-size="70" font-weight="900" fill="#fff" font-family="Noto Sans TC,sans-serif">P</text>`),
+ train:sg(`<polygon points="50,8 95,88 5,88" fill="#fff" stroke="${R}" stroke-width="8" stroke-linejoin="round"/><path d="M24 72 V52 q0 -10 10 -10 h24 l10 10 h8 v20 z" fill="${INK}"/><rect x="32" y="48" width="10" height="9" rx="1.5" fill="#fff"/><rect x="46" y="48" width="10" height="9" rx="1.5" fill="#fff"/><circle cx="34" cy="75" r="4.5" fill="${INK}"/><circle cx="50" cy="75" r="4.5" fill="${INK}"/><circle cx="66" cy="75" r="4.5" fill="${INK}"/><rect x="18" y="80" width="64" height="3" fill="${INK}"/>`),
+ signalwarn:sg(`<polygon points="50,8 95,88 5,88" fill="#fff" stroke="${R}" stroke-width="8" stroke-linejoin="round"/><rect x="40" y="34" width="20" height="46" rx="5" fill="${INK}"/><circle cx="50" cy="43" r="5" fill="#ff4b3e"/><circle cx="50" cy="57" r="5" fill="#ffc62b"/><circle cx="50" cy="71" r="5" fill="#3fd27a"/>`),
+ zebra:road(Array.from({length:8},(_,k)=>`<rect x="${44+k*15}" y="8" width="8" height="94" fill="#fff"/>`).join('')+carTop(4,62)),
+ stopline:road(`<rect x="128" y="56" width="8" height="48" fill="#fff"/><line x1="0" y1="55" x2="200" y2="55" stroke="#f5c62b" stroke-width="4"/>`+carTop(84,70)+`<text x="142" y="96" font-size="12" font-weight="700" fill="#fff" font-family="Noto Sans TC,sans-serif">停止線</text>`)
 };
-const WIDE=new Set(['dblyellow','mixyellow','redcurb','yellowcurb','whitesolid','whitedash','chevron']);
+const WIDE=new Set(['dblyellow','mixyellow','redcurb','yellowcurb','whitesolid','whitedash','chevron','zebra','stopline']);
 
 /* ============ 圖：いらすとや風キャラ ============ */
 const wakaba=(x,y,s=1)=>`<g transform="translate(${x} ${y}) scale(${s})"><path d="M10 5 L10 25 L1 18 L1 0 Z" fill="#f5c62b" stroke="#5b4b43" stroke-width="1.6" stroke-linejoin="round"/><path d="M10 5 L19 0 L19 18 L10 25 Z" fill="#35a852" stroke="#5b4b43" stroke-width="1.6" stroke-linejoin="round"/></g>`;
@@ -380,12 +539,24 @@ function newRun(){
   }
   return {mode:'q',qs,n:0,lives:LIVES,score:0,combo:0,maxCombo:0,right:0,wrong:[],picked:null};
 }
+function newPractice(st){
+  const ids=shuffle(Q.map((q,i)=>i).filter(i=>!st||Q[i].c===st));
+  const qs=ids.map(i=>{const q=Q[i];
+    if(q.t==='ox')return{i,opts:['○','✕'],ans:q.a?0:1};
+    const ord=shuffle(q.o.map((_,k)=>k));return{i,opts:ord.map(k=>q.o[k]),ans:ord.indexOf(0)}});
+  return {mode:'q',practice:st||'all',qs,n:0,lives:LIVES,score:0,combo:0,maxCombo:0,right:0,wrong:[],picked:null};
+}
 const stageOf=n=>Math.floor(n/PER)+1;
+const sceneOf=()=>S.practice?Q[S.qs[Math.min(S.n,S.qs.length-1)].i].c:Math.min(stageOf(S.n),5);
+const pracName=()=>S.practice==='all'?'全部題目':STAGES[S.practice].name;
 
 /* ============ 畫面 ============ */
 function hud(){
   const st=S&&S.mode!=='title'?Math.min(stageOf(S.n),5):0;
   const lives=Array.from({length:LIVES},(_,k)=>`<svg viewBox="0 0 20 26" class="${S&&k>=S.lives?'lost':''}" aria-hidden="true">${wakaba(0,0,1)}</svg>`).join('');
+  if(S&&S.practice){const done=S.right+S.wrong.length;
+    $('hud').innerHTML=`<span class="chip">練習・${pracName()}</span><span class="score" aria-label="答對題數">${S.right}/${done}</span><button class="icon-btn" id="mute" aria-label="音效" aria-pressed="${muted}">${muted?'🔇':'🔊'}</button>`;
+  }else
   $('hud').innerHTML=`<span class="chip">${st?`${st}/5・${STAGES[st].name}`:'駕照ヨシ！'}</span>`+
    (S?`<span class="lives" aria-label="剩下 ${S.lives} 條命">${lives}</span><span class="score" aria-label="分數">${S.score}</span>`:`<span class="score" aria-label="最高分">BEST ${best}</span>`)+
    `<button class="icon-btn" id="mute" aria-label="音效" aria-pressed="${muted}">${muted?'🔇':'🔊'}</button>`;
@@ -405,15 +576,18 @@ function title(){
   $('view').innerHTML=`<div class="card">
    <div class="hero"><h1>駕照<em>ヨシ</em>！</h1><p>台灣小型車筆試・闖關生存</p></div>
    <ul class="rules">
-    <li><b>5 關</b><span>駕訓班 → 市區 → 山路 → 高速公路 → 監理站魔王，每關 ${PER} 題</span></li>
+    <li><b>5 關</b><span>駕訓班 → 市區 → 山路 → 高速公路 → 監理站魔王，每關隨機 ${PER} 題</span></li>
     <li><b>3 命</b><span>答錯一題掉一片若葉マーク，掉光就 GAME OVER</span></li>
     <li><b>連擊</b><span>連續答對有加分，每題都有解析</span></li>
    </ul>
    <div class="map">${STAGES.slice(1).map(s=>`<span>${s.name}</span>`).join('')}</div>
-   <button class="big" id="go">開始考試（スタート）</button>
+   <button class="big" id="go">開始闖關（スタート）</button>
+   <div class="prac"><h2>練習模式</h2><p class="small">不扣命、不計分，把整個範圍的題目一題一題刷完，最後有錯題複習。</p>
+    <div class="pbtns">${STAGES.slice(1).map((s,k)=>`<button data-st="${k+1}">${s.name}<span>${Q.filter(q=>q.c===k+1).length} 題</span></button>`).join('')}<button data-st="0">全部題目<span>${Q.length} 題</span></button></div></div>
    <p class="small">題庫 ${Q.length} 題，依監理站汽車筆試常見考點整理（標誌、號誌、行車規則、高速公路、酒駕罰則）。法規以監理服務網最新公告為準。最高分 ${best}。</p>
   </div>`;
   $('go').onclick=()=>{S=newRun();stageIntro()};
+  document.querySelectorAll('.pbtns button').forEach(b=>b.onclick=()=>{S=newPractice(+b.dataset.st);question()});
   $('go').focus();
 }
 
@@ -430,7 +604,7 @@ function stageIntro(){
 }
 
 function question(){
-  const it=S.qs[S.n], q=Q[it.i], st=stageOf(S.n), k=S.n%PER;
+  const it=S.qs[S.n], q=Q[it.i], st=sceneOf(), k=S.n%PER;
   hud();setScene(st);
   if(S.picked===null)say('normal',rand(['どっちだ…？','落ち着いて','ここ、テストに出ます']),rand(['冷靜作答','想清楚再按','這題監理站很愛考']));
   const isOx=q.t==='ox';
@@ -438,11 +612,12 @@ function question(){
    ?`<div class="ox">${it.opts.map((o,j)=>`<button data-j="${j}" class="${j?'b':'m'}"><span class="g">${o}</span>${j?'錯誤':'正確'}</button>`).join('')}</div>`
    :`<div class="mc">${it.opts.map((o,j)=>`<button data-j="${j}"><span class="n">${j+1}</span><span>${o}</span></button>`).join('')}</div>`;
   $('view').innerHTML=`<div class="card" id="qc">
-   <div class="meta"><span>第 ${k+1} / ${PER} 題・${isOx?'是非題':'選擇題'}</span><span>${STAGES[st].sub}</span></div>
-   <div class="bar"><i style="width:${(S.n/(PER*5))*100}%"></i></div>
+   <div class="meta"><span>第 ${S.practice?S.n+1:k+1} / ${S.practice?S.qs.length:PER} 題・${isOx?'是非題':'選擇題'}</span>${S.practice?'<button class="quit" id="quit">結束練習</button>':`<span>${STAGES[st].sub}</span>`}</div>
+   <div class="bar"><i style="width:${(S.n/S.qs.length)*100}%"></i></div>
    ${q.s?`<div class="fig${WIDE.has(q.s)?' wide':''}">${SIGNS[q.s]}</div>`:''}
    <p class="q">${q.q}</p>${opts}<div id="fb"></div></div>`;
   document.querySelectorAll('#qc [data-j]').forEach(b=>b.onclick=()=>answer(+b.dataset.j));
+  if(S.practice)$('quit').onclick=()=>result(false);
   if(S.picked!==null)showResult(true);
 }
 
@@ -450,8 +625,8 @@ function answer(j){
   if(S.picked!==null)return;
   S.picked=j;
   const it=S.qs[S.n], ok=j===it.ans;
-  if(ok){S.right++;S.combo++;S.maxCombo=Math.max(S.maxCombo,S.combo);S.score+=100+Math.min(S.combo-1,5)*20;SFX.ok()}
-  else{S.lives--;S.combo=0;S.wrong.push({i:it.i,you:it.opts[j],ans:it.opts[it.ans]});SFX.ng()}
+  if(ok){S.right++;S.combo++;S.maxCombo=Math.max(S.maxCombo,S.combo);if(!S.practice)S.score+=100+Math.min(S.combo-1,5)*20;SFX.ok()}
+  else{if(!S.practice)S.lives--;S.combo=0;S.wrong.push({i:it.i,you:it.opts[j],ans:it.opts[it.ans]});SFX.ng()}
   showResult(false);
 }
 
@@ -465,11 +640,11 @@ function showResult(restored){
     else say(S.lives<=0?'dead':'ng',line[0],S.lives<=0?'若葉マーク全滅…':line[1],'shake');
   }
   hud();
-  const last=S.lives<=0, endStage=(S.n+1)%PER===0;
+  const last=!S.practice&&S.lives<=0, endStage=!S.practice&&(S.n+1)%PER===0;
   $('fb').innerHTML=`<div class="fb">
    <div class="verdict ${ok?'ok':'ng'}"><b>${ok?'○ 正解':'✕ 不正解'}</b><span>${ok?'答對了':'正確答案：'+it.opts[it.ans]}</span>${ok&&S.combo>=3?`<span class="combo">${S.combo} COMBO!!</span>`:''}</div>
    <p class="exp">${q.e}</p>
-   <button class="big" id="next">${last?'看結果…':S.n+1>=S.qs.length?'領駕照！':endStage?'過關！下一關 →':'下一題 →'}</button></div>`;
+   <button class="big" id="next">${last?'看結果…':S.n+1>=S.qs.length?(S.practice?'看結果':'領駕照！'):endStage?'過關！下一關 →':'下一題 →'}</button></div>`;
   $('next').onclick=next;
   $('next').focus({preventScroll:true});
   $('fb').scrollIntoView({block:'nearest',behavior:'smooth'});
@@ -480,11 +655,29 @@ function next(){
   if(S.lives<=0)return result(false);
   S.n++;
   if(S.n>=S.qs.length)return result(true);
-  if(S.n%PER===0)return stageIntro();
+  if(!S.practice&&S.n%PER===0)return stageIntro();
   question();
 }
 
+function practiceResult(){
+  S.mode='done';S.picked=null;hud();setScene(sceneOf());
+  const done=S.right+S.wrong.length, pct=done?Math.round(S.right/done*100):0;
+  if(pct>=85){SFX.clear();say('cool','合格ライン突破','正確率 '+pct+'%，已達筆試 85 分門檻','pop')}
+  else say('ng','もう一回！','正確率 '+pct+'%，筆試要 85 分才及格','shake');
+  const rev=S.wrong.map(w=>`<li><div class="rq">${Q[w.i].q}</div><div class="ry">你的答案：${w.you}</div><div class="ra">正確答案：${w.ans}</div><div>${Q[w.i].e}</div></li>`).join('');
+  $('view').innerHTML=`<div class="card">
+   <div class="hero"><p>練習結束・${pracName()}</p><h1>正確率 <em>${pct}%</em></h1><p>${pct>=85?'達到筆試及格標準 85 分':'筆試 85 分及格，再加油'}</p></div>
+   <div class="stats"><div><b>${done}</b><span>作答題數</span></div><div><b>${S.right}</b><span>答對</span></div><div><b>${S.wrong.length}</b><span>答錯</span></div></div>
+   <div class="row">${S.wrong.length?'<button class="big" id="redo">只練錯的題目</button>':''}<button class="big${S.wrong.length?' sec':''}" id="again">重新練習</button><button class="big sec" id="home">回標題</button></div>
+   ${rev?`<h2 class="small" style="font-weight:700">錯題複習（${S.wrong.length} 題）</h2><ul class="review">${rev}</ul>`:''}
+  </div>`;
+  const pr=S.practice, wrongIds=S.wrong.map(w=>w.i);
+  if($('redo'))$('redo').onclick=()=>{const p=newPractice(pr==='all'?0:pr);p.qs=p.qs.filter(x=>wrongIds.includes(x.i));S=p;question()};
+  $('again').onclick=()=>{S=newPractice(pr==='all'?0:pr);question()};
+  $('home').onclick=title;
+}
 function result(cleared){
+  if(S.practice)return practiceResult();
   S.mode=cleared?'clear':'over';
   if(cleared&&!S.bonus){S.score+=S.lives*300;S.bonus=1}
   const nb=S.score>best;if(nb){best=S.score;try{localStorage.setItem('drvq_best',best)}catch(e){}}
