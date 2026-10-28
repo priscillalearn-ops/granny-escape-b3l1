@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>腦科學萬聖夜</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Creepster&family=Noto+Sans+TC:wght@400;700;900&display=swap">
+<style>
+/* One narrow column: HUD, graveyard scene with the approaching ghost, prompt card, four tombstone answers. */
+:root{
+  --bg:#f3ecf7; --card:#ffffff; --ink:#2b2236; --sub:#6f6380; --line:#ddd0e8;
+  --pump:#f07c1a; --pumpD:#c95f08; --purple:#6b3fa0; --good:#2f9e55; --bad:#d8433a;
+  --stone:#e9e4ef; --stoneH:#ddd5e8; --sky1:#4b2d73; --sky2:#f0a35b; --shadow:0 4px 0 #c9bcd8;
+  --display:"Creepster","Noto Sans TC",cursive;
+  --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#140f1d; --card:#221a30; --ink:#f3ecfa; --sub:#a99cbc; --line:#3a2e4d;
+  --pump:#ff8a2a; --pumpD:#d96a10; --purple:#a77be0; --good:#4cc277; --bad:#ff6a5c;
+  --stone:#2e2540; --stoneH:#3a2f50; --sky1:#120b22; --sky2:#3b1f5c; --shadow:0 4px 0 #0b0712; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#140f1d; --card:#221a30; --ink:#f3ecfa; --sub:#a99cbc; --line:#3a2e4d;
+  --pump:#ff8a2a; --pumpD:#d96a10; --purple:#a77be0; --good:#4cc277; --bad:#ff6a5c;
+  --stone:#2e2540; --stoneH:#3a2f50; --sky1:#120b22; --sky2:#3b1f5c; --shadow:0 4px 0 #0b0712; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;
+  padding:12px max(16px,env(safe-area-inset-right,0px)) 28px max(16px,env(safe-area-inset-left,0px))}
+#app{max-width:580px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--pump);outline-offset:2px}
+h1{font-family:var(--display);font-weight:400;font-size:44px;line-height:1.05;margin:4px 0 0;color:var(--pump);letter-spacing:1px;text-align:center}
+.sub{color:var(--sub);text-align:center;margin:0;font-size:14px}
+.card{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:14px 16px}
+.label{font-weight:900;font-size:14px;margin:0 0 8px;color:var(--purple)}
+
+/* menu */
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.seg button,.chips button{white-space:nowrap;background:var(--stone);border:2px solid var(--line);border-radius:12px;padding:8px 6px;font-weight:700;font-size:14px}
+.seg button[aria-pressed="true"],.chips button[aria-pressed="true"]{background:var(--pump);border-color:var(--pumpD);color:#fff}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{padding:4px 10px;font-size:13px;border-radius:999px}
+.chips button small{opacity:.75;font-weight:400}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.mini{background:none;border:0;color:var(--purple);font-weight:700;font-size:13px;padding:2px 4px;text-decoration:underline}
+.big{width:100%;border:0;border-radius:16px;padding:14px;font-size:20px;font-weight:900;background:var(--pump);color:#fff;box-shadow:0 5px 0 var(--pumpD)}
+.big:active{transform:translateY(3px);box-shadow:0 2px 0 var(--pumpD)}
+.ghostbtn{background:var(--stone);border:2px solid var(--line);border-radius:14px;padding:10px;font-weight:700;width:100%}
+.best{text-align:center;color:var(--sub);font-size:13px}
+
+/* game */
+.hud{display:flex;align-items:center;gap:10px}
+.lives{display:flex;gap:2px;font-size:20px;line-height:1}
+.lives span.lost{opacity:.2;filter:grayscale(1)}
+.chip{background:var(--card);border:2px solid var(--line);border-radius:999px;padding:1px 10px;font-weight:700;font-size:13px;white-space:nowrap}
+.score{margin-left:auto;font-weight:900;font-size:20px;font-variant-numeric:tabular-nums;color:var(--pump)}
+.icon-btn{background:var(--card);border:2px solid var(--line);border-radius:10px;padding:1px 8px;font-size:13px;font-weight:700}
+
+.scene{position:relative;height:190px;border-radius:18px;overflow:hidden;border:3px solid var(--line);
+  background:linear-gradient(var(--sky1),var(--sky2))}
+.scene svg.bgsvg{position:absolute;inset:0;width:100%;height:100%}
+.hero{position:absolute;left:8px;bottom:14px;width:74px;z-index:2}
+.foe{position:absolute;top:22px;left:100%;width:96px;z-index:3;transform:translateX(-100%);will-change:left}
+.foe svg{width:100%;display:block;animation:float 1.2s ease-in-out infinite alternate}
+@keyframes float{to{transform:translateY(10px) rotate(3deg)}}
+.foe.poof svg{animation:poof .5s forwards}
+@keyframes poof{to{transform:scale(1.6);opacity:0;filter:blur(4px)}}
+.foe.hit svg{animation:lunge .45s forwards}
+@keyframes lunge{to{transform:translateX(-30px) scale(1.3)}}
+.combo{position:absolute;right:10px;top:8px;font-family:var(--display);font-size:26px;color:#ffd166;text-shadow:0 2px 0 #7a3b00;z-index:4}
+.fx{position:absolute;pointer-events:none;font-size:24px;z-index:5;animation:rise 1s forwards}
+@keyframes rise{to{transform:translateY(-70px) rotate(25deg);opacity:0}}
+.bar{position:absolute;left:0;bottom:0;height:5px;background:var(--pump);width:100%}
+
+.prompt{text-align:center}
+.prompt .dir{font-size:12px;font-weight:700;color:var(--sub);letter-spacing:.5px}
+.prompt .word{font-size:30px;font-weight:900;line-height:1.25;margin:4px 0;word-break:break-word;text-wrap:balance}
+.prompt .word.long{font-size:22px}
+.prompt .hint{font-size:13px;color:var(--sub);min-height:1.4em}
+.say{border:2px solid var(--line);background:var(--stone);border-radius:999px;padding:0 10px;font-size:13px;font-weight:700;margin-top:2px}
+
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{position:relative;min-height:74px;background:var(--stone);border:2px solid var(--line);border-radius:40px 40px 12px 12px;
+  padding:14px 10px 10px;font-weight:700;font-size:16px;line-height:1.3;box-shadow:var(--shadow);word-break:break-word}
+.opt:hover{background:var(--stoneH)}
+.opt .k{position:absolute;top:6px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--sub);font-weight:400}
+.opt.ok{background:var(--good);border-color:var(--good);color:#fff}
+.opt.no{background:var(--bad);border-color:var(--bad);color:#fff}
+.opt:disabled{cursor:default}
+.feedback{min-height:3.2em;font-size:14px;text-align:center;color:var(--sub)}
+.feedback b{color:var(--ink)}
+.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+
+/* result */
+.res-score{font-family:var(--display);font-size:56px;color:var(--pump);text-align:center;line-height:1}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.stats div{background:var(--stone);border-radius:12px;padding:6px}
+.stats b{display:block;font-size:20px}
+.wrong{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:320px;overflow:auto}
+.wrong li{background:var(--stone);border-radius:10px;padding:6px 10px;font-size:14px}
+.wrong li b{font-size:15px}
+.wrong li small{display:block;color:var(--sub)}
+@media (max-width:380px){h1{font-size:36px}.prompt .word{font-size:25px}.opt{font-size:14px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ===== MENU ===== -->
+<section id="menu">
+  <h1>Neuro Halloween</h1>
+  <p class="sub">腦科學萬聖夜｜臺大腦心所口試單字・英翻中／中翻英</p>
+  <div class="card" style="margin-top:12px">
+    <p class="label">🎃 題型</p>
+    <div class="seg" id="modeSeg">
+      <button data-mode="en2zh" aria-pressed="true">英 → 中</button>
+      <button data-mode="zh2en" aria-pressed="false">中 → 英</button>
+      <button data-mode="mix" aria-pressed="false">混合</button>
+    </div>
+    <p class="label" style="margin-top:14px">🕸️ 速度</p>
+    <div class="seg" id="speedSeg">
+      <button data-speed="0" aria-pressed="false">練習・不限時</button>
+      <button data-speed="1" aria-pressed="true">普通</button>
+      <button data-speed="2" aria-pressed="false">惡夢</button>
+    </div>
+    <p class="label" style="margin-top:14px">👻 題數</p>
+    <div class="seg" id="countSeg">
+      <button data-count="20" aria-pressed="true">20 隻鬼</button>
+      <button data-count="50" aria-pressed="false">50 隻鬼</button>
+      <button data-count="0" aria-pressed="false">全部</button>
+    </div>
+    <div class="row" style="margin-top:14px;justify-content:space-between">
+      <p class="label" style="margin:0">🦇 範圍 <span id="pickCount" style="color:var(--sub);font-weight:400"></span></p>
+      <span><button class="mini" id="allOn">全選</button><button class="mini" id="allOff">全不選</button></span>
+    </div>
+    <div class="chips" id="secChips" style="margin-top:8px"></div>
+  </div>
+  <div style="margin-top:12px"><button class="big" id="startBtn">開始趕鬼 🎃</button></div>
+  <p class="best" id="bestLine"></p>
+  <p class="sub" style="font-size:12px">鬼帶著單字飄過來，在它碰到你之前選出正確翻譯！<br>電腦可按 1–4 作答；🔊 可聽英文發音。</p>
+</section>
+
+<!-- ===== GAME ===== -->
+<section id="game" hidden>
+  <div class="hud">
+    <div class="lives" id="lives" aria-label="剩餘生命"></div>
+    <span class="chip" id="prog">1/20</span>
+    <span class="score" id="score">0</span>
+    <button class="icon-btn" id="quitBtn">離開</button>
+  </div>
+  <div class="scene" id="scene" style="margin-top:10px">
+    <svg class="bgsvg" viewBox="0 0 400 190" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <circle cx="330" cy="42" r="26" fill="#fbe7a1" opacity=".95"/>
+      <circle cx="342" cy="36" r="24" fill="var(--sky1)" opacity=".35"/>
+      <g fill="#fff" opacity=".7"><circle cx="40" cy="20" r="1.4"/><circle cx="120" cy="40" r="1"/><circle cx="210" cy="16" r="1.3"/><circle cx="270" cy="60" r="1"/><circle cx="380" cy="90" r="1.2"/></g>
+      <path d="M150 50 q6 -6 12 0 q6 -6 12 0 q-6 2 -12 8 q-6 -6 -12 -8z" fill="#1a1024"/>
+      <path d="M240 30 q4 -4 8 0 q4 -4 8 0 q-4 1 -8 5 q-4 -4 -8 -5z" fill="#1a1024"/>
+      <path d="M0 150 Q100 128 200 146 T400 140 V190 H0z" fill="#2a1b3a"/>
+      <g fill="#3d2b52"><path d="M150 150 v-24 a12 12 0 0 1 24 0 v24z"/><path d="M250 148 v-30 a14 14 0 0 1 28 0 v30z"/><path d="M340 146 v-20 a10 10 0 0 1 20 0 v20z"/></g>
+      <g fill="#59457a" font-size="8" font-family="sans-serif" text-anchor="middle"><text x="162" y="140">RIP</text><text x="264" y="134">LTP</text></g>
+      <path d="M60 150 V92 M60 108 l-16 -10 M60 100 l14 -14 M60 120 l12 -6" stroke="#1a1024" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M0 176 H400" stroke="#1a1024" stroke-width="28"/>
+    </svg>
+    <div class="hero" aria-hidden="true">
+      <svg viewBox="0 0 80 90">
+        <path d="M14 42 L40 2 L66 42z" fill="#2b1a3d"/><ellipse cx="40" cy="42" rx="34" ry="7" fill="#2b1a3d"/>
+        <path d="M30 18 h20 v6 h-20z" fill="var(--pump)"/>
+        <ellipse cx="40" cy="68" rx="24" ry="20" fill="var(--pump)"/>
+        <path d="M28 60 l6 6 h-12z M52 60 l-6 6 h12z" fill="#3a1a00"/>
+        <path d="M28 74 q12 8 24 0 l-4 4 -4 -3 -4 3 -4 -3 -4 3z" fill="#3a1a00"/>
+        <path d="M40 48 q4 -6 8 -4" stroke="#3c7a2a" stroke-width="3" fill="none"/>
+      </svg>
+    </div>
+    <div class="foe" id="foe" aria-hidden="true"><svg viewBox="0 0 100 110"></svg></div>
+    <div class="combo" id="combo"></div>
+    <div class="bar" id="bar"></div>
+  </div>
+  <div class="card prompt" style="margin-top:10px">
+    <div class="dir" id="dir">英翻中</div>
+    <div class="word" id="word">Neuron</div>
+    <div class="hint" id="hint"></div>
+    <button class="say" id="sayBtn" hidden>🔊 發音</button>
+  </div>
+  <div class="opts" id="opts" style="margin-top:10px"></div>
+  <div class="feedback" id="feedback" aria-live="polite"></div>
+</section>
+
+<!-- ===== RESULT ===== -->
+<section id="result" hidden>
+  <h1 id="resTitle">Happy Halloween!</h1>
+  <p class="sub" id="resSub"></p>
+  <div class="card" style="margin-top:12px">
+    <div class="res-score" id="resScore">0</div>
+    <div class="stats" style="margin-top:10px">
+      <div><b id="stRight">0</b>答對</div>
+      <div><b id="stWrong">0</b>答錯</div>
+      <div><b id="stCombo">0</b>最高連擊</div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:12px" id="wrongCard">
+    <p class="label">🧟 要再背一次的單字</p>
+    <ul class="wrong" id="wrongList"></ul>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+    <button class="big" id="retryWrong">只練錯的 🔁</button>
+    <button class="big" id="again">再玩一次 🎃</button>
+    <button class="ghostbtn" id="toMenu">回選單</button>
+  </div>
+</section>
+
+</div>
+<script>
+/* ---------- 題庫：取自「臺大腦與心智科學研究所第二階段口試」單字講義（19 個單元） ---------- */
+/* 每行：英文|中文|補充說明（可省略） */
+const RAW = [
+["腦科學核心英文單字",`
+Neuroscience|神經科學|研究神經系統的學科
+Brain|大腦／腦|腦的整體結構與功能
+Mind|心智|思考、感知、記憶等心理歷程
+Nervous system|神經系統|包括中樞與周邊神經系統
+Central nervous system (CNS)|中樞神經系統|腦與脊髓
+Peripheral nervous system (PNS)|周邊神經系統|中樞以外的神經
+Neuron|神經元|傳遞與處理訊息的細胞
+Glial cell|神經膠細胞|支持、調節神經系統功能
+Synapse|突觸|神經細胞間傳遞訊息的接點
+Neurotransmitter|神經傳導物質|參與細胞間訊息傳遞
+Receptor|受體|接收特定訊號的分子
+Neural circuit|神經迴路|相互連結並協同工作的神經元
+Neural network|神經網路|互相連結的神經元或神經系統網路
+Action potential|動作電位|沿神經元傳導的電訊號
+Excitation|興奮／活化|增加神經元活動的傾向
+Inhibition|抑制|降低神經元活動的傾向
+Synaptic plasticity|突觸可塑性|突觸強度或功能隨經驗改變
+Neuroplasticity|神經可塑性|神經系統因經驗或損傷而改變
+Neurogenesis|神經新生|產生新神經元的過程
+Brain development|腦部發育|腦的生長、成熟與組織形成
+Cognition|認知|思考、記憶、注意等心理功能
+Perception|知覺|大腦對感覺資訊的處理與解讀
+Attention|注意力|選擇及分配認知資源
+Learning|學習|經驗帶來的相對持久改變
+Memory|記憶|資訊的編碼、儲存與提取
+Emotion|情緒|情感及相關生理、認知反應
+Behavior|行為|可觀察或可測量的反應
+Consciousness|意識|主觀經驗與覺察狀態
+Decision-making|決策|評估選項並作出選擇
+Executive function|執行功能|規劃、抑制控制、工作記憶等能力`],
+["腦區與神經解剖",`
+Cerebral cortex|大腦皮質|參與感覺、認知及高階資訊處理
+Frontal lobe|額葉|參與規劃、行動及執行功能
+Prefrontal cortex|前額葉皮質|決策、工作記憶及認知控制
+Parietal lobe|頂葉|空間處理、感覺整合及注意力
+Temporal lobe|顳葉|聽覺、語言及記憶相關功能
+Occipital lobe|枕葉|主要參與視覺資訊處理
+Hippocampus|海馬迴|記憶形成、鞏固及空間記憶
+Amygdala|杏仁核|情緒處理、情緒學習及威脅相關反應
+Hypothalamus|下視丘|恆定性調節、荷爾蒙及自主神經功能
+Thalamus|丘腦|感覺訊息中繼及多種神經迴路功能
+Limbic system|邊緣系統|與情緒、記憶及動機相關的腦區網路
+Basal ganglia|基底核|動作選擇、動作控制及獎賞學習
+Cerebellum|小腦|動作協調、運動學習及部分認知功能
+Brainstem|腦幹|呼吸、心跳、覺醒等重要功能
+Corpus callosum|胼胝體|連接左右大腦半球的神經纖維束
+Motor cortex|運動皮質|參與隨意動作的控制
+Sensory cortex|感覺皮質|接收及處理不同類型的感覺資訊`],
+["認知神經科學高頻名詞",`
+Working memory|工作記憶|暫時保留並操作資訊
+Long-term memory|長期記憶|長時間保存的資訊
+Short-term memory|短期記憶|短時間保留資訊
+Episodic memory|情節記憶|個人經歷及事件記憶
+Semantic memory|語意記憶|知識、概念及事實
+Spatial memory|空間記憶|位置與空間關係
+Memory consolidation|記憶鞏固|記憶逐漸穩定的過程
+Selective attention|選擇性注意|優先處理特定刺激
+Cognitive control|認知控制|調節思考與行為以達成目標
+Inhibitory control|抑制控制|抑制不適當的反應
+Reward system|獎賞系統|處理獎賞、動機及相關學習
+Motivation|動機|驅動行為的因素
+Sensory processing|感覺處理|神經系統處理感覺訊息
+Motor control|動作控制|規劃與調節動作
+Social cognition|社會認知|理解他人意圖、情緒與行為
+Neurodegeneration|神經退化|神經元或神經功能逐漸受損
+Aging|老化|隨年齡增加而出現的生理變化
+Neuroinflammation|神經發炎|神經系統中的發炎反應`],
+["研究方法與實驗技術",`
+fMRI|功能性磁振造影|Functional magnetic resonance imaging
+MRI|磁振造影|Magnetic resonance imaging
+EEG|腦電圖|Electroencephalography
+MEG|腦磁圖|Magnetoencephalography
+PET|正子斷層造影|Positron emission tomography
+TMS|經顱磁刺激|Transcranial magnetic stimulation
+tDCS|經顱直流電刺激|Transcranial direct current stimulation
+DTI|擴散張量影像|Diffusion tensor imaging
+Electrophysiology|電生理學
+Optogenetics|光遺傳學
+Calcium imaging|鈣離子影像
+Immunohistochemistry (IHC)|免疫組織化學
+Western blot|西方墨點法|Western blotting
+PCR|聚合酶連鎖反應|Polymerase chain reaction
+qPCR|定量聚合酶連鎖反應|Quantitative PCR
+RNA sequencing (RNA-seq)|RNA 定序
+Microscopy|顯微鏡觀察技術
+Behavioral assay|行為測試
+Animal model|動物模型
+Cell culture|細胞培養`],
+["研究方法動詞",`
+Measure|測量
+Record|記錄
+Detect|偵測
+Stimulate|刺激
+Inhibit|抑制
+Manipulate|操控
+Observe|觀察
+Quantify|定量
+Analyze|分析
+Compare|比較
+Validate|驗證
+Replicate|重複實驗／重現結果
+Identify|辨識／確認
+Investigate|探討
+Evaluate|評估`],
+["論文架構與段落",`
+Abstract|摘要
+Introduction|前言
+Background|研究背景
+Research question|研究問題
+Research objective|研究目標
+Hypothesis|假說
+Methodology|研究方法
+Experimental design|實驗設計
+Participants|參與者／受試者
+Sample size|樣本數
+Control group|對照組
+Experimental group|實驗組
+Independent variable|自變項
+Dependent variable|依變項
+Outcome measure|結果測量指標
+Results|研究結果
+Findings|研究發現
+Discussion|討論
+Conclusion|結論
+Limitation|研究限制
+Implication|意涵／啟示
+Future directions|未來研究方向`],
+["結果與統計分析",`
+Significant|顯著的
+Statistically significant|達統計顯著
+Non-significant|未達統計顯著
+Correlation|相關性
+Causation|因果關係
+Association|關聯
+Positive correlation|正相關
+Negative correlation|負相關
+Correlate with|與……相關
+Predict|預測
+Increase|增加
+Decrease|減少
+Enhance|增強
+Impair|損害／削弱
+Affect|影響
+Suggest|顯示／暗示
+Indicate|指示／顯示
+Demonstrate|證明／展示
+Consistent with|與……一致
+Compared with|與……相比
+In contrast|相較之下
+Due to|由於
+Associated with|與……有關聯
+Underlie|構成……的基礎／機制
+Mediate|中介
+Modulate|調節
+Mechanism|機制
+Potentially|潛在地／可能地
+Robust|穩健的
+Replicable|可重現的`],
+["摘要常見句型",`
+This study aimed to investigate...|本研究旨在探討……
+The purpose of this study was to...|本研究的目的是……
+We hypothesized that...|我們假設……
+Participants were randomly assigned to...|受試者被隨機分派至……
+The results showed that...|結果顯示……
+We found that...|我們發現……
+There was a significant difference between...|……之間有顯著差異
+These findings suggest that...|這些發現暗示……
+Our findings are consistent with...|我們的研究結果與……一致
+Further research is needed to...|仍需進一步研究以……`],
+["神經疾病與臨床",`
+Alzheimer's disease|阿茲海默症|記憶與認知退化
+Parkinson's disease|帕金森氏症|動作控制障礙
+Epilepsy|癲癇|反覆發作的異常神經活動
+Stroke|腦中風|腦血流受阻或出血造成損傷
+Traumatic brain injury (TBI)|創傷性腦損傷|外力造成的腦損傷
+Depression|憂鬱症|情緒與認知相關疾病
+Anxiety disorder|焦慮症|焦慮相關疾病
+Schizophrenia|思覺失調症|思考、知覺等功能受到影響
+Autism spectrum disorder (ASD)|自閉症類群障礙|神經發展相關狀況
+Attention-deficit/hyperactivity disorder (ADHD)|注意力不足過動症|注意力與衝動控制相關狀況
+Dementia|失智症|認知功能退化的症候群
+Chronic pain|慢性疼痛|持續或反覆的疼痛狀態
+Sleep disorder|睡眠障礙|睡眠品質或睡眠週期異常
+Neurodevelopmental disorder|神經發展障礙|神經系統發展相關障礙
+Psychiatric disorder|精神疾病|影響情緒、思考或行為的疾病`],
+["學術英文高頻單字",`
+Elucidate|闡明、解釋清楚
+Investigate|探討、調查
+Examine|檢視、研究
+Characterize|描述特徵、界定特性
+Determine|確定、判定
+Establish|建立、確立
+Reveal|揭示
+Identify|辨識、確認
+Demonstrate|顯示、證實
+Indicate|指出、顯示
+Suggest|暗示、顯示
+Imply|意味著、暗示
+Highlight|強調、凸顯
+Uncover|揭露、發現
+Elucidate the mechanism|闡明其作用機制
+Underlie|構成……的基礎、為……的底層機制
+Contribute to|促成、有助於
+Account for|解釋、占……的比例
+Mediate|中介、介導
+Modulate|調節
+Facilitate|促進、使……更容易發生
+Impair|損害、削弱
+Attenuate|減弱、降低
+Exacerbate|加劇、惡化
+Promote|促進
+Suppress|抑制
+Disrupt|干擾、破壞
+Enhance|增強、提升
+Trigger|觸發、引發
+Elicit|引發、誘發
+Regulate|調控
+Maintain|維持
+Depend on|取決於、依賴
+Arise from|源自、由……產生
+Be associated with|與……相關
+Be attributed to|被歸因於
+Be consistent with|與……一致
+Be mediated by|由……介導
+Be involved in|參與……
+Be responsible for|負責……、與……有關`],
+["最容易考的五個動詞",`
+Neural mechanisms underlying memory formation|記憶形成背後的神經機制|Underlie
+Dopamine mediates reward-related learning|多巴胺介導獎賞相關學習|Mediate
+Stress modulates neural activity|壓力調節神經活動|Modulate
+Sleep deprivation impairs memory|睡眠剝奪損害記憶|Impair
+The stimulus elicited a neural response|該刺激引發神經反應|Elicit`],
+["神經元與細胞訊號傳遞",`
+Axon|軸突
+Dendrite|樹突
+Myelin sheath|髓鞘
+Nodes of Ranvier|蘭氏結
+Resting membrane potential|靜止膜電位
+Membrane potential|膜電位
+Depolarization|去極化
+Repolarization|再極化
+Hyperpolarization|過極化
+Ion channel|離子通道
+Voltage-gated ion channel|電壓閘控離子通道
+Calcium influx|鈣離子流入
+Sodium influx|鈉離子流入
+Potassium efflux|鉀離子流出
+Vesicle|囊泡
+Synaptic vesicle|突觸囊泡
+Synaptic transmission|突觸傳遞
+Neurotransmitter release|神經傳導物質釋放
+Reuptake|再回收
+Degradation|降解
+Second messenger|第二訊息傳遞分子
+Signal transduction|訊號傳遞
+Intracellular signaling|細胞內訊號傳遞
+Phosphorylation|磷酸化
+Gene expression|基因表現
+Protein synthesis|蛋白質合成
+Receptor activation|受體活化
+Receptor binding|受體結合
+Excitatory|興奮性的
+Inhibitory|抑制性的
+Excitatory postsynaptic potential (EPSP)|興奮性突觸後電位
+Inhibitory postsynaptic potential (IPSP)|抑制性突觸後電位
+Firing rate|神經元放電頻率
+Spike train|神經放電序列
+Neural oscillation|神經振盪
+Synchronization|同步化
+Desynchronization|去同步化`],
+["突觸可塑性、學習與記憶",`
+Long-term potentiation (LTP)|長期增益|突觸傳遞效能長時間增強
+Long-term depression (LTD)|長期抑制|突觸傳遞效能長時間減弱
+Hebbian plasticity|赫布式可塑性
+Activity-dependent plasticity|活動依賴性可塑性
+Synaptic strengthening|突觸強化
+Synaptic weakening|突觸弱化
+Memory encoding|記憶編碼|把新資訊轉換成可形成記憶的表徵
+Memory retrieval|記憶提取|重新取出已儲存的資訊
+Memory consolidation|記憶鞏固|記憶逐漸穩定
+Reconsolidation|再鞏固
+Extinction learning|消退學習
+Associative learning|聯結學習
+Non-associative learning|非聯結學習
+Habituation|習慣化
+Sensitization|敏感化
+Fear conditioning|恐懼制約
+Spatial navigation|空間導航
+Pattern separation|模式分離
+Pattern completion|模式補全
+Memory trace|記憶痕跡
+Engram|記憶印痕
+Retrieval cue|提取線索
+Forgetting|遺忘
+Interference|干擾
+Reconsolidation-dependent memory|依賴再鞏固的記憶`],
+["認知神經科學與心理學",`
+Cognitive load|認知負荷
+Cognitive flexibility|認知彈性
+Cognitive impairment|認知障礙
+Cognitive performance|認知表現
+Processing speed|處理速度
+Response inhibition|反應抑制
+Conflict monitoring|衝突監控
+Task switching|作業轉換
+Sustained attention|持續性注意力
+Divided attention|分散性注意力
+Selective attention|選擇性注意力
+Visual attention|視覺注意力
+Spatial awareness|空間覺察
+Perceptual learning|知覺學習
+Sensory integration|感覺整合
+Top-down processing|由上而下處理
+Bottom-up processing|由下而上處理
+Working memory capacity|工作記憶容量
+Episodic retrieval|情節記憶提取
+Semantic processing|語意處理
+Emotional regulation|情緒調節
+Affective processing|情感處理
+Reward prediction error|獎賞預測誤差
+Reinforcement learning|增強式學習
+Risk preference|風險偏好
+Impulsivity|衝動性
+Metacognition|後設認知
+Theory of mind|心智理論
+Empathy|同理心
+Self-awareness|自我覺察
+Conscious awareness|意識覺察
+Decision bias|決策偏誤
+Behavioral response|行為反應
+Reaction time|反應時間
+Accuracy|正確率`],
+["神經傳導物質與荷爾蒙",`
+Dopamine|多巴胺
+Serotonin|血清素
+Norepinephrine|正腎上腺素
+Acetylcholine|乙醯膽鹼
+Glutamate|麩胺酸
+Gamma-aminobutyric acid (GABA)|γ-胺基丁酸
+Endorphin|腦內啡
+Oxytocin|催產素
+Cortisol|皮質醇
+Melatonin|褪黑激素
+Neuromodulation|神經調節
+Dopaminergic signaling|多巴胺訊號傳遞
+Serotonergic system|血清素系統
+Cholinergic system|膽鹼性神經系統
+GABAergic signaling|GABA 訊號傳遞
+Glutamatergic transmission|麩胺酸能神經傳遞
+Hormonal regulation|荷爾蒙調控
+Stress response|壓力反應
+HPA axis|下視丘－腦下垂體－腎上腺軸
+Circadian rhythm|生理時鐘／晝夜節律
+Homeostasis|恆定性
+Autonomic regulation|自主神經調節`],
+["神經發育、退化與細胞病理",`
+Neurodevelopment|神經發育
+Neuronal differentiation|神經元分化
+Neural progenitor cell|神經前驅細胞
+Stem cell|幹細胞
+Axonal growth|軸突生長
+Axonal regeneration|軸突再生
+Synaptogenesis|突觸生成
+Myelination|髓鞘形成
+Apoptosis|細胞凋亡
+Necrosis|細胞壞死
+Autophagy|自噬
+Oxidative stress|氧化壓力
+Mitochondrial dysfunction|粒線體功能障礙
+Protein aggregation|蛋白質聚集
+Misfolded protein|錯誤摺疊蛋白質
+Amyloid-beta|β 類澱粉蛋白
+Tau protein|Tau 蛋白
+Neurotoxicity|神經毒性
+Neuroprotection|神經保護
+Neuroinflammation|神經發炎
+Microglia|小膠細胞
+Astrocyte|星狀膠細胞
+Oligodendrocyte|寡樹突膠細胞
+Blood-brain barrier (BBB)|血腦障壁
+Demyelination|脫髓鞘
+Neurodegeneration|神經退化
+Cellular senescence|細胞衰老
+Inflammatory response|發炎反應
+Reactive oxygen species (ROS)|活性氧物種
+Mitochondrial membrane potential|粒線體膜電位`],
+["研究設計與統計分析",`
+Baseline|基線／基準值
+Endpoint|終點指標／研究終點
+Longitudinal study|縱貫研究
+Cross-sectional study|橫斷研究
+Randomization|隨機分派
+Blinding|盲法
+Double-blind|雙盲
+Confounding variable|混淆變項
+Covariate|共變項
+Repeated measures|重複測量
+Within-subject design|受試者內設計
+Between-subject design|受試者間設計
+Sample size|樣本數
+Statistical power|統計檢定力
+Effect size|效應量
+Confidence interval (CI)|信賴區間
+Standard deviation (SD)|標準差
+Standard error (SE)|標準誤
+Variance|變異數
+Regression analysis|迴歸分析
+Linear regression|線性迴歸
+Logistic regression|羅吉斯迴歸
+Analysis of variance (ANOVA)|變異數分析
+Multiple comparisons|多重比較
+Correction for multiple comparisons|多重比較校正
+False positive|偽陽性
+False negative|偽陰性
+Sensitivity analysis|敏感度分析
+Outlier|離群值
+Missing data|缺失資料
+Reproducibility|可再現性
+Generalizability|可推廣性
+Reliability|信度／可靠性
+Validity|效度
+Statistical significance|統計顯著性
+Clinical significance|臨床重要性
+Null hypothesis|虛無假說
+Alternative hypothesis|對立假說`],
+["結果段落縮寫",`
+SD|標準差|Standard Deviation
+SE|標準誤|Standard Error
+SEM|平均值標準誤|Standard Error of the Mean
+CI|信賴區間|Confidence Interval
+df|自由度|Degrees of Freedom
+OR|勝算比|Odds Ratio
+HR|風險比|Hazard Ratio
+RR|相對風險|Relative Risk
+AUC|曲線下面積|Area Under the Curve
+ROC|受試者工作特徵曲線|Receiver Operating Characteristic
+FDR|假發現率|False Discovery Rate
+ICC|組內相關係數|Intraclass Correlation Coefficient`],
+["圖表與腦影像",`
+Figure|圖
+Panel|子圖／圖版
+Legend|圖說
+Bar graph|長條圖
+Scatter plot|散布圖
+Heatmap|熱圖
+Time course|時間變化曲線
+Time point|時間點
+Peak amplitude|峰值振幅
+Signal intensity|訊號強度
+Activation|活化
+Deactivation|活化降低／去活化
+Connectivity|連結性
+Functional connectivity|功能性連結
+Structural connectivity|結構性連結
+White matter|白質
+Gray matter|灰質
+Region of interest (ROI)|感興趣區域
+Voxel|體素
+Spatial resolution|空間解析度
+Temporal resolution|時間解析度
+Contrast|對比
+Threshold|閾值
+Cluster|群集
+Cluster size|群集大小
+Peak coordinate|峰值座標
+Error bar|誤差棒
+Fold change|倍數變化
+Upregulation|上調
+Downregulation|下調
+Normalization|標準化／正規化
+Signal-to-noise ratio (SNR)|訊噪比`],
+["Discussion 與研究限制",`
+Interpretation|詮釋、解讀
+Implication|意涵、啟示
+Limitation|限制
+Caveat|注意事項／解讀上的限制
+Alternative explanation|其他可能的解釋
+Potential mechanism|潛在機制
+Novel finding|新穎的發現
+Previous studies|先前研究
+Emerging evidence|新興證據
+Converging evidence|相互支持的證據
+Contradictory findings|相互矛盾的研究結果
+Discrepancy|差異、不一致
+Inconsistency|不一致性
+Generalizability|可推廣性
+Translational relevance|轉譯研究相關性
+Clinical application|臨床應用
+Therapeutic target|治療標的
+Biomarker|生物標記
+Vulnerability|易受損性
+Resilience|韌性／抵抗能力
+Compensatory mechanism|代償機制
+Dose-dependent|劑量依賴性的
+Time-dependent|時間依賴性的
+Age-dependent|年齡依賴性的
+Sex differences|性別差異
+Species-specific|物種特異性的
+Preliminary evidence|初步證據
+Further investigation|進一步探討
+Remains unclear|仍不清楚
+Warrants further study|值得進一步研究`],
+["最容易誤解的學術英文",`
+May|可能|不代表一定會發生
+Potentially|潛在地／可能地|不代表已證實
+Suggest|顯示／暗示|不等於證明
+Associated with|與……相關|不一定具有因果關係
+Predict|預測|不一定代表因果
+Significant|顯著的|不一定代表效果很大
+Robust|穩健的|不代表完全沒有偏誤
+Impair|損害／削弱|不一定代表完全喪失功能
+Attenuate|減弱|不一定代表完全抑制
+Compensate for|補償、代償|不代表恢復到正常狀態
+Mediate|中介|指特定變項參與解釋關係
+Moderate|調節|指關係的強度或方向隨條件改變
+Conversely|反過來說|常用來引出相反情況
+Whereas|然而／而|用來對比兩種情況
+Despite|儘管|後面常接名詞或動名詞
+Nevertheless|儘管如此|用來引出轉折
+Respectively|分別地|對應前面列出的項目順序
+Account for|解釋／占……比例|需要依上下文判斷
+In turn|進而／反過來|描述後續影響或連鎖關係
+Notably|值得注意的是|用來強調特定結果`],
+];
+const SECS = RAW.map(([name, txt], si) => ({
+  name,
+  items: txt.trim().split("\n").map((l, i) => {
+    const [en, zh, note = ""] = l.split("|").map(s => s.trim());
+    return { id: si + "-" + i, sec: si, en, zh, note };
+  })
+}));
+const ALL = SECS.flatMap(s => s.items);
+
+/* ---------- state ---------- */
+const $ = id => document.getElementById(id);
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+const prefs = store.get("nh_prefs", { mode: "en2zh", speed: 1, count: 20, secs: SECS.map((_, i) => i) });
+let G = null;
+
+/* ---------- menu ---------- */
+function seg(id, key, attr, cast) {
+  const el = $(id);
+  const sync = () => el.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(cast(b.dataset[attr]) === prefs[key])));
+  el.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; prefs[key] = cast(b.dataset[attr]); sync(); store.set("nh_prefs", prefs); });
+  sync();
+}
+seg("modeSeg", "mode", "mode", String);
+seg("speedSeg", "speed", "speed", Number);
+seg("countSeg", "count", "count", Number);
+
+function renderChips() {
+  $("secChips").innerHTML = SECS.map((s, i) =>
+    `<button data-i="${i}" aria-pressed="${prefs.secs.includes(i)}">${s.name} <small>${s.items.length}</small></button>`).join("");
+  const n = prefs.secs.reduce((a, i) => a + SECS[i].items.length, 0);
+  $("pickCount").textContent = `（${n} 個）`;
+  $("startBtn").disabled = n === 0;
+  $("startBtn").style.opacity = n ? 1 : .5;
+}
+$("secChips").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const i = +b.dataset.i;
+  prefs.secs = prefs.secs.includes(i) ? prefs.secs.filter(x => x !== i) : [...prefs.secs, i].sort((a, b) => a - b);
+  store.set("nh_prefs", prefs); renderChips();
+});
+$("allOn").onclick = () => { prefs.secs = SECS.map((_, i) => i); store.set("nh_prefs", prefs); renderChips(); };
+$("allOff").onclick = () => { prefs.secs = []; store.set("nh_prefs", prefs); renderChips(); };
+function renderBest() { const b = store.get("nh_best", 0); $("bestLine").textContent = b ? `🏆 最高分 ${b}` : ""; }
+renderChips(); renderBest();
+
+/* ---------- helpers ---------- */
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const norm = s => s.toLowerCase().replace(/[^a-z0-9一-鿿]/g, "");
+const show = id => ["menu", "game", "result"].forEach(s => $(s).hidden = s !== id);
+
+const FOES = [
+  // ghost
+  `<path d="M50 6 C22 6 12 30 12 56 V100 l12 -10 l13 10 l13 -10 l13 10 l13 -10 l12 10 V56 C88 30 78 6 50 6z" fill="#f6f1ff" stroke="#c8b8e6" stroke-width="2"/><ellipse cx="38" cy="46" rx="6" ry="9" fill="#2b1a3d"/><ellipse cx="62" cy="46" rx="6" ry="9" fill="#2b1a3d"/><ellipse cx="50" cy="68" rx="8" ry="10" fill="#2b1a3d"/>`,
+  // bat
+  `<path d="M50 40 C30 10 10 20 2 40 C14 36 18 46 26 44 C28 52 36 50 40 56 Z M50 40 C70 10 90 20 98 40 C86 36 82 46 74 44 C72 52 64 50 60 56 Z" fill="#2b1a3d"/><ellipse cx="50" cy="52" rx="14" ry="18" fill="#3a2452"/><path d="M40 36 l4 -12 l4 10z M60 36 l-4 -12 l-4 10z" fill="#3a2452"/><circle cx="45" cy="48" r="3" fill="#ffd166"/><circle cx="55" cy="48" r="3" fill="#ffd166"/><path d="M45 60 l2 4 l2 -4 M51 60 l2 4 l2 -4" stroke="#fff" stroke-width="1.5" fill="none"/>`,
+  // brain zombie
+  `<ellipse cx="50" cy="60" rx="38" ry="34" fill="#9ccf7a" stroke="#5e8f46" stroke-width="2"/><path d="M20 46 C24 18 76 18 80 46 C70 34 60 40 50 32 C40 40 30 34 20 46z" fill="#f2a3b5" stroke="#c46e86" stroke-width="2"/><path d="M34 30 q6 6 0 12 M50 24 q6 8 0 14 M66 30 q-6 6 0 12" stroke="#c46e86" stroke-width="2" fill="none"/><circle cx="38" cy="60" r="7" fill="#fff"/><circle cx="62" cy="58" r="9" fill="#fff"/><circle cx="39" cy="61" r="3" fill="#2b1a3d"/><circle cx="63" cy="59" r="4" fill="#2b1a3d"/><path d="M34 78 h32 M40 74 v8 M48 74 v8 M56 74 v8" stroke="#2b1a3d" stroke-width="2"/>`,
+  // skull
+  `<path d="M50 8 C24 8 14 28 14 48 C14 62 22 70 30 74 V90 H70 V74 C78 70 86 62 86 48 C86 28 76 8 50 8z" fill="#efe9dc" stroke="#b9ae98" stroke-width="2"/><circle cx="36" cy="48" r="11" fill="#2b1a3d"/><circle cx="64" cy="48" r="11" fill="#2b1a3d"/><path d="M50 58 l-6 10 h12z" fill="#2b1a3d"/><path d="M38 80 v10 M50 80 v10 M62 80 v10" stroke="#b9ae98" stroke-width="2"/><circle cx="38" cy="47" r="3" fill="#ff8a2a"/><circle cx="66" cy="47" r="3" fill="#ff8a2a"/>`
+];
+const TREATS = ["🍬", "🍭", "🍫", "🧠", "🎃", "✨"];
+
+/* ---------- audio ---------- */
+let AC = null;
+function beep(freqs, dur = .12, type = "square", vol = .05) {
+  try {
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    freqs.forEach((f, i) => {
+      const o = AC.createOscillator(), g = AC.createGain(), t = AC.currentTime + i * dur;
+      o.type = type; o.frequency.value = f; g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      o.connect(g).connect(AC.destination); o.start(t); o.stop(t + dur);
+    });
+  } catch {}
+}
+const sfx = { ok: () => beep([660, 880, 1320], .08), bad: () => beep([220, 160], .18, "sawtooth"), end: () => beep([523, 392, 330, 262], .2, "triangle", .06) };
+function speak(text) {
+  try {
+    if (!("speechSynthesis" in window)) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text.replace(/\.\.\.$/, "").replace(/\s*\(.*?\)\s*/g, " "));
+    u.lang = "en-US"; u.rate = .9; speechSynthesis.speak(u);
+  } catch {}
+}
+
+/* ---------- game ---------- */
+function start(pool) {
+  let deck = shuffle(pool);
+  if (prefs.count) deck = deck.slice(0, prefs.count);
+  G = { deck, i: 0, score: 0, lives: 5, combo: 0, maxCombo: 0, right: 0, wrong: [], pool, locked: false, raf: 0 };
+  show("game"); renderLives(); next();
+}
+function startFromMenu() {
+  const pool = prefs.secs.flatMap(i => SECS[i].items);
+  if (pool.length) start(pool);
+}
+function renderLives() {
+  $("lives").innerHTML = Array.from({ length: 5 }, (_, i) => `<span class="${i < G.lives ? "" : "lost"}">🎃</span>`).join("");
+}
+// 中文意思拆成片段（「顯示／暗示」→ 顯示、暗示），有重疊就算同義，不能當誘答
+const zhParts = s => s.split(/[／、]/).map(norm).filter(Boolean);
+function pickDistractors(q, field) {
+  const used = new Set([norm(q[field])]), usedEn = new Set([norm(q.en)]), usedZh = new Set(zhParts(q.zh));
+  const out = [];
+  const tryFrom = list => {
+    for (const it of shuffle(list)) {
+      if (out.length >= 3) break;
+      const k = norm(it[field]), parts = zhParts(it.zh);
+      if (used.has(k) || usedEn.has(norm(it.en)) || parts.some(p => usedZh.has(p))) continue;
+      used.add(k); usedEn.add(norm(it.en)); parts.forEach(p => usedZh.add(p)); out.push(it);
+    }
+  };
+  tryFrom(SECS[q.sec].items.filter(it => it !== q));
+  tryFrom(ALL);
+  return out;
+}
+function next() {
+  cancelAnimationFrame(G.raf);
+  if ($("game").hidden) return;
+  if (G.i >= G.deck.length || G.lives <= 0) return finish();
+  const q = G.deck[G.i];
+  const dir = prefs.mode === "mix" ? (Math.random() < .5 ? "en2zh" : "zh2en") : prefs.mode;
+  const ask = dir === "en2zh" ? "en" : "zh", ans = dir === "en2zh" ? "zh" : "en";
+  G.q = q; G.dir = dir; G.locked = false;
+  $("prog").textContent = `${G.i + 1}/${G.deck.length}`;
+  $("dir").textContent = dir === "en2zh" ? "英翻中｜選出中文意思" : "中翻英｜選出英文";
+  const w = $("word"); w.textContent = q[ask]; w.classList.toggle("long", q[ask].length > 26);
+  $("hint").textContent = SECS[q.sec].name;
+  $("sayBtn").hidden = dir !== "en2zh";
+  $("feedback").innerHTML = "&nbsp;";
+  const opts = shuffle([q, ...pickDistractors(q, ans)]);
+  $("opts").innerHTML = opts.map((o, k) => `<button class="opt" data-ok="${o === q}"><span class="k">${k + 1}</span>${esc(o[ans])}</button>`).join("");
+  const foe = $("foe");
+  foe.className = "foe"; foe.querySelector("svg").innerHTML = FOES[G.i % FOES.length];
+  foe.style.left = "100%";
+  // ghost approach timer
+  const base = [0, 11000, 7000][prefs.speed];
+  G.dur = base ? Math.max(base * .55, base - G.right * 120) + (q.en.length > 30 ? 3000 : 0) : 0;
+  G.t0 = performance.now();
+  $("bar").style.width = "100%";
+  if (G.dur) G.raf = requestAnimationFrame(tick);
+}
+function tick(now) {
+  const p = Math.min(1, (now - G.t0) / G.dur);
+  $("foe").style.left = `calc(${100 - p * 72}% + ${p * 70}px)`;
+  $("bar").style.width = `${(1 - p) * 100}%`;
+  if (p >= 1) return answer(null);
+  G.raf = requestAnimationFrame(tick);
+}
+const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function fx(txt, x, y) {
+  const d = document.createElement("div"); d.className = "fx"; d.textContent = txt;
+  d.style.left = x + "px"; d.style.top = y + "px"; $("scene").appendChild(d); setTimeout(() => d.remove(), 1000);
+}
+function answer(btn) {
+  if (G.locked) return;
+  G.locked = true; cancelAnimationFrame(G.raf);
+  const q = G.q, ok = btn && btn.dataset.ok === "true";
+  document.querySelectorAll(".opt").forEach(b => { b.disabled = true; if (b.dataset.ok === "true") b.classList.add("ok"); });
+  const foe = $("foe"), sc = $("scene").getBoundingClientRect(), fr = foe.getBoundingClientRect();
+  const fxX = fr.left - sc.left + 30, fxY = fr.top - sc.top + 30;
+  const pair = `<b>${esc(q.en)}</b> ＝ <b>${esc(q.zh)}</b>${q.note ? `<br>${esc(q.note)}` : ""}`;
+  if (ok) {
+    G.combo++; G.maxCombo = Math.max(G.maxCombo, G.combo); G.right++;
+    const speedBonus = G.dur ? Math.round(50 * (1 - Math.min(1, (performance.now() - G.t0) / G.dur))) : 0;
+    G.score += 100 + speedBonus + (G.combo - 1) * 20;
+    foe.classList.add("poof"); sfx.ok();
+    for (let k = 0; k < 3; k++) setTimeout(() => fx(TREATS[Math.random() * TREATS.length | 0], fxX + k * 18 - 18, fxY), k * 80);
+    $("feedback").innerHTML = `✅ Trick or treat! ${pair}`;
+  } else {
+    G.combo = 0; G.lives--; renderLives();
+    if (btn) btn.classList.add("no");
+    foe.classList.add("hit"); sfx.bad();
+    $("scene").classList.remove("shake"); void $("scene").offsetWidth; $("scene").classList.add("shake");
+    if (!G.wrong.includes(q)) G.wrong.push(q);
+    $("feedback").innerHTML = `${btn ? "❌ 被鬼抓到了！" : "⏰ 鬼飄到你面前了！"} ${pair}`;
+  }
+  $("combo").textContent = G.combo >= 2 ? `x${G.combo} COMBO` : "";
+  $("score").textContent = G.score;
+  if (G.dir === "en2zh" || !ok) speak(q.en);
+  G.i++;
+  setTimeout(next, ok ? 1100 : 2300);
+}
+function finish() {
+  cancelAnimationFrame(G.raf); sfx.end();
+  const best = store.get("nh_best", 0);
+  if (G.score > best) store.set("nh_best", G.score);
+  const total = G.right + G.wrong.length, dead = G.lives <= 0;
+  $("resTitle").textContent = dead ? "Game Over…" : "Happy Halloween!";
+  $("resSub").textContent = dead ? "南瓜燈全滅了，背完錯的單字再來挑戰！" : `${total} 隻鬼都被趕走了！${G.score > best ? "🏆 新紀錄！" : ""}`;
+  $("resScore").textContent = G.score;
+  $("stRight").textContent = G.right; $("stWrong").textContent = G.wrong.length; $("stCombo").textContent = G.maxCombo;
+  $("wrongCard").hidden = !G.wrong.length; $("retryWrong").hidden = !G.wrong.length;
+  $("wrongList").innerHTML = G.wrong.map(q => `<li><b>${esc(q.en)}</b>　${esc(q.zh)}${q.note ? `<small>${esc(q.note)}</small>` : ""}</li>`).join("");
+  renderBest(); show("result");
+}
+
+$("opts").addEventListener("click", e => { const b = e.target.closest(".opt"); if (b) answer(b); });
+document.addEventListener("keydown", e => {
+  if ($("game").hidden) return;
+  const n = +e.key; if (n >= 1 && n <= 4) { const b = document.querySelectorAll(".opt")[n - 1]; if (b) answer(b); }
+});
+$("sayBtn").onclick = () => speak(G.q.en);
+$("startBtn").onclick = startFromMenu;
+$("quitBtn").onclick = () => { cancelAnimationFrame(G.raf); show("menu"); };
+$("again").onclick = () => start(G.pool);
+$("retryWrong").onclick = () => { const w = G.wrong.slice(); const c = prefs.count; prefs.count = 0; start(w); prefs.count = c; G.pool = w; };
+$("toMenu").onclick = () => show("menu");
+</script>
+</body>
+</html>
