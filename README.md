@@ -5,6 +5,7 @@
 **遊戲網址**：https://priscillalearn-ops.github.io/granny-escape-b3l1/
 **小遊戲（單字跑酷）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/parkour/
 **小遊戲（駕照ヨシ！汽車筆試）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/driving/
+**小遊戲（腦科學萬聖夜 Neuro Halloween）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/neuro-halloween/
 
 ## 獨立的週評量版本（不跟上面的題庫混在一起）
 
@@ -292,3 +293,16 @@ GitHub Pages 會自動重建，**網址不變**，學生重新整理就是新版
 - **錯題本**：答錯的題目自動收進 `localStorage` 的 `drvq_book`，在錯題本練習答對就移出。
 - **休憩所（日本經典小遊戲）**：もぐらたたき（打地鼠）、あっち向いてホイ、だるまさんがころんだ、福笑い，最高紀錄存在 `drvq_mg_*`。
 - 官方題庫要更新時：把新版 PDF 重新解析成 `OFF` 陣列（格式 `[題號,分類,關卡,題幹,[選項1,2,3],正解索引,圖片,選項是圖片]`）和 `IMG` 圖片表，換掉 `index.html` 最前面那段 `<script>`。
+
+## 🎃 腦科學萬聖夜 Neuro Halloween（neuro-halloween/）
+
+臺大腦與心智科學研究所第二階段口試的英文單字小遊戲，萬聖節主題，單一 `neuro-halloween/index.html`，不和英文題庫共用。
+
+- **題庫**：取自口試準備講義的 19 個單元，共 **503 個詞條**（核心單字、腦區、研究方法、統計、論文句型、神經傳導物質、疾病、易誤解的學術英文……），有面試重點或英文全名的會在答題後顯示。
+- **玩法**：鬼／蝙蝠／殭屍腦／骷髏帶著單字從右邊飄過來，碰到南瓜之前選出正確翻譯；答對噴糖果，連擊加分，越快越高分；5 顆南瓜燈用完就 Game Over。
+- **題型**：英 → 中、中 → 英、混合；速度：練習（不限時）、普通、惡夢；題數 20／50／全部；範圍可以勾任意單元。
+- 英翻中會自動唸英文（瀏覽器語音），也可按 🔊；電腦可按 1–4 作答。
+- 誘答選項會避開同義詞（例如 Inhibit 和 Suppress 都是「抑制」就不會同時出現）。
+- 結束後列出答錯的單字，可「只練錯的」；最高分存在 `localStorage` 的 `nh_best`。
+- 要加單字：在 `index.html` 的 `RAW` 陣列裡照 `英文|中文|補充說明` 一行一個加上去即可。
+
