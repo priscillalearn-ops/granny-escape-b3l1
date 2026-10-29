@@ -5,7 +5,7 @@
 **遊戲網址**：https://priscillalearn-ops.github.io/granny-escape-b3l1/
 **小遊戲（單字跑酷）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/parkour/
 **小遊戲（駕照ヨシ！汽車筆試）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/driving/
-**小遊戲（腦科學萬聖夜 Neuro Halloween）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/neuro-halloween/
+**小遊戲（腦與心智萬聖夜 Neuro Halloween）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/neuro-halloween/
 
 ## 獨立的週評量版本（不跟上面的題庫混在一起）
 
@@ -294,7 +294,7 @@ GitHub Pages 會自動重建，**網址不變**，學生重新整理就是新版
 - **休憩所（日本經典小遊戲）**：もぐらたたき（打地鼠）、あっち向いてホイ、だるまさんがころんだ、福笑い，最高紀錄存在 `drvq_mg_*`。
 - 官方題庫要更新時：把新版 PDF 重新解析成 `OFF` 陣列（格式 `[題號,分類,關卡,題幹,[選項1,2,3],正解索引,圖片,選項是圖片]`）和 `IMG` 圖片表，換掉 `index.html` 最前面那段 `<script>`。
 
-## 🎃 腦科學萬聖夜 Neuro Halloween（neuro-halloween/）
+## 🎃 腦與心智萬聖夜 Neuro Halloween（neuro-halloween/）
 
 臺大腦與心智科學研究所第二階段口試的英文單字小遊戲，萬聖節主題，單一 `neuro-halloween/index.html`，不和英文題庫共用。
 
