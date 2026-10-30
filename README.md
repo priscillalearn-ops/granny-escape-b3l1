@@ -5,7 +5,7 @@
 **遊戲網址**：https://priscillalearn-ops.github.io/granny-escape-b3l1/
 **小遊戲（單字跑酷）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/parkour/
 **小遊戲（駕照ヨシ！汽車筆試）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/driving/
-**小遊戲（腦科學萬聖夜 Neuro Halloween）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/neuro-halloween/
+**小遊戲（腦與心智萬聖夜 Neuro Halloween）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/neuro-halloween/
 
 ## 獨立的週評量版本（不跟上面的題庫混在一起）
 
@@ -294,13 +294,16 @@ GitHub Pages 會自動重建，**網址不變**，學生重新整理就是新版
 - **休憩所（日本經典小遊戲）**：もぐらたたき（打地鼠）、あっち向いてホイ、だるまさんがころんだ、福笑い，最高紀錄存在 `drvq_mg_*`。
 - 官方題庫要更新時：把新版 PDF 重新解析成 `OFF` 陣列（格式 `[題號,分類,關卡,題幹,[選項1,2,3],正解索引,圖片,選項是圖片]`）和 `IMG` 圖片表，換掉 `index.html` 最前面那段 `<script>`。
 
-## 🎃 腦科學萬聖夜 Neuro Halloween（neuro-halloween/）
+## 🎃 腦與心智萬聖夜 Neuro Halloween（neuro-halloween/）
 
 臺大腦與心智科學研究所第二階段口試的英文單字小遊戲，萬聖節主題，單一 `neuro-halloween/index.html`，不和英文題庫共用。
 
 - **題庫**：取自口試準備講義的 19 個單元，共 **503 個詞條**（核心單字、腦區、研究方法、統計、論文句型、神經傳導物質、疾病、易誤解的學術英文……），有面試重點或英文全名的會在答題後顯示。
 - **玩法**：鬼／蝙蝠／殭屍腦／骷髏帶著單字從右邊飄過來，碰到南瓜之前選出正確翻譯；答對噴糖果，連擊加分，越快越高分；5 顆南瓜燈用完就 Game Over。
-- **題型**：英 → 中、中 → 英、混合；速度：練習（不限時）、普通、惡夢；題數 20／50／全部；範圍可以勾任意單元。
+- **題型**：英 → 中、中 → 英、混合、🎤 口說；速度：練習（不限時）、普通、惡夢；題數 20／50／全部；範圍可以勾任意單元。
+- **一輪不重複**：範圍內的單字（不同單元重複的英文字只算一個，全部共 475 個）會全部出過一次才會再出現，進度存在 `localStorage` 的 `nh_seen`，選單上有「本輪已出現 X/N」進度條和「重新一輪」。
+- **🎤 口說考試**：看中文、按麥克風用英文唸出來，用瀏覽器內建語音辨識（Chrome、Android、iPhone Safari；LINE／FB 內建瀏覽器可能不支援）。唸錯可以一直重唸直到鬼飄到面前；💡 提示第一次給首字母、第二次播發音（用了提示只拿一半分數）。縮寫（fMRI、ADHD）唸縮寫或全名都算對。
+- **🐶 道具 BUBU 戰士（馬爾濟斯）**：開局 1 隻，每連續答對 5 題 +1（最多 3 隻）；按下去 BUBU 衝出去把鬼咬跑，這題直接過關，結算畫面會列出「BUBU 幫你打掉的」單字提醒複習。電腦可按 B。
 - 英翻中會自動唸英文（瀏覽器語音），也可按 🔊；電腦可按 1–4 作答。
 - 誘答選項會避開同義詞（例如 Inhibit 和 Suppress 都是「抑制」就不會同時出現）。
 - 結束後列出答錯的單字，可「只練錯的」；最高分存在 `localStorage` 的 `nh_best`。

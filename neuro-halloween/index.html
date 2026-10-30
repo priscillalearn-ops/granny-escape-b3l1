@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>腦科學萬聖夜</title>
+<title>腦與心智萬聖夜</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Creepster&family=Noto+Sans+TC:wght@400;700;900&display=swap">
@@ -52,11 +52,11 @@ h1{font-family:var(--display);font-weight:400;font-size:44px;line-height:1.05;ma
 .best{text-align:center;color:var(--sub);font-size:13px}
 
 /* game */
-.hud{display:flex;align-items:center;gap:10px}
-.lives{display:flex;gap:2px;font-size:20px;line-height:1}
+.hud{display:flex;align-items:center;gap:6px}
+.lives{display:flex;gap:0;font-size:17px;line-height:1}
 .lives span.lost{opacity:.2;filter:grayscale(1)}
 .chip{background:var(--card);border:2px solid var(--line);border-radius:999px;padding:1px 10px;font-weight:700;font-size:13px;white-space:nowrap}
-.score{margin-left:auto;font-weight:900;font-size:20px;font-variant-numeric:tabular-nums;color:var(--pump)}
+.score{margin-left:auto;font-weight:900;font-size:18px;font-variant-numeric:tabular-nums;color:var(--pump)}
 .icon-btn{background:var(--card);border:2px solid var(--line);border-radius:10px;padding:1px 8px;font-size:13px;font-weight:700}
 
 .scene{position:relative;height:190px;border-radius:18px;overflow:hidden;border:3px solid var(--line);
@@ -90,6 +90,32 @@ h1{font-family:var(--display);font-weight:400;font-size:44px;line-height:1.05;ma
 .opt.ok{background:var(--good);border-color:var(--good);color:#fff}
 .opt.no{background:var(--bad);border-color:var(--bad);color:#fff}
 .opt:disabled{cursor:default}
+.seg.four{grid-template-columns:repeat(4,1fr)}
+.cycle{font-size:13px;color:var(--sub);margin:10px 0 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cycle .track{flex:1;min-width:120px;height:8px;border-radius:99px;background:var(--stone);overflow:hidden}
+.cycle .track i{display:block;height:100%;background:var(--pump)}
+.note{font-size:12px;color:var(--sub);margin:6px 0 0}
+
+/* speaking test */
+.speakbox{display:flex;flex-direction:column;gap:8px}
+.mic{width:100%;border:0;border-radius:18px;padding:14px;font-size:20px;font-weight:900;background:var(--purple);color:#fff;box-shadow:0 5px 0 #3d2163}
+.mic.on{background:var(--bad);animation:pulse 1s ease-in-out infinite alternate}
+@keyframes pulse{to{transform:scale(1.03)}}
+.mic:disabled{opacity:.5}
+.heard{text-align:center;font-size:15px;min-height:1.5em}
+.speakrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+/* BUBU 戰士 */
+.bubu-btn{display:flex;align-items:center;gap:2px;background:var(--card);border:2px solid var(--pump);border-radius:999px;padding:0 8px 0 2px;font-weight:900;font-size:14px}
+.bubu-btn svg{width:28px;height:28px}
+.bubu-btn:disabled{opacity:.35;border-color:var(--line)}
+.bubu{position:absolute;left:14px;bottom:10px;width:70px;z-index:6;transition:left .45s ease-in,bottom .45s ease-out}
+.bubu svg{width:100%;display:block;animation:hop .25s ease-in-out infinite alternate}
+@keyframes hop{to{transform:translateY(-6px) rotate(-6deg)}}
+.intro{display:flex;gap:12px;align-items:center}
+.intro svg{flex:0 0 64px;width:64px}
+.intro p{margin:0;font-size:13px;color:var(--sub)}
+.intro b{color:var(--ink)}
 .feedback{min-height:3.2em;font-size:14px;text-align:center;color:var(--sub)}
 .feedback b{color:var(--ink)}
 .shake{animation:shake .4s}
@@ -109,19 +135,44 @@ h1{font-family:var(--display);font-weight:400;font-size:44px;line-height:1.05;ma
 </style>
 </head>
 <body>
+<!-- BUBU 戰士：白色馬爾濟斯，頭頂粉紅蝴蝶結、紅披風、小木劍 -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="maltese" viewBox="0 0 100 92">
+    <path d="M30 50 Q18 80 32 88 H68 Q82 80 70 50z" fill="#d8433a"/>
+    <path d="M80 82 L95 52" stroke="#c98a3a" stroke-width="4" stroke-linecap="round"/>
+    <path d="M76 76 l9 4" stroke="#7a4a12" stroke-width="4" stroke-linecap="round"/>
+    <g fill="#fff" stroke="#d9cfe3" stroke-width="1.5">
+      <ellipse cx="50" cy="68" rx="24" ry="17"/>
+      <circle cx="35" cy="82" r="7"/><circle cx="65" cy="82" r="7"/>
+      <path d="M26 24 C10 26 10 50 14 62 C18 70 28 66 30 58 C32 46 34 30 26 24z"/>
+      <path d="M74 24 C90 26 90 50 86 62 C82 70 72 66 70 58 C68 46 66 30 74 24z"/>
+      <circle cx="50" cy="38" r="22"/>
+      <circle cx="50" cy="15" r="7"/>
+    </g>
+    <path d="M38 8 L50 13 L38 18z M62 8 L50 13 L62 18z" fill="#ff5c8a"/><circle cx="50" cy="13" r="3" fill="#ff5c8a"/>
+    <circle cx="42" cy="37" r="3.6" fill="#1b1b1b"/><circle cx="58" cy="37" r="3.6" fill="#1b1b1b"/>
+    <circle cx="43.2" cy="35.8" r="1.1" fill="#fff"/><circle cx="59.2" cy="35.8" r="1.1" fill="#fff"/>
+    <ellipse cx="50" cy="45" rx="4" ry="3" fill="#1b1b1b"/>
+    <path d="M45 49 q5 4 10 0" stroke="#1b1b1b" stroke-width="1.5" fill="none"/>
+    <ellipse cx="50" cy="53" rx="3" ry="3.5" fill="#ff7a9a"/>
+    <circle cx="36" cy="44" r="3" fill="#ffb3c4" opacity=".7"/><circle cx="64" cy="44" r="3" fill="#ffb3c4" opacity=".7"/>
+  </symbol>
+</svg>
 <div id="app">
 
 <!-- ===== MENU ===== -->
 <section id="menu">
   <h1>Neuro Halloween</h1>
-  <p class="sub">腦科學萬聖夜｜臺大腦心所口試單字・英翻中／中翻英</p>
+  <p class="sub">腦與心智萬聖夜｜臺大腦心所口試單字・英翻中／中翻英／口說</p>
   <div class="card" style="margin-top:12px">
     <p class="label">🎃 題型</p>
-    <div class="seg" id="modeSeg">
+    <div class="seg four" id="modeSeg">
       <button data-mode="en2zh" aria-pressed="true">英 → 中</button>
       <button data-mode="zh2en" aria-pressed="false">中 → 英</button>
       <button data-mode="mix" aria-pressed="false">混合</button>
+      <button data-mode="speak" aria-pressed="false">🎤 口說</button>
     </div>
+    <p class="note" id="speakNote">🎤 口說考試：看中文，用英文唸出來。第一次會跳出麥克風權限，請按「允許」。</p>
     <p class="label" style="margin-top:14px">🕸️ 速度</p>
     <div class="seg" id="speedSeg">
       <button data-speed="0" aria-pressed="false">練習・不限時</button>
@@ -139,10 +190,15 @@ h1{font-family:var(--display);font-weight:400;font-size:44px;line-height:1.05;ma
       <span><button class="mini" id="allOn">全選</button><button class="mini" id="allOff">全不選</button></span>
     </div>
     <div class="chips" id="secChips" style="margin-top:8px"></div>
+    <div class="cycle"><span id="cycleText"></span><span class="track"><i id="cycleBar"></i></span><button class="mini" id="cycleReset">重新一輪</button></div>
+  </div>
+  <div class="card intro" style="margin-top:12px">
+    <svg viewBox="0 0 100 92" aria-hidden="true"><use href="#maltese"/></svg>
+    <p><b>道具：BUBU 戰士（馬爾濟斯）</b><br>開局送 1 隻，每連續答對 5 題再得 1 隻（最多 3 隻）。按下 🐶 BUBU 就會衝出去把鬼咬跑，這題直接過關。</p>
   </div>
   <div style="margin-top:12px"><button class="big" id="startBtn">開始趕鬼 🎃</button></div>
   <p class="best" id="bestLine"></p>
-  <p class="sub" style="font-size:12px">鬼帶著單字飄過來，在它碰到你之前選出正確翻譯！<br>電腦可按 1–4 作答；🔊 可聽英文發音。</p>
+  <p class="sub" style="font-size:12px">鬼帶著單字飄過來，在它碰到你之前選出正確翻譯！<br>範圍裡的單字會全部出過一輪才重複。電腦可按 1–4 作答、B 叫 BUBU。</p>
 </section>
 
 <!-- ===== GAME ===== -->
@@ -151,7 +207,8 @@ h1{font-family:var(--display);font-weight:400;font-size:44px;line-height:1.05;ma
     <div class="lives" id="lives" aria-label="剩餘生命"></div>
     <span class="chip" id="prog">1/20</span>
     <span class="score" id="score">0</span>
-    <button class="icon-btn" id="quitBtn">離開</button>
+    <button class="bubu-btn" id="bubuBtn" aria-label="使用 BUBU 戰士"><svg viewBox="0 0 100 92" aria-hidden="true"><use href="#maltese"/></svg><span id="bubuN">×1</span></button>
+    <button class="icon-btn" id="quitBtn" aria-label="離開">✕</button>
   </div>
   <div class="scene" id="scene" style="margin-top:10px">
     <svg class="bgsvg" viewBox="0 0 400 190" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
@@ -177,6 +234,7 @@ h1{font-family:var(--display);font-weight:400;font-size:44px;line-height:1.05;ma
       </svg>
     </div>
     <div class="foe" id="foe" aria-hidden="true"><svg viewBox="0 0 100 110"></svg></div>
+    <div class="bubu" id="bubu" hidden aria-hidden="true"><svg viewBox="0 0 100 92"><use href="#maltese"/></svg></div>
     <div class="combo" id="combo"></div>
     <div class="bar" id="bar"></div>
   </div>
@@ -187,6 +245,14 @@ h1{font-family:var(--display);font-weight:400;font-size:44px;line-height:1.05;ma
     <button class="say" id="sayBtn" hidden>🔊 發音</button>
   </div>
   <div class="opts" id="opts" style="margin-top:10px"></div>
+  <div class="speakbox" id="speakBox" style="margin-top:10px" hidden>
+    <button class="mic" id="micBtn">🎤 點我開始唸</button>
+    <div class="heard" id="heard"></div>
+    <div class="speakrow">
+      <button class="ghostbtn" id="hintBtn">💡 提示</button>
+      <button class="ghostbtn" id="skipBtn">跳過（算錯）</button>
+    </div>
+  </div>
   <div class="feedback" id="feedback" aria-live="polite"></div>
 </section>
 
@@ -201,6 +267,11 @@ h1{font-family:var(--display);font-weight:400;font-size:44px;line-height:1.05;ma
       <div><b id="stWrong">0</b>答錯</div>
       <div><b id="stCombo">0</b>最高連擊</div>
     </div>
+    <p class="best" id="resCycle" style="margin:10px 0 0"></p>
+  </div>
+  <div class="card" style="margin-top:12px" id="helpCard">
+    <p class="label">🐶 BUBU 幫你打掉的（記得複習）</p>
+    <ul class="wrong" id="helpList"></ul>
   </div>
   <div class="card" style="margin-top:12px" id="wrongCard">
     <p class="label">🧟 要再背一次的單字</p>
@@ -775,10 +846,10 @@ seg("countSeg", "count", "count", Number);
 function renderChips() {
   $("secChips").innerHTML = SECS.map((s, i) =>
     `<button data-i="${i}" aria-pressed="${prefs.secs.includes(i)}">${s.name} <small>${s.items.length}</small></button>`).join("");
-  const n = prefs.secs.reduce((a, i) => a + SECS[i].items.length, 0);
-  $("pickCount").textContent = `（${n} 個）`;
+  const n = prefs.secs.length;
   $("startBtn").disabled = n === 0;
   $("startBtn").style.opacity = n ? 1 : .5;
+  if (typeof renderCycle === "function" && $("cycleText")) try { renderCycle(); } catch {}
 }
 $("secChips").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
@@ -820,7 +891,7 @@ function beep(freqs, dur = .12, type = "square", vol = .05) {
     });
   } catch {}
 }
-const sfx = { ok: () => beep([660, 880, 1320], .08), bad: () => beep([220, 160], .18, "sawtooth"), end: () => beep([523, 392, 330, 262], .2, "triangle", .06) };
+const sfx = { miss: () => beep([300, 260], .1, "triangle"), ok: () => beep([660, 880, 1320], .08), bad: () => beep([220, 160], .18, "sawtooth"), end: () => beep([523, 392, 330, 262], .2, "triangle", .06) };
 function speak(text) {
   try {
     if (!("speechSynthesis" in window)) return;
@@ -830,20 +901,106 @@ function speak(text) {
   } catch {}
 }
 
+/* ---------- 一輪不重複：範圍內每個單字都出過一次才會重複 ---------- */
+let seen = new Set(store.get("nh_seen", []));
+const saveSeen = () => store.set("nh_seen", [...seen]);
+// 不同單元裡同一個英文字只算一個（例如 Mediate、Memory consolidation）
+function rangePool() {
+  const keys = new Set();
+  return prefs.secs.flatMap(i => SECS[i].items).filter(q => { const k = norm(q.en); if (keys.has(k)) return false; keys.add(k); return true; });
+}
+function renderCycle() {
+  const pool = rangePool(), done = pool.filter(q => seen.has(q.id)).length;
+  $("pickCount").textContent = `（${pool.length} 個）`;
+  $("cycleText").textContent = pool.length ? `本輪已出現 ${done}/${pool.length}` : "";
+  $("cycleBar").style.width = pool.length ? `${done / pool.length * 100}%` : "0";
+}
+
+/* ---------- 口說：Web Speech API 語音辨識 ---------- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (!SR) {
+  $("speakNote").textContent = "🎤 這個瀏覽器不支援語音辨識，口說模式請改用 Chrome（電腦／Android）或 iPhone 的 Safari 開啟。";
+  $("modeSeg").querySelector('[data-mode="speak"]').disabled = true;
+  if (prefs.mode === "speak") { prefs.mode = "en2zh"; $("modeSeg").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === "en2zh"))); }
+}
+const letters = s => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+// 可以接受的唸法：完整、括號前的全名、括號裡的縮寫；句型去掉 ...
+function targets(en) {
+  const base = en.replace(/\.\.\.$/, "");
+  const out = new Set([base, base.replace(/\s*\(.*?\)\s*/g, " ")]);
+  const ab = base.match(/\(([^)]+)\)/); if (ab) out.add(ab[1]);
+  return [...out].map(letters).filter(Boolean);
+}
+function lev(a, b) {
+  const d = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    let prev = d[0]; d[0] = i;
+    for (let j = 1; j <= b.length; j++) { const t = d[j]; d[j] = Math.min(d[j] + 1, d[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1)); prev = t; }
+  }
+  return d[b.length];
+}
+function heardOk(said, q) {
+  const s = letters(said);
+  return targets(q.en).some(t => {
+    if (s === t || (t.length >= 4 && s.includes(t))) return true;
+    const tol = t.length <= 4 ? 0 : t.length <= 8 ? 1 : Math.floor(t.length * .2);
+    return lev(s, t) <= tol;
+  });
+}
+let rec = null;
+function stopMic() { try { rec && rec.abort(); } catch {} rec = null; $("micBtn").classList.remove("on"); $("micBtn").textContent = "🎤 點我開始唸"; }
+function listen() {
+  if (!SR || G.locked) return;
+  if (rec) return stopMic();
+  try { speechSynthesis.cancel(); } catch {}
+  rec = new SR(); rec.lang = "en-US"; rec.interimResults = true; rec.maxAlternatives = 5; rec.continuous = false;
+  const q = G.q; let got = false;
+  rec.onresult = e => {
+    const r = e.results[e.results.length - 1];
+    const alts = Array.from(r, a => a.transcript);
+    $("heard").innerHTML = `你唸的：<b>${esc(alts[0])}</b>`;
+    if (G.q !== q || G.locked) return;
+    if (alts.some(a => heardOk(a, q))) { got = true; stopMic(); resolve(true); }
+    else if (r.isFinal) { got = true; G.tries++; $("heard").innerHTML = `聽起來像「<b>${esc(alts[0])}</b>」，再唸一次！${G.tries >= 2 ? "（可以按 💡 提示）" : ""}`; sfx.miss(); }
+  };
+  rec.onerror = e => {
+    $("heard").textContent = e.error === "not-allowed" || e.error === "service-not-allowed" ? "麥克風被擋住了：請在瀏覽器設定允許麥克風。"
+      : e.error === "no-speech" ? "沒聽到聲音，再按一次 🎤" : "辨識出了點問題，再按一次 🎤";
+  };
+  rec.onend = () => { if (!got && !$("heard").textContent) $("heard").textContent = "沒聽清楚，再按一次 🎤"; stopMic(); };
+  $("heard").textContent = "";
+  $("micBtn").classList.add("on"); $("micBtn").textContent = "👂 正在聽…再按一次停止";
+  try { rec.start(); } catch { stopMic(); }
+}
+function hint() {
+  if (G.locked) return;
+  G.hints++;
+  if (G.hints === 1) {
+    $("hint").textContent = "💡 " + G.q.en.replace(/\.\.\.$/, "").split(/\s+/).map(w => w[0] + w.slice(1).replace(/[A-Za-z]/g, "_")).join("  ");
+  } else speak(G.q.en);
+  $("hintBtn").textContent = G.hints === 1 ? "🔊 再提示：聽發音" : "🔊 再聽一次";
+}
+
 /* ---------- game ---------- */
-function start(pool) {
-  let deck = shuffle(pool);
-  if (prefs.count) deck = deck.slice(0, prefs.count);
-  G = { deck, i: 0, score: 0, lives: 5, combo: 0, maxCombo: 0, right: 0, wrong: [], pool, locked: false, raf: 0 };
-  show("game"); renderLives(); next();
+function start(deck, replay) {
+  G = { deck, i: 0, score: 0, lives: 5, combo: 0, maxCombo: 0, right: 0, wrong: [], helped: [], bubu: 1, bubuUsed: 0, replay, locked: false, raf: 0 };
+  show("game"); renderLives(); renderBubu(); next();
 }
 function startFromMenu() {
-  const pool = prefs.secs.flatMap(i => SECS[i].items);
-  if (pool.length) start(pool);
+  const pool = rangePool();
+  if (!pool.length) return;
+  let fresh = pool.filter(q => !seen.has(q.id));
+  let newCycle = false;
+  if (!fresh.length) { pool.forEach(q => seen.delete(q.id)); saveSeen(); fresh = pool; newCycle = true; }
+  let deck = shuffle(fresh);
+  if (prefs.count) deck = deck.slice(0, prefs.count);
+  start(deck, startFromMenu);
+  if (newCycle) $("feedback").textContent = "🎉 這個範圍全部玩過一輪了，開始新的一輪！";
 }
 function renderLives() {
   $("lives").innerHTML = Array.from({ length: 5 }, (_, i) => `<span class="${i < G.lives ? "" : "lost"}">🎃</span>`).join("");
 }
+function renderBubu() { $("bubuN").textContent = "×" + G.bubu; $("bubuBtn").disabled = !G.bubu; }
 // 中文意思拆成片段（「顯示／暗示」→ 顯示、暗示），有重疊就算同義，不能當誘答
 const zhParts = s => s.split(/[／、]/).map(norm).filter(Boolean);
 function pickDistractors(q, field) {
@@ -862,36 +1019,46 @@ function pickDistractors(q, field) {
   return out;
 }
 function next() {
-  cancelAnimationFrame(G.raf);
+  cancelAnimationFrame(G.raf); stopMic();
   if ($("game").hidden) return;
   if (G.i >= G.deck.length || G.lives <= 0) return finish();
   const q = G.deck[G.i];
   const dir = prefs.mode === "mix" ? (Math.random() < .5 ? "en2zh" : "zh2en") : prefs.mode;
-  const ask = dir === "en2zh" ? "en" : "zh", ans = dir === "en2zh" ? "zh" : "en";
-  G.q = q; G.dir = dir; G.locked = false;
+  G.q = q; G.dir = dir; G.locked = false; G.tries = 0; G.hints = 0;
   $("prog").textContent = `${G.i + 1}/${G.deck.length}`;
-  $("dir").textContent = dir === "en2zh" ? "英翻中｜選出中文意思" : "中翻英｜選出英文";
-  const w = $("word"); w.textContent = q[ask]; w.classList.toggle("long", q[ask].length > 26);
-  $("hint").textContent = SECS[q.sec].name;
-  $("sayBtn").hidden = dir !== "en2zh";
   $("feedback").innerHTML = "&nbsp;";
-  const opts = shuffle([q, ...pickDistractors(q, ans)]);
-  $("opts").innerHTML = opts.map((o, k) => `<button class="opt" data-ok="${o === q}"><span class="k">${k + 1}</span>${esc(o[ans])}</button>`).join("");
+  $("hint").textContent = SECS[q.sec].name;
+  const speaking = dir === "speak";
+  $("opts").hidden = speaking; $("speakBox").hidden = !speaking;
+  if (speaking) {
+    $("dir").textContent = "口說｜看中文，用英文唸出來";
+    setWord(q.zh);
+    $("sayBtn").hidden = true;
+    $("heard").textContent = ""; $("hintBtn").textContent = "💡 提示"; $("micBtn").disabled = false;
+  } else {
+    const ask = dir === "en2zh" ? "en" : "zh", ans = dir === "en2zh" ? "zh" : "en";
+    $("dir").textContent = dir === "en2zh" ? "英翻中｜選出中文意思" : "中翻英｜選出英文";
+    setWord(q[ask]);
+    $("sayBtn").hidden = dir !== "en2zh";
+    const opts = shuffle([q, ...pickDistractors(q, ans)]);
+    $("opts").innerHTML = opts.map((o, k) => `<button class="opt" data-ok="${o === q}"><span class="k">${k + 1}</span>${esc(o[ans])}</button>`).join("");
+  }
   const foe = $("foe");
   foe.className = "foe"; foe.querySelector("svg").innerHTML = FOES[G.i % FOES.length];
   foe.style.left = "100%";
-  // ghost approach timer
-  const base = [0, 11000, 7000][prefs.speed];
+  // ghost approach timer（口說要多一點時間）
+  const base = [0, 11000, 7000][prefs.speed] * (speaking ? 1.7 : 1);
   G.dur = base ? Math.max(base * .55, base - G.right * 120) + (q.en.length > 30 ? 3000 : 0) : 0;
   G.t0 = performance.now();
   $("bar").style.width = "100%";
   if (G.dur) G.raf = requestAnimationFrame(tick);
 }
+function setWord(t) { const w = $("word"); w.textContent = t; w.classList.toggle("long", t.length > 26); }
 function tick(now) {
   const p = Math.min(1, (now - G.t0) / G.dur);
   $("foe").style.left = `calc(${100 - p * 72}% + ${p * 70}px)`;
   $("bar").style.width = `${(1 - p) * 100}%`;
-  if (p >= 1) return answer(null);
+  if (p >= 1) return resolve(false, { timeout: true });
   G.raf = requestAnimationFrame(tick);
 }
 const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -899,37 +1066,55 @@ function fx(txt, x, y) {
   const d = document.createElement("div"); d.className = "fx"; d.textContent = txt;
   d.style.left = x + "px"; d.style.top = y + "px"; $("scene").appendChild(d); setTimeout(() => d.remove(), 1000);
 }
-function answer(btn) {
+function useBubu() {
+  if (!G || G.locked || !G.bubu || $("game").hidden) return;
+  G.locked = true; cancelAnimationFrame(G.raf); stopMic();
+  G.bubu--; G.bubuUsed++; renderBubu();
+  const sc = $("scene").getBoundingClientRect(), fr = $("foe").getBoundingClientRect();
+  const dog = $("bubu"); dog.hidden = false; dog.style.left = "14px"; dog.style.bottom = "10px";
+  beep([880, 660, 880], .07, "triangle", .07);
+  fx("汪！", 70, 60);
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    dog.style.left = Math.max(20, fr.left - sc.left - 30) + "px"; dog.style.bottom = "60px";
+  }));
+  setTimeout(() => { fx("汪汪！", fr.left - sc.left, 20); G.locked = false; resolve(true, { bubu: true }); }, 480);
+  setTimeout(() => { dog.hidden = true; }, 1100);
+}
+function resolve(ok, { btn = null, timeout = false, bubu = false } = {}) {
   if (G.locked) return;
-  G.locked = true; cancelAnimationFrame(G.raf);
-  const q = G.q, ok = btn && btn.dataset.ok === "true";
+  G.locked = true; cancelAnimationFrame(G.raf); stopMic();
+  const q = G.q;
+  seen.add(q.id); saveSeen();
   document.querySelectorAll(".opt").forEach(b => { b.disabled = true; if (b.dataset.ok === "true") b.classList.add("ok"); });
+  $("micBtn").disabled = true;
   const foe = $("foe"), sc = $("scene").getBoundingClientRect(), fr = foe.getBoundingClientRect();
   const fxX = fr.left - sc.left + 30, fxY = fr.top - sc.top + 30;
   const pair = `<b>${esc(q.en)}</b> ＝ <b>${esc(q.zh)}</b>${q.note ? `<br>${esc(q.note)}` : ""}`;
   if (ok) {
     G.combo++; G.maxCombo = Math.max(G.maxCombo, G.combo); G.right++;
-    const speedBonus = G.dur ? Math.round(50 * (1 - Math.min(1, (performance.now() - G.t0) / G.dur))) : 0;
-    G.score += 100 + speedBonus + (G.combo - 1) * 20;
+    const speedBonus = G.dur && !bubu && !G.hints ? Math.round(50 * (1 - Math.min(1, (performance.now() - G.t0) / G.dur))) : 0;
+    G.score += (G.hints ? 50 : 100) + speedBonus + (G.combo - 1) * 20;
     foe.classList.add("poof"); sfx.ok();
     for (let k = 0; k < 3; k++) setTimeout(() => fx(TREATS[Math.random() * TREATS.length | 0], fxX + k * 18 - 18, fxY), k * 80);
-    $("feedback").innerHTML = `✅ Trick or treat! ${pair}`;
+    if (bubu) { if (!G.helped.includes(q)) G.helped.push(q); $("feedback").innerHTML = `🐶 BUBU 戰士出擊！${pair}`; }
+    else $("feedback").innerHTML = `✅ ${G.dir === "speak" ? "唸對了！" : "Trick or treat!"} ${pair}`;
+    if (G.combo % 5 === 0 && G.bubu < 3) { G.bubu++; renderBubu(); setTimeout(() => fx("🐶+1", 20, 30), 200); $("feedback").innerHTML += "<br>🐶 連對 5 題，BUBU 戰士 +1！"; }
   } else {
     G.combo = 0; G.lives--; renderLives();
     if (btn) btn.classList.add("no");
     foe.classList.add("hit"); sfx.bad();
     $("scene").classList.remove("shake"); void $("scene").offsetWidth; $("scene").classList.add("shake");
     if (!G.wrong.includes(q)) G.wrong.push(q);
-    $("feedback").innerHTML = `${btn ? "❌ 被鬼抓到了！" : "⏰ 鬼飄到你面前了！"} ${pair}`;
+    $("feedback").innerHTML = `${timeout ? "⏰ 鬼飄到你面前了！" : "❌ 被鬼抓到了！"} ${pair}`;
   }
   $("combo").textContent = G.combo >= 2 ? `x${G.combo} COMBO` : "";
   $("score").textContent = G.score;
-  if (G.dir === "en2zh" || !ok) speak(q.en);
+  if (G.dir !== "zh2en" || !ok) speak(q.en);
   G.i++;
-  setTimeout(next, ok ? 1100 : 2300);
+  setTimeout(next, ok ? (G.dir === "speak" ? 1600 : 1100) : 2400);
 }
 function finish() {
-  cancelAnimationFrame(G.raf); sfx.end();
+  cancelAnimationFrame(G.raf); stopMic(); sfx.end();
   const best = store.get("nh_best", 0);
   if (G.score > best) store.set("nh_best", G.score);
   const total = G.right + G.wrong.length, dead = G.lives <= 0;
@@ -937,22 +1122,35 @@ function finish() {
   $("resSub").textContent = dead ? "南瓜燈全滅了，背完錯的單字再來挑戰！" : `${total} 隻鬼都被趕走了！${G.score > best ? "🏆 新紀錄！" : ""}`;
   $("resScore").textContent = G.score;
   $("stRight").textContent = G.right; $("stWrong").textContent = G.wrong.length; $("stCombo").textContent = G.maxCombo;
+  const pool = rangePool(), done = pool.filter(q => seen.has(q.id)).length;
+  $("resCycle").textContent = G.replay === startFromMenu ? (done >= pool.length ? `🎉 範圍內 ${pool.length} 個單字全部玩過一輪了！下一局開始新的一輪。` : `本輪已出現 ${done}/${pool.length}，還有 ${pool.length - done} 個沒出過`) : "";
+  const li = q => `<li><b>${esc(q.en)}</b>　${esc(q.zh)}${q.note ? `<small>${esc(q.note)}</small>` : ""}</li>`;
   $("wrongCard").hidden = !G.wrong.length; $("retryWrong").hidden = !G.wrong.length;
-  $("wrongList").innerHTML = G.wrong.map(q => `<li><b>${esc(q.en)}</b>　${esc(q.zh)}${q.note ? `<small>${esc(q.note)}</small>` : ""}</li>`).join("");
-  renderBest(); show("result");
+  $("wrongList").innerHTML = G.wrong.map(li).join("");
+  $("helpCard").hidden = !G.helped.length;
+  $("helpList").innerHTML = G.helped.map(li).join("");
+  $("again").textContent = G.replay === startFromMenu && done < pool.length ? "繼續下一批新單字 🎃" : "再玩一次 🎃";
+  renderBest(); renderCycle(); show("result");
 }
 
-$("opts").addEventListener("click", e => { const b = e.target.closest(".opt"); if (b) answer(b); });
+$("opts").addEventListener("click", e => { const b = e.target.closest(".opt"); if (b) resolve(b.dataset.ok === "true", { btn: b }); });
 document.addEventListener("keydown", e => {
-  if ($("game").hidden) return;
-  const n = +e.key; if (n >= 1 && n <= 4) { const b = document.querySelectorAll(".opt")[n - 1]; if (b) answer(b); }
+  if ($("game").hidden || e.repeat) return;
+  if (e.key === "b" || e.key === "B") return useBubu();
+  const n = +e.key; if (n >= 1 && n <= 4) { const b = document.querySelectorAll(".opt")[n - 1]; if (b && !$("opts").hidden) b.click(); }
 });
+$("micBtn").onclick = listen;
+$("hintBtn").onclick = hint;
+$("skipBtn").onclick = () => resolve(false);
+$("bubuBtn").onclick = useBubu;
 $("sayBtn").onclick = () => speak(G.q.en);
 $("startBtn").onclick = startFromMenu;
-$("quitBtn").onclick = () => { cancelAnimationFrame(G.raf); show("menu"); };
-$("again").onclick = () => start(G.pool);
-$("retryWrong").onclick = () => { const w = G.wrong.slice(); const c = prefs.count; prefs.count = 0; start(w); prefs.count = c; G.pool = w; };
-$("toMenu").onclick = () => show("menu");
+$("quitBtn").onclick = () => { cancelAnimationFrame(G.raf); stopMic(); show("menu"); renderCycle(); };
+$("again").onclick = () => G.replay();
+$("retryWrong").onclick = () => { const w = G.wrong.slice(); const again = () => start(shuffle(w), again); again(); };
+$("toMenu").onclick = () => { show("menu"); renderCycle(); };
+$("cycleReset").onclick = () => { rangePool().forEach(q => seen.delete(q.id)); saveSeen(); renderCycle(); };
+renderCycle();
 </script>
 </body>
 </html>
