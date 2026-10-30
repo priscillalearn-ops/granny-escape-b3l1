@@ -55,6 +55,7 @@ h1{font-family:var(--display);font-weight:400;font-size:44px;line-height:1.05;ma
 .hud{display:flex;align-items:center;gap:6px}
 .lives{display:flex;gap:0;font-size:17px;line-height:1}
 .lives span.lost{opacity:.2;filter:grayscale(1)}
+.lives b{font-size:15px;font-variant-numeric:tabular-nums;margin-left:2px}
 .chip{background:var(--card);border:2px solid var(--line);border-radius:999px;padding:1px 10px;font-weight:700;font-size:13px;white-space:nowrap}
 .score{margin-left:auto;font-weight:900;font-size:18px;font-variant-numeric:tabular-nums;color:var(--pump)}
 .icon-btn{background:var(--card);border:2px solid var(--line);border-radius:10px;padding:1px 8px;font-size:13px;font-weight:700}
@@ -90,20 +91,10 @@ h1{font-family:var(--display);font-weight:400;font-size:44px;line-height:1.05;ma
 .opt.ok{background:var(--good);border-color:var(--good);color:#fff}
 .opt.no{background:var(--bad);border-color:var(--bad);color:#fff}
 .opt:disabled{cursor:default}
-.seg.four{grid-template-columns:repeat(4,1fr)}
 .cycle{font-size:13px;color:var(--sub);margin:10px 0 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .cycle .track{flex:1;min-width:120px;height:8px;border-radius:99px;background:var(--stone);overflow:hidden}
 .cycle .track i{display:block;height:100%;background:var(--pump)}
 .note{font-size:12px;color:var(--sub);margin:6px 0 0}
-
-/* speaking test */
-.speakbox{display:flex;flex-direction:column;gap:8px}
-.mic{width:100%;border:0;border-radius:18px;padding:14px;font-size:20px;font-weight:900;background:var(--purple);color:#fff;box-shadow:0 5px 0 #3d2163}
-.mic.on{background:var(--bad);animation:pulse 1s ease-in-out infinite alternate}
-@keyframes pulse{to{transform:scale(1.03)}}
-.mic:disabled{opacity:.5}
-.heard{text-align:center;font-size:15px;min-height:1.5em}
-.speakrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 
 /* BUBU 戰士 */
 .bubu-btn{display:flex;align-items:center;gap:2px;background:var(--card);border:2px solid var(--pump);border-radius:999px;padding:0 8px 0 2px;font-weight:900;font-size:14px}
@@ -163,22 +154,26 @@ h1{font-family:var(--display);font-weight:400;font-size:44px;line-height:1.05;ma
 <!-- ===== MENU ===== -->
 <section id="menu">
   <h1>Neuro Halloween</h1>
-  <p class="sub">腦與心智萬聖夜｜臺大腦心所口試單字・英翻中／中翻英／口說</p>
+  <p class="sub">腦與心智萬聖夜｜臺大腦心所口試單字・英翻中／中翻英</p>
   <div class="card" style="margin-top:12px">
     <p class="label">🎃 題型</p>
-    <div class="seg four" id="modeSeg">
+    <div class="seg" id="modeSeg">
       <button data-mode="en2zh" aria-pressed="true">英 → 中</button>
       <button data-mode="zh2en" aria-pressed="false">中 → 英</button>
       <button data-mode="mix" aria-pressed="false">混合</button>
-      <button data-mode="speak" aria-pressed="false">🎤 口說</button>
     </div>
-    <p class="note" id="speakNote">🎤 口說考試：看中文，用英文唸出來。第一次會跳出麥克風權限，請按「允許」。</p>
     <p class="label" style="margin-top:14px">🕸️ 速度</p>
     <div class="seg" id="speedSeg">
       <button data-speed="0" aria-pressed="false">練習・不限時</button>
       <button data-speed="1" aria-pressed="true">普通</button>
       <button data-speed="2" aria-pressed="false">惡夢</button>
     </div>
+    <p class="label" style="margin-top:14px">🎃 南瓜燈（生命）</p>
+    <div class="seg" id="livesSeg" style="grid-template-columns:1fr 1fr">
+      <button data-lives="5" aria-pressed="true">一般・5 顆</button>
+      <button data-lives="100" aria-pressed="false">💪 無敵模式・100 顆</button>
+    </div>
+    <p class="note" id="livesNote" hidden>無敵模式不會輕易 Game Over，適合一次刷完全部單字；分數不列入 🏆 最高分。</p>
     <p class="label" style="margin-top:14px">👻 題數</p>
     <div class="seg" id="countSeg">
       <button data-count="20" aria-pressed="true">20 隻鬼</button>
@@ -245,14 +240,6 @@ h1{font-family:var(--display);font-weight:400;font-size:44px;line-height:1.05;ma
     <button class="say" id="sayBtn" hidden>🔊 發音</button>
   </div>
   <div class="opts" id="opts" style="margin-top:10px"></div>
-  <div class="speakbox" id="speakBox" style="margin-top:10px" hidden>
-    <button class="mic" id="micBtn">🎤 點我開始唸</button>
-    <div class="heard" id="heard"></div>
-    <div class="speakrow">
-      <button class="ghostbtn" id="hintBtn">💡 提示</button>
-      <button class="ghostbtn" id="skipBtn">跳過（算錯）</button>
-    </div>
-  </div>
   <div class="feedback" id="feedback" aria-live="polite"></div>
 </section>
 
@@ -829,7 +816,8 @@ const store = {
   get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
 };
-const prefs = store.get("nh_prefs", { mode: "en2zh", speed: 1, count: 20, secs: SECS.map((_, i) => i) });
+const prefs = Object.assign({ mode: "en2zh", speed: 1, count: 20, lives: 5, secs: SECS.map((_, i) => i) }, store.get("nh_prefs", {}));
+if (!["en2zh", "zh2en", "mix"].includes(prefs.mode)) prefs.mode = "en2zh";  // 舊版存過的「口說」
 let G = null;
 
 /* ---------- menu ---------- */
@@ -842,6 +830,9 @@ function seg(id, key, attr, cast) {
 seg("modeSeg", "mode", "mode", String);
 seg("speedSeg", "speed", "speed", Number);
 seg("countSeg", "count", "count", Number);
+seg("livesSeg", "lives", "lives", Number);
+const syncLivesNote = () => $("livesNote").hidden = prefs.lives <= 5;
+$("livesSeg").addEventListener("click", syncLivesNote); syncLivesNote();
 
 function renderChips() {
   $("secChips").innerHTML = SECS.map((s, i) =>
@@ -916,74 +907,9 @@ function renderCycle() {
   $("cycleBar").style.width = pool.length ? `${done / pool.length * 100}%` : "0";
 }
 
-/* ---------- 口說：Web Speech API 語音辨識 ---------- */
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-if (!SR) {
-  $("speakNote").textContent = "🎤 這個瀏覽器不支援語音辨識，口說模式請改用 Chrome（電腦／Android）或 iPhone 的 Safari 開啟。";
-  $("modeSeg").querySelector('[data-mode="speak"]').disabled = true;
-  if (prefs.mode === "speak") { prefs.mode = "en2zh"; $("modeSeg").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === "en2zh"))); }
-}
-const letters = s => s.toLowerCase().replace(/[^a-z0-9]/g, "");
-// 可以接受的唸法：完整、括號前的全名、括號裡的縮寫；句型去掉 ...
-function targets(en) {
-  const base = en.replace(/\.\.\.$/, "");
-  const out = new Set([base, base.replace(/\s*\(.*?\)\s*/g, " ")]);
-  const ab = base.match(/\(([^)]+)\)/); if (ab) out.add(ab[1]);
-  return [...out].map(letters).filter(Boolean);
-}
-function lev(a, b) {
-  const d = Array.from({ length: b.length + 1 }, (_, i) => i);
-  for (let i = 1; i <= a.length; i++) {
-    let prev = d[0]; d[0] = i;
-    for (let j = 1; j <= b.length; j++) { const t = d[j]; d[j] = Math.min(d[j] + 1, d[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1)); prev = t; }
-  }
-  return d[b.length];
-}
-function heardOk(said, q) {
-  const s = letters(said);
-  return targets(q.en).some(t => {
-    if (s === t || (t.length >= 4 && s.includes(t))) return true;
-    const tol = t.length <= 4 ? 0 : t.length <= 8 ? 1 : Math.floor(t.length * .2);
-    return lev(s, t) <= tol;
-  });
-}
-let rec = null;
-function stopMic() { try { rec && rec.abort(); } catch {} rec = null; $("micBtn").classList.remove("on"); $("micBtn").textContent = "🎤 點我開始唸"; }
-function listen() {
-  if (!SR || G.locked) return;
-  if (rec) return stopMic();
-  try { speechSynthesis.cancel(); } catch {}
-  rec = new SR(); rec.lang = "en-US"; rec.interimResults = true; rec.maxAlternatives = 5; rec.continuous = false;
-  const q = G.q; let got = false;
-  rec.onresult = e => {
-    const r = e.results[e.results.length - 1];
-    const alts = Array.from(r, a => a.transcript);
-    $("heard").innerHTML = `你唸的：<b>${esc(alts[0])}</b>`;
-    if (G.q !== q || G.locked) return;
-    if (alts.some(a => heardOk(a, q))) { got = true; stopMic(); resolve(true); }
-    else if (r.isFinal) { got = true; G.tries++; $("heard").innerHTML = `聽起來像「<b>${esc(alts[0])}</b>」，再唸一次！${G.tries >= 2 ? "（可以按 💡 提示）" : ""}`; sfx.miss(); }
-  };
-  rec.onerror = e => {
-    $("heard").textContent = e.error === "not-allowed" || e.error === "service-not-allowed" ? "麥克風被擋住了：請在瀏覽器設定允許麥克風。"
-      : e.error === "no-speech" ? "沒聽到聲音，再按一次 🎤" : "辨識出了點問題，再按一次 🎤";
-  };
-  rec.onend = () => { if (!got && !$("heard").textContent) $("heard").textContent = "沒聽清楚，再按一次 🎤"; stopMic(); };
-  $("heard").textContent = "";
-  $("micBtn").classList.add("on"); $("micBtn").textContent = "👂 正在聽…再按一次停止";
-  try { rec.start(); } catch { stopMic(); }
-}
-function hint() {
-  if (G.locked) return;
-  G.hints++;
-  if (G.hints === 1) {
-    $("hint").textContent = "💡 " + G.q.en.replace(/\.\.\.$/, "").split(/\s+/).map(w => w[0] + w.slice(1).replace(/[A-Za-z]/g, "_")).join("  ");
-  } else speak(G.q.en);
-  $("hintBtn").textContent = G.hints === 1 ? "🔊 再提示：聽發音" : "🔊 再聽一次";
-}
-
 /* ---------- game ---------- */
 function start(deck, replay) {
-  G = { deck, i: 0, score: 0, lives: 5, combo: 0, maxCombo: 0, right: 0, wrong: [], helped: [], bubu: 1, bubuUsed: 0, replay, locked: false, raf: 0 };
+  G = { deck, i: 0, score: 0, lives: prefs.lives, maxLives: prefs.lives, combo: 0, maxCombo: 0, right: 0, wrong: [], helped: [], bubu: 1, bubuUsed: 0, replay, locked: false, raf: 0 };
   show("game"); renderLives(); renderBubu(); next();
 }
 function startFromMenu() {
@@ -998,7 +924,9 @@ function startFromMenu() {
   if (newCycle) $("feedback").textContent = "🎉 這個範圍全部玩過一輪了，開始新的一輪！";
 }
 function renderLives() {
-  $("lives").innerHTML = Array.from({ length: 5 }, (_, i) => `<span class="${i < G.lives ? "" : "lost"}">🎃</span>`).join("");
+  // 無敵模式 100 顆南瓜放不下，改顯示數字
+  $("lives").innerHTML = G.maxLives > 5 ? `<span>🎃</span><b>×${G.lives}</b>`
+    : Array.from({ length: G.maxLives }, (_, i) => `<span class="${i < G.lives ? "" : "lost"}">🎃</span>`).join("");
 }
 function renderBubu() { $("bubuN").textContent = "×" + G.bubu; $("bubuBtn").disabled = !G.bubu; }
 // 中文意思拆成片段（「顯示／暗示」→ 顯示、暗示），有重疊就算同義，不能當誘答
@@ -1019,35 +947,26 @@ function pickDistractors(q, field) {
   return out;
 }
 function next() {
-  cancelAnimationFrame(G.raf); stopMic();
+  cancelAnimationFrame(G.raf);
   if ($("game").hidden) return;
   if (G.i >= G.deck.length || G.lives <= 0) return finish();
   const q = G.deck[G.i];
   const dir = prefs.mode === "mix" ? (Math.random() < .5 ? "en2zh" : "zh2en") : prefs.mode;
-  G.q = q; G.dir = dir; G.locked = false; G.tries = 0; G.hints = 0;
+  G.q = q; G.dir = dir; G.locked = false;
   $("prog").textContent = `${G.i + 1}/${G.deck.length}`;
   $("feedback").innerHTML = "&nbsp;";
   $("hint").textContent = SECS[q.sec].name;
-  const speaking = dir === "speak";
-  $("opts").hidden = speaking; $("speakBox").hidden = !speaking;
-  if (speaking) {
-    $("dir").textContent = "口說｜看中文，用英文唸出來";
-    setWord(q.zh);
-    $("sayBtn").hidden = true;
-    $("heard").textContent = ""; $("hintBtn").textContent = "💡 提示"; $("micBtn").disabled = false;
-  } else {
-    const ask = dir === "en2zh" ? "en" : "zh", ans = dir === "en2zh" ? "zh" : "en";
-    $("dir").textContent = dir === "en2zh" ? "英翻中｜選出中文意思" : "中翻英｜選出英文";
-    setWord(q[ask]);
-    $("sayBtn").hidden = dir !== "en2zh";
-    const opts = shuffle([q, ...pickDistractors(q, ans)]);
-    $("opts").innerHTML = opts.map((o, k) => `<button class="opt" data-ok="${o === q}"><span class="k">${k + 1}</span>${esc(o[ans])}</button>`).join("");
-  }
+  const ask = dir === "en2zh" ? "en" : "zh", ans = dir === "en2zh" ? "zh" : "en";
+  $("dir").textContent = dir === "en2zh" ? "英翻中｜選出中文意思" : "中翻英｜選出英文";
+  setWord(q[ask]);
+  $("sayBtn").hidden = dir !== "en2zh";
+  const opts = shuffle([q, ...pickDistractors(q, ans)]);
+  $("opts").innerHTML = opts.map((o, k) => `<button class="opt" data-ok="${o === q}"><span class="k">${k + 1}</span>${esc(o[ans])}</button>`).join("");
   const foe = $("foe");
   foe.className = "foe"; foe.querySelector("svg").innerHTML = FOES[G.i % FOES.length];
   foe.style.left = "100%";
-  // ghost approach timer（口說要多一點時間）
-  const base = [0, 11000, 7000][prefs.speed] * (speaking ? 1.7 : 1);
+  // ghost approach timer
+  const base = [0, 11000, 7000][prefs.speed];
   G.dur = base ? Math.max(base * .55, base - G.right * 120) + (q.en.length > 30 ? 3000 : 0) : 0;
   G.t0 = performance.now();
   $("bar").style.width = "100%";
@@ -1068,7 +987,7 @@ function fx(txt, x, y) {
 }
 function useBubu() {
   if (!G || G.locked || !G.bubu || $("game").hidden) return;
-  G.locked = true; cancelAnimationFrame(G.raf); stopMic();
+  G.locked = true; cancelAnimationFrame(G.raf);
   G.bubu--; G.bubuUsed++; renderBubu();
   const sc = $("scene").getBoundingClientRect(), fr = $("foe").getBoundingClientRect();
   const dog = $("bubu"); dog.hidden = false; dog.style.left = "14px"; dog.style.bottom = "10px";
@@ -1082,22 +1001,21 @@ function useBubu() {
 }
 function resolve(ok, { btn = null, timeout = false, bubu = false } = {}) {
   if (G.locked) return;
-  G.locked = true; cancelAnimationFrame(G.raf); stopMic();
+  G.locked = true; cancelAnimationFrame(G.raf);
   const q = G.q;
   seen.add(q.id); saveSeen();
   document.querySelectorAll(".opt").forEach(b => { b.disabled = true; if (b.dataset.ok === "true") b.classList.add("ok"); });
-  $("micBtn").disabled = true;
   const foe = $("foe"), sc = $("scene").getBoundingClientRect(), fr = foe.getBoundingClientRect();
   const fxX = fr.left - sc.left + 30, fxY = fr.top - sc.top + 30;
   const pair = `<b>${esc(q.en)}</b> ＝ <b>${esc(q.zh)}</b>${q.note ? `<br>${esc(q.note)}` : ""}`;
   if (ok) {
     G.combo++; G.maxCombo = Math.max(G.maxCombo, G.combo); G.right++;
-    const speedBonus = G.dur && !bubu && !G.hints ? Math.round(50 * (1 - Math.min(1, (performance.now() - G.t0) / G.dur))) : 0;
-    G.score += (G.hints ? 50 : 100) + speedBonus + (G.combo - 1) * 20;
+    const speedBonus = G.dur && !bubu ? Math.round(50 * (1 - Math.min(1, (performance.now() - G.t0) / G.dur))) : 0;
+    G.score += 100 + speedBonus + (G.combo - 1) * 20;
     foe.classList.add("poof"); sfx.ok();
     for (let k = 0; k < 3; k++) setTimeout(() => fx(TREATS[Math.random() * TREATS.length | 0], fxX + k * 18 - 18, fxY), k * 80);
     if (bubu) { if (!G.helped.includes(q)) G.helped.push(q); $("feedback").innerHTML = `🐶 BUBU 戰士出擊！${pair}`; }
-    else $("feedback").innerHTML = `✅ ${G.dir === "speak" ? "唸對了！" : "Trick or treat!"} ${pair}`;
+    else $("feedback").innerHTML = `✅ Trick or treat! ${pair}`;
     if (G.combo % 5 === 0 && G.bubu < 3) { G.bubu++; renderBubu(); setTimeout(() => fx("🐶+1", 20, 30), 200); $("feedback").innerHTML += "<br>🐶 連對 5 題，BUBU 戰士 +1！"; }
   } else {
     G.combo = 0; G.lives--; renderLives();
@@ -1109,17 +1027,18 @@ function resolve(ok, { btn = null, timeout = false, bubu = false } = {}) {
   }
   $("combo").textContent = G.combo >= 2 ? `x${G.combo} COMBO` : "";
   $("score").textContent = G.score;
-  if (G.dir !== "zh2en" || !ok) speak(q.en);
+  if (G.dir === "en2zh" || !ok) speak(q.en);
   G.i++;
-  setTimeout(next, ok ? (G.dir === "speak" ? 1600 : 1100) : 2400);
+  setTimeout(next, ok ? 1100 : 2400);
 }
 function finish() {
-  cancelAnimationFrame(G.raf); stopMic(); sfx.end();
+  cancelAnimationFrame(G.raf); sfx.end();
+  const invincible = G.maxLives > 5;
   const best = store.get("nh_best", 0);
-  if (G.score > best) store.set("nh_best", G.score);
+  if (!invincible && G.score > best) store.set("nh_best", G.score);
   const total = G.right + G.wrong.length, dead = G.lives <= 0;
   $("resTitle").textContent = dead ? "Game Over…" : "Happy Halloween!";
-  $("resSub").textContent = dead ? "南瓜燈全滅了，背完錯的單字再來挑戰！" : `${total} 隻鬼都被趕走了！${G.score > best ? "🏆 新紀錄！" : ""}`;
+  $("resSub").textContent = dead ? "南瓜燈全滅了，背完錯的單字再來挑戰！" : `${total} 隻鬼都被趕走了！${invincible ? `（無敵模式，剩 ${G.lives} 顆南瓜）` : G.score > best ? "🏆 新紀錄！" : ""}`;
   $("resScore").textContent = G.score;
   $("stRight").textContent = G.right; $("stWrong").textContent = G.wrong.length; $("stCombo").textContent = G.maxCombo;
   const pool = rangePool(), done = pool.filter(q => seen.has(q.id)).length;
@@ -1139,13 +1058,10 @@ document.addEventListener("keydown", e => {
   if (e.key === "b" || e.key === "B") return useBubu();
   const n = +e.key; if (n >= 1 && n <= 4) { const b = document.querySelectorAll(".opt")[n - 1]; if (b && !$("opts").hidden) b.click(); }
 });
-$("micBtn").onclick = listen;
-$("hintBtn").onclick = hint;
-$("skipBtn").onclick = () => resolve(false);
 $("bubuBtn").onclick = useBubu;
 $("sayBtn").onclick = () => speak(G.q.en);
 $("startBtn").onclick = startFromMenu;
-$("quitBtn").onclick = () => { cancelAnimationFrame(G.raf); stopMic(); show("menu"); renderCycle(); };
+$("quitBtn").onclick = () => { cancelAnimationFrame(G.raf); show("menu"); renderCycle(); };
 $("again").onclick = () => G.replay();
 $("retryWrong").onclick = () => { const w = G.wrong.slice(); const again = () => start(shuffle(w), again); again(); };
 $("toMenu").onclick = () => { show("menu"); renderCycle(); };
