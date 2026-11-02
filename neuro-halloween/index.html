@@ -107,6 +107,15 @@ h1{font-family:var(--display);font-weight:400;font-size:44px;line-height:1.05;ma
 .intro svg{flex:0 0 64px;width:64px}
 .intro p{margin:0;font-size:13px;color:var(--sub)}
 .intro b{color:var(--ink)}
+/* 打開就有的鼓勵：BUBU 說話的對話框 */
+.cheer{display:flex;gap:10px;align-items:flex-end;margin-top:12px}
+.cheer svg{flex:0 0 58px;width:58px}
+.cheer .bub{position:relative;flex:1;background:var(--card);border:2px solid var(--pump);border-radius:16px;padding:10px 14px;margin-bottom:10px;cursor:pointer;animation:pop .4s cubic-bezier(.3,1.6,.5,1)}
+.cheer .bub::before{content:"";position:absolute;left:-10px;bottom:14px;border:8px solid transparent;border-right-color:var(--pump);border-left:0}
+.cheer .zh{font-weight:900;font-size:16px;line-height:1.45}
+.cheer .en{font-size:13px;color:var(--sub);margin-top:2px}
+.cheer .tap{font-size:11px;color:var(--sub);margin-top:4px;text-align:right}
+@keyframes pop{from{transform:scale(.7);opacity:0}}
 .feedback{min-height:3.2em;font-size:14px;text-align:center;color:var(--sub)}
 .feedback b{color:var(--ink)}
 .shake{animation:shake .4s}
@@ -155,6 +164,14 @@ h1{font-family:var(--display);font-weight:400;font-size:44px;line-height:1.05;ma
 <section id="menu">
   <h1>Neuro Halloween</h1>
   <p class="sub">腦與心智萬聖夜｜臺大腦心所口試單字・英翻中／中翻英</p>
+  <div class="cheer">
+    <svg viewBox="0 0 100 92" aria-hidden="true"><use href="#maltese"/></svg>
+    <div class="bub" id="cheer" role="button" tabindex="0" aria-live="polite" title="點一下換一句">
+      <div class="zh" id="cheerZh"></div>
+      <div class="en" id="cheerEn"></div>
+      <div class="tap">BUBU 戰士・點我換一句 🐾</div>
+    </div>
+  </div>
   <div class="card" style="margin-top:12px">
     <p class="label">🎃 題型</p>
     <div class="seg" id="modeSeg">
@@ -852,6 +869,34 @@ $("allOn").onclick = () => { prefs.secs = SECS.map((_, i) => i); store.set("nh_p
 $("allOff").onclick = () => { prefs.secs = []; store.set("nh_prefs", prefs); renderChips(); };
 function renderBest() { const b = store.get("nh_best", 0); $("bestLine").textContent = b ? `🏆 最高分 ${b}` : ""; }
 renderChips(); renderBest();
+
+/* ---------- 打開就有的鼓勵（BUBU 說），點一下換一句 ---------- */
+const CHEERS = [
+  ["你已經準備得比你以為的還要多了！", "You're more prepared than you think."],
+  ["每背一個單字，離臺大腦心所就更近一步 🧠", "Every word brings you one step closer."],
+  ["口試只是把你會的東西說出來，你可以的！", "Just show them what you already know."],
+  ["今天也來趕幾隻鬼吧，汪！", "Let's chase some ghosts today. Woof!"],
+  ["錯了沒關係，大腦就是靠犯錯學習的（Reward prediction error！）", "Mistakes are how the brain learns."],
+  ["你的 neuroplasticity 正在發揮作用 ✨", "Your neuroplasticity is working right now."],
+  ["慢慢來也沒關係，持續練習就會穩穩進步", "Slow and steady wins the race."],
+  ["深呼吸，相信自己，你值得那個位子 🎃", "Take a deep breath. You belong there."],
+  ["Long-term potentiation 啟動中：多練幾次，記憶就會變牢固！", "Practice makes your synapses stronger."],
+  ["BUBU 戰士永遠站在你這邊 🐶", "BUBU is always on your side."],
+  ["比昨天的自己多會一個字，就是進步", "One more word than yesterday is progress."],
+  ["教授們會看到你的認真和熱情的！", "Your passion will shine through."],
+  ["緊張是正常的，那代表你很在乎 💪", "Feeling nervous means you care."],
+  ["你一定可以順利上榜，加油！", "You've got this. Go get it!"],
+];
+let cheerI = -1;
+function cheer() {
+  let i; do { i = Math.random() * CHEERS.length | 0; } while (i === cheerI && CHEERS.length > 1);
+  cheerI = i;
+  const b = $("cheer"); b.style.animation = "none"; void b.offsetWidth; b.style.animation = "";
+  $("cheerZh").textContent = CHEERS[i][0]; $("cheerEn").textContent = CHEERS[i][1];
+}
+$("cheer").onclick = cheer;
+$("cheer").onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); cheer(); } };
+cheer();
 
 /* ---------- helpers ---------- */
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
