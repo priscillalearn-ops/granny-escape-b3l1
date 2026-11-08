@@ -6,7 +6,7 @@
 **小遊戲（單字跑酷）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/parkour/
 **小遊戲（駕照ヨシ！汽車筆試）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/driving/
 **小遊戲（腦與心智萬聖夜 Neuro Halloween）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/neuro-halloween/
-**單字精靈探險（藍思分級・小六雛形）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/lexile-quest/（老師需求確認表：`lexile-quest/訪談表.md`）
+**單字守城（藍思分級・小六雛形）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/lexile-quest/（老師需求確認表：`lexile-quest/訪談表.md`）
 
 ## 獨立的週評量版本（不跟上面的題庫混在一起）
 
