@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>藍思單字探險</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Noto+Sans+TC:wght@400;700;900&display=swap">
+<style>
+/* 雛形：地圖（3 關）→ 預習單字卡 → 闖關（10 題、3 顆心）→ 結算星星 → 錯題本 */
+:root{
+  --bg:#eef6ff; --card:#ffffff; --ink:#1f2a3a; --sub:#5d6b80; --line:#d6e2f0;
+  --pri:#2f7de1; --priD:#1d5fb3; --good:#2e9e5b; --bad:#d9443b; --gold:#f5b301;
+  --opt:#f4f8fd; --optH:#e3eefb; --shadow:0 4px 0 #c5d6ea;
+  --display:"Baloo 2","Noto Sans TC",system-ui,sans-serif;
+  --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1622; --card:#1a2433; --ink:#eef3fa; --sub:#9fb0c6; --line:#2c3a4f;
+  --pri:#5aa0ff; --priD:#3a7fd9; --good:#4cc27e; --bad:#ff6b5f; --gold:#ffc83a;
+  --opt:#223046; --optH:#2b3c57; --shadow:0 4px 0 #080d15; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1622; --card:#1a2433; --ink:#eef3fa; --sub:#9fb0c6; --line:#2c3a4f;
+  --pri:#5aa0ff; --priD:#3a7fd9; --good:#4cc27e; --bad:#ff6b5f; --gold:#ffc83a;
+  --opt:#223046; --optH:#2b3c57; --shadow:0 4px 0 #080d15; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;
+  -webkit-tap-highlight-color:transparent}
+.wrap{max-width:560px;margin:0 auto;padding:16px 16px 40px}
+h1{font-family:var(--display);font-size:34px;line-height:1.1;margin:8px 0 2px;text-align:center}
+.tag{text-align:center;color:var(--sub);margin:0 0 18px;font-size:15px}
+.card{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 18px;border-radius:14px;
+  font-weight:700;background:var(--pri);color:#fff;box-shadow:0 4px 0 var(--priD);min-height:48px}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--priD)}
+.btn.ghost{background:var(--opt);color:var(--ink);box-shadow:0 4px 0 var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row .btn{flex:1 1 140px}
+
+/* 地圖 */
+.stage{display:flex;gap:14px;align-items:center}
+.stage .ico{font-size:44px;width:64px;height:64px;display:grid;place-items:center;border-radius:16px;background:var(--opt);flex:none}
+.stage h2{margin:0;font-size:20px}
+.stage .lx{display:inline-block;font-size:13px;font-weight:700;color:var(--pri);background:var(--opt);border-radius:999px;padding:1px 10px;margin-left:6px;vertical-align:2px}
+.stage p{margin:2px 0 0;color:var(--sub);font-size:14px}
+.stars{color:var(--gold);letter-spacing:2px;font-size:18px}
+.locked{opacity:.55}
+.stage-actions{margin-top:12px}
+
+/* 闖關 */
+.hud{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-weight:700}
+.hearts{font-size:22px;letter-spacing:2px}
+.bar{height:10px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:14px}
+.bar i{display:block;height:100%;background:var(--pri);width:0;transition:width .3s}
+.qtype{font-size:14px;color:var(--sub);font-weight:700}
+.prompt{font-size:30px;font-weight:900;margin:6px 0 4px;word-break:break-word}
+.prompt.sent{font-size:21px;font-weight:700;line-height:1.5}
+.blank{display:inline-block;min-width:90px;border-bottom:3px solid var(--pri);margin:0 4px}
+.speak{font-size:15px;padding:6px 12px;border-radius:999px;background:var(--opt);font-weight:700;margin-top:4px}
+.big-speak{font-size:56px;width:110px;height:110px;border-radius:50%;background:var(--opt);display:grid;place-items:center;margin:8px auto}
+.opts{display:grid;gap:10px;margin-top:14px}
+.opt{text-align:left;padding:14px 16px;border-radius:14px;background:var(--opt);border:2px solid var(--line);font-size:19px;font-weight:700;min-height:56px}
+.opt:hover:not(:disabled){background:var(--optH)}
+.opt.ok{background:var(--good);border-color:var(--good);color:#fff}
+.opt.no{background:var(--bad);border-color:var(--bad);color:#fff}
+.opt:disabled{cursor:default}
+.fb{margin-top:14px;padding:12px 14px;border-radius:14px;font-size:16px}
+.fb.ok{background:color-mix(in srgb,var(--good) 15%,transparent)}
+.fb.no{background:color-mix(in srgb,var(--bad) 13%,transparent)}
+.fb b{font-size:18px}
+.fb .ex{color:var(--sub);margin-top:4px}
+
+/* 單字卡 / 錯題本 */
+.word{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line)}
+.word:last-child{border-bottom:0}
+.word .en{font-size:21px;font-weight:900}
+.word .zh{font-weight:700}
+.word .pos{color:var(--sub);font-size:14px;margin-left:4px}
+.word .ex{color:var(--sub);font-size:15px}
+.result{text-align:center}
+.result .big{font-size:54px;letter-spacing:6px;color:var(--gold);margin:6px 0}
+.note{font-size:13px;color:var(--sub);text-align:center;margin-top:20px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.link{color:var(--pri);font-weight:700;padding:8px 4px}
+@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.shake{animation:shake .3s}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+/* =========================================================
+   給老師／維護者：只要改這一段的單字就能換題庫。
+   每個字：w 英文、zh 中文、pos 詞性、ex 例句（例句裡要「原封不動」出現 w，
+   填空題才挖得掉）、exZh 例句中譯。每關 10 個字。
+   ※ 下面是示範用單字，依小六程度挑選，並非官方 Lexile 字表。
+   ========================================================= */
+const STAGES = [
+  { id:'forest', name:'魔法森林', icon:'🌳', lexile:'300L–400L', desc:'日常生活單字', words:[
+    {w:'brave',   zh:'勇敢的', pos:'adj.', ex:'The brave boy helped the lost dog.', exZh:'那個勇敢的男孩幫助了走失的狗。'},
+    {w:'hungry',  zh:'餓的',   pos:'adj.', ex:'I am hungry, so I want to eat lunch now.', exZh:'我餓了，所以現在想吃午餐。'},
+    {w:'quiet',   zh:'安靜的', pos:'adj.', ex:'Please be quiet in the library.', exZh:'在圖書館裡請保持安靜。'},
+    {w:'carry',   zh:'搬；提', pos:'v.',   ex:'Can you carry this box for me?', exZh:'你可以幫我搬這個箱子嗎？'},
+    {w:'shout',   zh:'大喊',   pos:'v.',   ex:'Please don\'t shout in the classroom.', exZh:'請不要在教室裡大喊。'},
+    {w:'forest',  zh:'森林',   pos:'n.',   ex:'Many animals live in the forest.', exZh:'很多動物住在森林裡。'},
+    {w:'smile',   zh:'微笑',   pos:'n.',   ex:'She has a big smile on her face.', exZh:'她臉上掛著大大的微笑。'},
+    {w:'travel',  zh:'旅行',   pos:'v.',   ex:'We travel to Tainan every summer.', exZh:'我們每年夏天都去台南旅行。'},
+    {w:'heavy',   zh:'重的',   pos:'adj.', ex:'This bag is too heavy for me.', exZh:'這個包包對我來說太重了。'},
+    {w:'afraid',  zh:'害怕的', pos:'adj.', ex:'My little sister is afraid of the dark.', exZh:'我妹妹怕黑。'},
+  ]},
+  { id:'ocean', name:'神祕海洋', icon:'🐋', lexile:'400L–550L', desc:'故事與自然單字', words:[
+    {w:'discover', zh:'發現',     pos:'v.',   ex:'Scientists discover new fish in the ocean every year.', exZh:'科學家每年都在海裡發現新的魚。'},
+    {w:'journey',  zh:'旅程',     pos:'n.',   ex:'The journey across the sea took ten days.', exZh:'橫越大海的旅程花了十天。'},
+    {w:'curious',  zh:'好奇的',   pos:'adj.', ex:'The curious cat looked inside the box.', exZh:'那隻好奇的貓往箱子裡看。'},
+    {w:'protect',  zh:'保護',     pos:'v.',   ex:'We should protect the sea turtles.', exZh:'我們應該保護海龜。'},
+    {w:'dangerous',zh:'危險的',   pos:'adj.', ex:'It is dangerous to swim alone.', exZh:'獨自游泳很危險。'},
+    {w:'island',   zh:'島嶼',     pos:'n.',   ex:'Taiwan is a beautiful island.', exZh:'台灣是一座美麗的島嶼。'},
+    {w:'gather',   zh:'收集；聚集',pos:'v.',  ex:'The children gather shells on the beach.', exZh:'孩子們在沙灘上撿貝殼。'},
+    {w:'disappear',zh:'消失',     pos:'v.',   ex:'The boat began to disappear into the fog.', exZh:'那艘船開始消失在霧中。'},
+    {w:'surface',  zh:'表面',     pos:'n.',   ex:'The whale came up to the surface of the water.', exZh:'鯨魚浮到了水面上。'},
+    {w:'patient',  zh:'有耐心的', pos:'adj.', ex:'Be patient. The fish will come soon.', exZh:'要有耐心，魚很快就會來。'},
+  ]},
+  { id:'space', name:'星際太空', icon:'🚀', lexile:'550L–700L', desc:'知識性文章單字', words:[
+    {w:'explore',    zh:'探索',   pos:'v.',   ex:'Astronauts explore space in a rocket.', exZh:'太空人搭火箭探索太空。'},
+    {w:'enormous',   zh:'巨大的', pos:'adj.', ex:'Jupiter is an enormous planet.', exZh:'木星是一顆巨大的行星。'},
+    {w:'observe',    zh:'觀察',   pos:'v.',   ex:'We observe the moon with a telescope.', exZh:'我們用望遠鏡觀察月亮。'},
+    {w:'ancient',    zh:'古老的', pos:'adj.', ex:'People in ancient times also looked at the stars.', exZh:'古時候的人也會看星星。'},
+    {w:'distance',   zh:'距離',   pos:'n.',   ex:'The distance from Earth to the moon is very long.', exZh:'地球到月球的距離非常遠。'},
+    {w:'survive',    zh:'存活',   pos:'v.',   ex:'Plants cannot survive without water.', exZh:'植物沒有水就無法存活。'},
+    {w:'launch',     zh:'發射',   pos:'v.',   ex:'They will launch the rocket tomorrow morning.', exZh:'他們明天早上會發射火箭。'},
+    {w:'mysterious', zh:'神祕的', pos:'adj.', ex:'Black holes are very mysterious.', exZh:'黑洞非常神祕。'},
+    {w:'temperature',zh:'溫度',   pos:'n.',   ex:'The temperature on Mars is very low.', exZh:'火星上的溫度非常低。'},
+    {w:'scientist',  zh:'科學家', pos:'n.',   ex:'My dream is to become a scientist.', exZh:'我的夢想是成為科學家。'},
+  ]},
+];
+const HEARTS = 3;               // 每關幾顆心
+const SAVE_KEY = 'lexile_quest_v1';
+
+/* ---------- 存檔（只存在這台裝置的瀏覽器） ---------- */
+function load(){ try{ return JSON.parse(localStorage.getItem(SAVE_KEY)) || {}; }catch(e){ return {}; } }
+function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){} }
+const S = Object.assign({ stars:{}, wrong:{} }, load());   // stars[stageId]=0..3, wrong[word]=次數
+
+/* ---------- 小工具 ---------- */
+const $app = document.getElementById('app');
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const shuffle = a => { a = a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const pick = (a,n) => shuffle(a).slice(0,n);
+const allWords = STAGES.flatMap(s => s.words);
+const findWord = w => allWords.find(x => x.w === w);
+
+let voice = null;
+function speak(text){
+  if(!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US'; u.rate = 0.85;
+  if(!voice){ voice = speechSynthesis.getVoices().find(v => /en[-_]US/i.test(v.lang)) || null; }
+  if(voice) u.voice = voice;
+  speechSynthesis.speak(u);
+}
+const canSpeak = 'speechSynthesis' in window;
+const starStr = n => '★'.repeat(n) + '☆'.repeat(3-n);
+const unlocked = i => i === 0 || (S.stars[STAGES[i-1].id] || 0) > 0;
+
+/* ---------- 畫面：地圖 ---------- */
+function showMap(){
+  const wrongN = Object.keys(S.wrong).length;
+  $app.innerHTML = `
+    <h1>🗺️ 藍思單字探險</h1>
+    <p class="tag">Lexile Word Quest・小六版雛形</p>
+    ${STAGES.map((st,i) => {
+      const open = unlocked(i), got = S.stars[st.id] || 0;
+      return `<div class="card ${open?'':'locked'}">
+        <div class="stage">
+          <div class="ico">${open ? st.icon : '🔒'}</div>
+          <div style="flex:1">
+            <h2>第 ${i+1} 關　${esc(st.name)}<span class="lx">${esc(st.lexile)}</span></h2>
+            <p>${esc(st.desc)}・${st.words.length} 個字</p>
+            <div class="stars">${starStr(got)}</div>
+          </div>
+        </div>
+        <div class="row stage-actions">
+          ${open
+            ? `<button class="btn ghost" data-learn="${i}">📖 先看單字卡</button>
+               <button class="btn" data-play="${i}">▶ 開始闖關</button>`
+            : `<p style="margin:0;color:var(--sub);font-size:14px">過了上一關（拿到至少 1 顆星）才會開啟</p>`}
+        </div>
+      </div>`;
+    }).join('')}
+    <div class="row">
+      <button class="btn ghost" id="toWrong">📒 錯題本（${wrongN}）</button>
+      <button class="btn ghost" id="toHelp">❓ 怎麼玩</button>
+    </div>
+    <p class="note">進度只存在這台裝置的瀏覽器，不會上傳。示範單字依小六程度挑選，並非官方 Lexile 字表。</p>`;
+  $app.querySelectorAll('[data-learn]').forEach(b => b.onclick = () => showLearn(+b.dataset.learn));
+  $app.querySelectorAll('[data-play]').forEach(b => b.onclick = () => startStage(+b.dataset.play));
+  document.getElementById('toWrong').onclick = showWrong;
+  document.getElementById('toHelp').onclick = showHelp;
+  scrollTo(0,0);
+}
+
+function topbar(title){
+  return `<div class="topbar"><button class="link" id="back">← 回地圖</button><b>${esc(title)}</b><span style="width:70px"></span></div>`;
+}
+
+function wordRow(x, extra=''){
+  return `<div class="word">
+    <div>
+      <div><span class="en">${esc(x.w)}</span><span class="pos">${esc(x.pos)}</span>　<span class="zh">${esc(x.zh)}</span>${extra}</div>
+      <div class="ex">${esc(x.ex)}<br>${esc(x.exZh)}</div>
+    </div>
+    ${canSpeak ? `<button class="speak" data-say="${esc(x.w)}">🔊</button>` : ''}
+  </div>`;
+}
+function bindSay(){ $app.querySelectorAll('[data-say]').forEach(b => b.onclick = () => speak(b.dataset.say)); }
+
+/* ---------- 畫面：單字卡 ---------- */
+function showLearn(i){
+  const st = STAGES[i];
+  $app.innerHTML = `${topbar(st.icon+' '+st.name)}
+    <div class="card">${st.words.map(x => wordRow(x)).join('')}</div>
+    <button class="btn" style="width:100%" id="go">我準備好了，開始闖關 ▶</button>`;
+  document.getElementById('back').onclick = showMap;
+  document.getElementById('go').onclick = () => startStage(i);
+  bindSay(); scrollTo(0,0);
+}
+
+/* ---------- 出題 ---------- */
+const TYPES = ['en2zh','zh2en','listen','fill'];
+const TYPE_LABEL = { en2zh:'看英文，選中文', zh2en:'看中文，選英文', listen:'聽發音，選單字', fill:'例句填空' };
+
+function makeQuestion(x, pool, type){
+  if(type === 'listen' && !canSpeak) type = 'zh2en';
+  const others = pick(pool.filter(y => y.w !== x.w), 3);
+  const opts = shuffle([x, ...others]);
+  const q = { word:x, type, opts, answer:x.w };
+  if(type === 'en2zh') q.labels = opts.map(o => o.zh);
+  else q.labels = opts.map(o => o.w);
+  return q;
+}
+
+/* ---------- 畫面：闖關 ---------- */
+let G = null;
+function startStage(i){
+  const st = STAGES[i];
+  const types = shuffle([...TYPES, ...TYPES, ...TYPES]).slice(0, st.words.length);
+  G = { i, st, qs: shuffle(st.words).map((x,k) => makeQuestion(x, st.words, types[k])),
+        k:0, hearts:HEARTS, right:0, missed:[] };
+  showQ();
+}
+
+function showQ(){
+  const q = G.qs[G.k], x = q.word;
+  let promptHtml;
+  if(q.type === 'en2zh') promptHtml = `<div class="prompt">${esc(x.w)}</div>${canSpeak?`<button class="speak" data-say="${esc(x.w)}">🔊 聽發音</button>`:''}`;
+  else if(q.type === 'zh2en') promptHtml = `<div class="prompt">${esc(x.zh)} <span class="pos" style="font-size:16px;color:var(--sub)">${esc(x.pos)}</span></div>`;
+  else if(q.type === 'listen') promptHtml = `<button class="big-speak" data-say="${esc(x.w)}" aria-label="再聽一次">🔊</button><p style="text-align:center;color:var(--sub);margin:0">點喇叭可以再聽一次</p>`;
+  else {
+    const parts = x.ex.split(x.w);
+    promptHtml = `<div class="prompt sent">${esc(parts[0])}<span class="blank">&nbsp;</span>${esc(parts.slice(1).join(x.w))}</div>
+      <div style="color:var(--sub);font-size:15px">${esc(x.exZh)}</div>`;
+  }
+  $app.innerHTML = `${topbar(G.st.icon+' '+G.st.name)}
+    <div class="hud"><span class="hearts">${'❤️'.repeat(G.hearts)}${'🤍'.repeat(HEARTS-G.hearts)}</span><span>${G.k+1} / ${G.qs.length}</span></div>
+    <div class="bar"><i style="width:${G.k/G.qs.length*100}%"></i></div>
+    <div class="card" id="qcard">
+      <div class="qtype">${TYPE_LABEL[q.type]}</div>
+      ${promptHtml}
+      <div class="opts">${q.labels.map((l,j) => `<button class="opt" data-j="${j}">${esc(l)}</button>`).join('')}</div>
+      <div id="fb"></div>
+    </div>`;
+  document.getElementById('back').onclick = () => { if(confirm('確定要離開嗎？這一關的進度不會保留。')) showMap(); };
+  bindSay();
+  $app.querySelectorAll('.opt').forEach(b => b.onclick = () => answer(+b.dataset.j));
+  if(q.type === 'listen') setTimeout(() => speak(x.w), 250);
+}
+
+function answer(j){
+  const q = G.qs[G.k], x = q.word;
+  const ok = q.opts[j].w === q.answer;
+  const btns = $app.querySelectorAll('.opt');
+  btns.forEach((b,n) => { b.disabled = true; if(q.opts[n].w === q.answer) b.classList.add('ok'); });
+  if(ok){
+    G.right++;
+    if(S.wrong[x.w]){ S.wrong[x.w]--; if(S.wrong[x.w] <= 0) delete S.wrong[x.w]; }
+  }else{
+    btns[j].classList.add('no');
+    document.getElementById('qcard').classList.add('shake');
+    G.hearts--; G.missed.push(x.w);
+    S.wrong[x.w] = (S.wrong[x.w] || 0) + 1;
+  }
+  save();
+  if(q.type !== 'listen' && canSpeak) speak(x.w);
+  const last = G.k === G.qs.length - 1 || G.hearts <= 0;
+  document.getElementById('fb').innerHTML = `<div class="fb ${ok?'ok':'no'}">
+      ${ok ? '✅ 答對了！' : '❌ 正確答案是：'} <b>${esc(x.w)}</b> ${esc(x.pos)} ${esc(x.zh)}
+      <div class="ex">${esc(x.ex)}<br>${esc(x.exZh)}</div>
+    </div>
+    <button class="btn" style="width:100%;margin-top:12px" id="next">${last ? '看結果' : '下一題 →'}</button>`;
+  const nb = document.getElementById('next');
+  nb.focus({preventScroll:true});
+  nb.onclick = () => { if(last) showResult(); else { G.k++; showQ(); } };
+}
+
+/* ---------- 畫面：結算 ---------- */
+function showResult(){
+  const pass = G.hearts > 0;
+  const stars = pass ? G.hearts : 0;      // 剩幾顆心 = 幾顆星
+  const prev = S.stars[G.st.id] || 0;
+  if(stars > prev){ S.stars[G.st.id] = stars; save(); }
+  const nextOpen = pass && G.i < STAGES.length - 1;
+  const missed = [...new Set(G.missed)].map(findWord);
+  $app.innerHTML = `
+    <div class="card result">
+      <div style="font-size:48px">${pass ? (stars===3?'🏆':'🎉') : '💪'}</div>
+      <h2 style="margin:4px 0">${pass ? '過關！' : '差一點點！再試一次'}</h2>
+      <div class="big">${starStr(stars)}</div>
+      <p style="margin:0">答對 ${G.right} 題${pass ? '' : `（在第 ${G.k+1} 題用完了愛心）`}</p>
+      ${stars > prev && prev > 0 ? '<p style="color:var(--good);font-weight:700;margin:6px 0 0">刷新最佳紀錄！</p>' : ''}
+      ${nextOpen && prev === 0 ? `<p style="color:var(--pri);font-weight:700;margin:6px 0 0">🔓 第 ${G.i+2} 關開啟了！</p>` : ''}
+    </div>
+    ${missed.length ? `<div class="card"><b>這一關答錯的字</b>${missed.map(x => wordRow(x)).join('')}</div>` : ''}
+    <div class="row">
+      <button class="btn ghost" id="again">🔁 再玩一次</button>
+      ${nextOpen ? `<button class="btn" id="next">下一關 ▶</button>` : `<button class="btn" id="map">回地圖</button>`}
+    </div>`;
+  bindSay();
+  document.getElementById('again').onclick = () => startStage(G.i);
+  const n = document.getElementById('next'); if(n) n.onclick = () => startStage(G.i + 1);
+  const m = document.getElementById('map'); if(m) m.onclick = showMap;
+  scrollTo(0,0);
+}
+
+/* ---------- 畫面：錯題本 ---------- */
+function showWrong(){
+  const list = Object.entries(S.wrong).sort((a,b) => b[1]-a[1]).map(([w,n]) => [findWord(w), n]).filter(([x]) => x);
+  $app.innerHTML = `${topbar('📒 錯題本')}
+    ${list.length
+      ? `<div class="card">${list.map(([x,n]) => wordRow(x, ` <span style="color:var(--bad);font-size:14px;font-weight:700">錯 ${n} 次</span>`)).join('')}</div>
+         <p style="color:var(--sub);font-size:14px;margin:0 0 12px">在闖關或複習中答對一次，錯誤次數就會減 1，減到 0 就會從錯題本畢業。</p>
+         ${list.length >= 4 ? `<button class="btn" style="width:100%" id="review">🎯 只練錯題（${Math.min(list.length,10)} 題）</button>` : '<p style="color:var(--sub);font-size:14px">錯題累積到 4 個以上就能開「只練錯題」。</p>'}`
+      : `<div class="card" style="text-align:center"><div style="font-size:44px">🌟</div><p>目前沒有錯題，太厲害了！</p></div>`}`;
+  document.getElementById('back').onclick = showMap;
+  bindSay();
+  const r = document.getElementById('review');
+  if(r) r.onclick = () => {
+    const words = list.slice(0,10).map(([x]) => x);
+    G = { i:-1, st:{ id:'_review', name:'錯題複習', icon:'🎯' },
+          qs: shuffle(words).map((x,k) => makeQuestion(x, words.length >= 4 ? words : allWords, TYPES[k % 4])),
+          k:0, hearts:HEARTS, right:0, missed:[] };
+    showQ();
+  };
+  scrollTo(0,0);
+}
+
+/* ---------- 畫面：說明 ---------- */
+function showHelp(){
+  $app.innerHTML = `${topbar('❓ 怎麼玩')}
+    <div class="card">
+      <p style="margin-top:0">🗺️ 一共有 <b>3 關</b>，難度依藍思（Lexile）分級由淺到深。</p>
+      <p>📖 每一關可以先看<b>單字卡</b>預習，再按「開始闖關」。</p>
+      <p>❤️ 每關 10 題、有 <b>3 顆心</b>，答錯扣一顆，心用完就要重來。</p>
+      <p>⭐ 過關時剩幾顆心就拿幾顆星。拿到至少 1 顆星，下一關就會打開。</p>
+      <p>🧩 題型有四種：看英文選中文、看中文選英文、聽發音選單字、例句填空。</p>
+      <p style="margin-bottom:0">📒 答錯的字會收進<b>錯題本</b>，可以只練錯題。</p>
+    </div>
+    <button class="btn ghost" style="width:100%" id="reset">清除這台裝置的進度</button>`;
+  document.getElementById('back').onclick = showMap;
+  document.getElementById('reset').onclick = () => {
+    if(confirm('確定要清除所有星星和錯題本嗎？')){ S.stars = {}; S.wrong = {}; save(); showMap(); }
+  };
+  scrollTo(0,0);
+}
+
+if(canSpeak) speechSynthesis.onvoiceschanged = () => { voice = null; };
+showMap();
+</script>
+</body>
+</html>
