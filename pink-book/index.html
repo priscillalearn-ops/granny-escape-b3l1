@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
 <title>閱讀守城</title>
+<meta name="description" content="Grade 3 英文守城遊戲：Pink Book Cycles 3–4 閱讀複習＋G3 Grammar 文法。答對題目，弓箭手就會射退敵人。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://priscillalearn-ops.github.io/granny-escape-b3l1/pink-book/">
+<meta property="og:title" content="閱讀守城｜Grade 3 Reading & Grammar">
+<meta property="og:description" content="Pink Book Cycles 3–4 閱讀複習＋G3 Grammar 文法。答對題目，弓箭手就會射退敵人。">
+<meta property="og:image" content="https://priscillalearn-ops.github.io/granny-escape-b3l1/pink-book/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://priscillalearn-ops.github.io/granny-escape-b3l1/pink-book/og.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700;800&family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@400;500;700&display=swap">
@@ -161,7 +171,7 @@ button:focus-visible{outline:3px solid var(--ochre);outline-offset:2px}
 </head>
 <body>
 <div class="wrap" id="app"></div>
-<div class="modal" id="modal" hidden><div class="box"><p id="modalMsg"></p><div class="row"><button class="btn alt" id="modalNo">取消</button><button class="btn" id="modalYes">確定</button></div></div></div>
+<div class="modal" id="modal" hidden><div class="box"><p id="modalMsg"></p><div class="row"><button class="btn alt" id="modalNo"></button><button class="btn" id="modalYes"></button></div></div></div>
 
 <script>
 /* =========================================================
@@ -1106,6 +1116,8 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>'
 function ask(msg, onYes){
   const m = document.getElementById('modal');
   document.getElementById('modalMsg').textContent = msg;
+  document.getElementById('modalNo').textContent = '取消';
+  document.getElementById('modalYes').textContent = '確定';
   m.hidden = false;
   document.getElementById('modalNo').onclick = () => { m.hidden = true; };
   document.getElementById('modalYes').onclick = () => { m.hidden = true; onYes(); };
