@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>閱讀守城</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700;800&family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* 版面：單欄。上方是戰場畫布（城堡在左，敵人沿小路從右邊走來），下方是題目板。
+   畫風：繪本式平塗＋墨線，冷調石牆與暮色天空，赭黃旗幟點綴。整頁固定深色石板底。 */
+:root{
+  --page:#1f2a30; --page2:#283740; --panel:#eef0ea; --panel2:#e0e5dd; --ink:#1c2428; --muted:#5d686b; --line:#c3cbc2;
+  --ochre:#c9932e; --ochreD:#9c6f1c; --moss:#4f7a4a; --brick:#a8463a; --steel:#2f4a5e; --steelD:#1d3240;
+  --onDark:#e9ece4; --onDarkMuted:#a3b0ae;
+  --display:"Noto Serif TC","Songti TC","PMingLiU",serif;
+  --latin:"Alegreya",Georgia,"Times New Roman",serif;
+  --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+[hidden]{display:none!important}
+body{background:var(--page);color:var(--onDark);font-family:var(--body);font-size:16px;line-height:1.6;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:760px;margin:0 auto;padding-block:18px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible{outline:3px solid var(--ochre);outline-offset:2px}
+.latin{font-family:var(--latin)}
+.ipa{font-family:"Charis SIL","Doulos SIL","Lucida Sans Unicode","Arial Unicode MS",sans-serif;font-size:.85em;color:var(--muted);font-weight:400}
+
+/* 標題 */
+.brand{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:6px 0 18px;border-bottom:1px solid #ffffff1f;padding-bottom:14px}
+.brand h1{font-family:var(--display);font-weight:900;font-size:36px;letter-spacing:.12em;margin:0;line-height:1.1}
+.brand .en{font-family:var(--latin);font-weight:700;font-size:13px;letter-spacing:.24em;text-transform:uppercase;color:var(--ochre);display:block;margin-bottom:4px}
+.brand p{margin:0;color:var(--onDarkMuted);font-size:14px}
+
+/* 按鈕 */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;border-radius:8px;font-weight:700;background:var(--steel);color:var(--onDark);box-shadow:inset 0 -3px 0 var(--steelD);min-height:46px}
+.btn:active{transform:translateY(2px);box-shadow:inset 0 -1px 0 var(--steelD)}
+.btn.gold{background:var(--ochre);color:#1c1608;box-shadow:inset 0 -3px 0 var(--ochreD)}
+.btn.alt{background:var(--panel2);color:var(--ink);box-shadow:inset 0 -3px 0 var(--line)}
+.btn.quiet{background:transparent;color:var(--onDark);box-shadow:inset 0 0 0 1.5px #ffffff33}
+.btn svg{width:18px;height:18px;flex:none}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row > .btn{flex:1 1 150px}
+.full{width:100%}
+
+/* 地圖：關卡卡片 */
+.stages{display:grid;gap:16px}
+.stage{background:var(--panel);color:var(--ink);border-radius:10px;overflow:hidden;box-shadow:0 1px 0 #ffffff14,0 10px 24px #0000004d}
+.stage canvas{display:block;width:100%;height:auto;aspect-ratio:var(--ar,720/300)}
+.stage .body{padding:14px 16px 16px;display:grid;gap:10px}
+.stage .head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.stage h2{font-family:var(--display);font-weight:900;font-size:22px;letter-spacing:.06em;margin:0}
+.stage .no{font-family:var(--latin);font-weight:700;color:var(--muted);font-size:14px;letter-spacing:.1em}
+.weeks{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.wk{padding:8px 16px;border-radius:999px;font-weight:700;box-shadow:inset 0 0 0 1.5px #ffffff33;color:var(--onDark)}
+.wk.on{background:var(--ochre);color:#1c1608;box-shadow:none}
+.parts{display:grid}
+.part{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.part:last-child{border-bottom:1px solid var(--line)}
+.part .stars svg{width:16px;height:16px;vertical-align:-2px}
+.btn.sm{min-height:40px;padding:6px 14px;font-size:15px}
+.pill{font-family:var(--latin);font-weight:700;font-size:14px;border:1.5px solid var(--line);border-radius:4px;padding:0 8px;color:var(--steel)}
+.meta{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--muted);font-size:14px;flex-wrap:wrap}
+.stars{display:inline-flex;gap:2px}
+.stars svg{width:18px;height:18px}
+.stage.locked canvas{filter:grayscale(1) brightness(.6)}
+.stage.locked .body{color:var(--muted)}
+.lockline{display:flex;align-items:center;gap:8px;font-size:14px}
+.lockline svg{width:16px;height:16px}
+.foot{margin-top:18px;font-size:13px;color:var(--onDarkMuted);text-align:center}
+
+/* 戰場 */
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.topbar b{font-family:var(--display);font-weight:900;letter-spacing:.08em;font-size:18px}
+.tbtn{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;box-shadow:inset 0 0 0 1.5px #ffffff2e;font-weight:700;font-size:14px;min-height:40px}
+.tbtn svg{width:16px;height:16px}
+.field{position:relative;border-radius:10px;overflow:hidden;box-shadow:0 10px 24px #0000004d}
+#cv{display:block;width:100%;height:auto;aspect-ratio:var(--ar,720/300);touch-action:manipulation}
+.hud{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:10px 2px 12px;font-size:14px;color:var(--onDarkMuted);flex-wrap:wrap}
+.hud .grp{display:flex;align-items:center;gap:8px}
+.pips{display:inline-flex;gap:3px}
+.pips svg{width:17px;height:17px}
+.num{font-variant-numeric:lining-nums tabular-nums;color:var(--onDark);font-weight:700}
+
+/* 題目板 */
+.qp{background:var(--panel);color:var(--ink);border-radius:10px;padding:14px 16px 16px;min-height:236px}
+.qlabel{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.12em}
+.prompt{margin:4px 0 2px;word-break:break-word}
+.prompt.w{font-family:var(--latin);font-weight:800;font-size:38px;line-height:1.15}
+.prompt.zh{font-family:var(--display);font-weight:900;font-size:30px;letter-spacing:.04em}
+.prompt.sent{font-family:var(--latin);font-weight:700;font-size:23px;line-height:1.45}
+.pos{font-family:var(--latin);font-size:16px;color:var(--muted);font-weight:500;margin-left:8px;letter-spacing:0}
+.blank{display:inline-block;min-width:88px;border-bottom:2.5px solid var(--ochre);margin:0 4px;transform:translateY(-4px)}
+.trans{color:var(--muted);font-size:15px}
+.say{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:var(--steel);padding:6px 10px;border-radius:6px;box-shadow:inset 0 0 0 1.5px var(--line)}
+.say svg{width:16px;height:16px}
+.bigsay{display:flex;align-items:center;justify-content:center;gap:10px;margin:8px auto 2px;padding:14px 22px;border-radius:10px;background:var(--panel2);color:var(--steel);font-weight:700;box-shadow:inset 0 -3px 0 var(--line)}
+.bigsay svg{width:28px;height:28px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.opt{background:var(--panel2);border:1.5px solid var(--line);border-radius:8px;padding:10px;font-size:19px;font-weight:700;min-height:56px;color:var(--ink);word-break:break-word;position:relative}
+.opt.latin{font-size:22px;font-weight:700}
+.opt .k{position:absolute;left:8px;top:4px;font-family:var(--latin);font-size:12px;color:var(--muted);font-weight:700}
+.opt:hover:not(:disabled){border-color:var(--steel)}
+.opt.ok{background:var(--moss);border-color:var(--moss);color:#fff}
+.opt.no{background:var(--brick);border-color:var(--brick);color:#fff}
+.opt.ok .k,.opt.no .k{color:#ffffffaa}
+.opt:disabled{cursor:default}
+.fb{margin-top:10px;font-size:15px;min-height:1.6em}
+.fb b{font-family:var(--latin);font-size:19px}
+.fb .good{color:var(--moss);font-weight:700}
+.fb .bad{color:var(--brick);font-weight:700}
+.wait{display:grid;place-items:center;min-height:200px;text-align:center;color:var(--muted)}
+.wait b{font-family:var(--display);font-size:20px;color:var(--ink);letter-spacing:.08em}
+
+/* 清單、結果 */
+.sheet{background:var(--panel);color:var(--ink);border-radius:10px;padding:6px 16px;margin-bottom:14px}
+.sheet h3{font-family:var(--display);font-weight:900;letter-spacing:.06em;font-size:17px;margin:10px 0 2px}
+.word{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.word:last-child{border-bottom:0}
+.word .en{font-family:var(--latin);font-weight:800;font-size:23px}
+.word .zh{font-weight:700}
+.word .ex{font-family:var(--latin);font-size:16px;color:#3c474b}
+.word .exz{font-size:14px;color:var(--muted)}
+.word .cnt{font-size:13px;color:var(--brick);font-weight:700;margin-left:6px}
+.result{background:var(--panel);color:var(--ink);border-radius:10px;overflow:hidden;margin-bottom:14px}
+.result canvas{display:block;width:100%;height:auto;aspect-ratio:var(--ar,720/300)}
+.result .body{padding:16px;text-align:center}
+.result h2{font-family:var(--display);font-weight:900;font-size:28px;letter-spacing:.12em;margin:0}
+.result .stars svg{width:30px;height:30px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.stats div{background:var(--panel2);border-radius:8px;padding:8px 4px}
+.stats .n{font-family:var(--latin);font-weight:800;font-size:28px;line-height:1.1;font-variant-numeric:lining-nums tabular-nums}
+.stats .l{font-size:13px;color:var(--muted)}
+.lead{color:var(--onDarkMuted);font-size:15px;margin:0 0 12px}
+.help p{margin:12px 0}
+.help b{font-family:var(--display)}
+.modal{position:fixed;inset:0;background:#0b1013b3;display:grid;place-items:center;padding:16px;z-index:20}
+.modal .box{background:var(--panel);color:var(--ink);border-radius:10px;padding:18px;max-width:360px;width:100%}
+.modal p{margin:0 0 14px;font-weight:700}
+.prompt.sent.long{font-size:19px}
+.prompt.scr{letter-spacing:.18em;color:var(--steel)}
+.hl{color:var(--brick);text-decoration:underline;text-underline-offset:3px}
+.opts.long{grid-template-columns:1fr}
+.opts.long .opt{font-size:16px;text-align:left;padding:10px 12px 10px 28px;min-height:48px;font-weight:600}
+.opts.long .opt .k{top:10px}
+.psg{background:#fff;border:1.5px solid var(--line);border-radius:8px;margin:6px 0 10px;color:var(--ink)}
+.psg summary{display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-family:var(--latin);font-weight:800;font-size:17px;color:var(--steel)}
+.psg summary svg{width:18px;height:18px;flex:none}
+.psg .ptext{max-height:190px;overflow:auto;padding:0 12px 6px;font-family:var(--latin);font-size:17px;line-height:1.5;border-top:1px solid var(--line)}
+.sheet .psg .ptext{max-height:none}
+.psg .ptext p{margin:8px 0}
+.notes ul{margin:4px 0 12px;padding-left:20px}
+.notes li{margin:6px 0}
+.ans{font-size:13px;color:var(--muted)}
+@media (max-width:420px){ .prompt.w{font-size:32px} .opt.latin{font-size:20px} .brand h1{font-size:30px} }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div class="modal" id="modal" hidden><div class="box"><p id="modalMsg"></p><div class="row"><button class="btn alt" id="modalNo">取消</button><button class="btn" id="modalYes">確定</button></div></div></div>
+
+<script>
+/* =========================================================
+   給老師／維護者：題庫在這裡。
+   TABS 是上方的分頁（Cycle 3、Cycle 4、期末總複習），每個分頁有幾個單元（units）。
+   單元裡的題目有三種寫法：
+     W(...)   單字卡：w 英文、pos 詞性、zh 中文、def 英文定義（講義原文）、ex 例句（講義原文）
+              → 遊戲會自動出「看定義選字、看字選定義、聽發音、例句填空、字母重組」
+     fill(box, [[句子（空格寫 ___）, 答案], ...])  → 從 box 裡抽另外 3 個字當誘答
+     mc(題目, 正解, [誘答...], 文章代號)            → 選擇題（正解寫第一個，畫面上會打亂）
+     tf([[敘述, true/false], ...], 文章代號)       → True / False
+   文章放在 P 裡，題目寫上文章代號，作答時會在題目上方顯示文章。
+   題目與答案依照《Reading Workbook Grade 3 Pink Book Cycles 3-4 & Final Exam Review》Answer Key。
+   ========================================================= */
+const P = {
+  preserve:{ t:'To Protect or Not to Protect?', x:`Today the United States has hundreds of national parks, monuments, and landmarks. Animals and plants live in them. Visitors enjoy them. Scientists learn from them. The rules protect them. But are there too many rules? Not everyone agrees.
+
+[Sidebar] Is It a Park or a Monument?
+A United States national monument is a protected area. It is like a national park, but easier to create. Monuments and parks are different in other important ways.
+National Parks: are large natural places with many different natural features; aim to protect many different aspects of nature.
+National Monuments: often focus on protecting one specific natural resource, landmark, or structure that has historic or scientific interest; receive less money and less wildlife protection than parks.` },
+  dolphin:{ t:'Dolphins', x:`Dolphins are good learners. They learn to play games. They learn to do tricks. Trainers have taught dolphins how to save lives. One trainer even taught his dolphins to clean out their tank. For each piece of trash they brought him, he gave them a fish.` },
+  zoo:{ t:'America’s First Zoo', x:`The first U.S. zoo opened in Philadelphia in 1874. Visitors were thrilled to see animals from all over the world. The zoo had six giraffes, an elephant named Jennie, and many colorful birds. It also had some animals from Australia. People were amazed at the kangaroos, wombats, and dingoes.` },
+  rushmore:{ t:'Mount Rushmore', x:`Mount Rushmore is a huge carving in a stone cliff. The carving shows the faces of four U.S. presidents. They are George Washington, Thomas Jefferson, Theodore Roosevelt, and Abraham Lincoln. Mount Rushmore is in South Dakota. Each year many people visit this amazing sight.` },
+  sports:{ t:'Kids Love Sports', x:`There are age-appropriate programs for almost every sport, and playing sports is a way for kids to challenge themselves in a safe and encouraging environment. Sports are a natural place to learn important life lessons, and participating in sports can pave the way to unique opportunities that kids might not otherwise have. Over time, as with many group activities, teammates and coaches become like family, so kids that are involved in sports have larger support systems. Sports are also a very viable way for athletic kids to be able to afford college. Many college and universities offer sports scholarships.` },
+  exercise:{ t:'Reasons for Exercise', x:`There are many excellent reasons for exercising several times each week. First, people who exercise look better. Exercise is important to keep our bodies in good shape. In addition, people who exercise have more energy. For example, a person who exercises can walk upstairs or climb hills more easily. People who exercise have a healthier heart, too. Finally, exercise reduces stress and helps you have a clear mind. Too much stress can cause you to worry a lot, and that is not good for your health. For these reasons, if you want to improve your health, you should exercise regularly.` },
+  rock:{ t:'Independence Rock — A Historic Site on the Oregon Trail', x:`In the 1800s, many people in the United States moved to the West to start a new life. These people were called pioneers. The pioneers traveled on the long, rocky Oregon Trail.
+
+Around 1812, some pioneers stopped at a very big rock located on the Oregon Trail. The rock was so massive that they were able to see it from far away. They carved their names on the rock.
+
+In 1830, someone named the rock Independence Rock. The rock became a famous landmark for pioneers. Soon, 5,000 names covered it.
+
+Today, Independence Rock is a historic site. Visitors can see the names on the rock. They can walk on the Oregon Trail.
+
+[Picture A: a map]  [Caption B] The map shows the Oregon Trail and the location of Independence Rock.
+
+Visit Our Historical Sites
+People should visit Independence Rock and other historical sites. Some people think they can just read about these places. But reading is not enough.
+
+They should experience the massive size of the rock. They should touch and see the carved names of the pioneers up close. They should walk on the rocky Oregon Trail. When people visit a historical site, they get more than information. They experience an important part of our history.
+
+[Box C] Independence Rock is often called the “Register of the Desert” because so many pioneers carved their names on it. The rock is about 130 feet tall and nearly a mile around.` },
+  census:{ t:'What Is a Census?', x:`What is a census? A census is a count. Every ten years the U.S. Census Bureau counts people. It also finds out where people live, the kind of work they do, and other facts. The census tells whether the population of a state changes. The number of representatives a state has in Congress depends on its population. Census numbers are helpful in planning new roads, schools, and other things.` },
+  bees:{ t:'Bees', x:`An average bee hive consists of about 20,000 bees. Within the colony, there are three types of bees, each with its own important job. There is only one queen bee in the hive, and her only job is to fill the hive with eggs. A queen will lay about 1,500 eggs a day. Male bees are called drones. Their only job is to mate with the queen. Worker bees, on the other hand, are extremely busy. They are female bees that lay no eggs. Worker bees tend the hive by taking care of the babies, building honeycombs, and keeping the hive cool. Some worker bees also leave the hive to go collect nectar and pollen.` },
+  leap:{ t:'One Giant Leap', x:`(1) On April 12, 1961, Russian cosmonaut Yuri Gagarin became the first man to travel into space. Just 23 days later, American astronaut Alan Shepard followed. Both flights were short, but they proved that people could go into space.
+
+(2) After Shepard, more astronauts went into space. Some orbited Earth. Some walked on the dusty, bumpy surface of the Moon. They took pictures and collected Moon rocks. Astronauts wanted to answer some important questions. Did the Sun’s warmth heat the Moon? Could the Moon support life someday?
+
+(3) Scientists studied the photographs and Moon rocks that the astronauts brought back. They made exciting discoveries using telescopes and satellites. But it wasn’t enough. Scientists wanted to get closer to the other planets. Soon they found a way!` },
+  presidents:{ t:'Presidents', x:`Many U.S. presidents have had nicknames. James Madison was sometimes called Jemmy. Honest Abe was a popular name for Abraham Lincoln. Dwight Eisenhower was known as Ike, and Theodore Roosevelt was Teddy. Several presidents have been called by their initials. John F. Kennedy was JFK, while Lyndon B. Johnson was LBJ.` },
+  planets:{ t:'Title: ________', x:`There are eight planets in the Solar System, and each one is very different. Some planets, like Jupiter and Saturn are very large. Others, like Mercury and Mars are smaller. Jupiter has moons that are larger than Mercury. The planets also have different atmospheres. Uranus, Jupiter and Saturn have atmospheres of hydrogen and helium. The atmosphere on Venus is made up of carbon dioxide. Earth has a nitrogen and oxygen atmosphere. Neptune’s atmosphere is mostly hydrogen. The planets also have different temperatures. Uranus is the coldest and Venus is the hottest.` },
+  winds:{ t:'Winds', x:`Do you know what a chinook is? It’s a warm winter wind in the western United States. Another wind is a purga. This very cold wind brings snow to Russia. In France, there is a dry wind called a mistral. Egypt has a khamsin. This wind blows across the desert, stirring up sand. Around the world, different winds come and go with the seasons.` },
+  dogs:{ t:'Dogs Are the Best Pets', x:`Many people around the world have pets. Pets can keep us company and play with us. Some people like lizards or snakes. Others keep fish or birds. Most people have a dog or a cat. I think that dogs are the best pets.
+
+(1) First of all, dogs are loyal and loving. They will always be there for you, in every situation, no matter what. They will comfort you when you are sad or lonely. They will protect you from harm and danger.
+
+(2) Secondly, dogs are fun and playful. They will join you for walks, runs, hikes, or any other outdoor activity. They will make you laugh with their silly antics and expressions. They will entertain you with their tricks and skills. For example, tricks like playing dead or rolling over.
+
+(3) The third reason is that dogs are smart and trainable. They can learn to help people with disabilities. They can help by being guide dogs, service dogs, or therapy dogs. They can also help people with jobs such as police dogs, rescue dogs, or hunting dogs.
+
+In conclusion, dogs make the best pets because they are loyal, fun, and smart. If you are looking for a pet, you should choose a dog. You won't regret it.` },
+  saturn:{ t:'The Rings of Saturn', x:`[Photograph A: Real image of Saturn’s rings.]
+
+Saturn is a planet with rings around it. You can see its rings through a telescope. They look solid, but they are made of pieces of rock and ice. Some pieces are very small. Others are as big as mountains. How were the rings made? Scientists are not sure. The rocks and ice could be pieces of an old moon that crashed into Saturn.
+
+[B: some words are printed in boldface]  [C: a chart showing the widths of Saturn’s rings]` },
+  modelt:{ t:'Moving America Forward', x:`(1) Henry Ford introduced the Ford Model T car in 1908. The original vehicles came in blue, gray, green, and red. They cost $850 to buy. Everyone wanted a Model T, and thanks to the moving assembly line, almost everyone could have one. By 1918, half of all cars in the United States were Model Ts.
+
+Everybody Wants One
+(2) The Model T was not the first car ever made, but it was the one most people could afford to buy at the time. One of the resources Ford used to build the Model T was steel. The car, which was nicknamed “Tin Lizzie,” was built to hold up on rough roads. It was dependable and easy to drive. They were also simple to maintain, or fix. As the nation’s population grew, more and more people were buying cars. They wanted to own a Model T.
+
+(3) Before the Model T, cars were expensive. Not everyone had enough money to own one. Ford knew that he needed to bring the price down. First he found a way to make more cars to meet the demand. Then he built them faster. Finally, he was able to make them affordable, or lower the cost so more people could buy one.` },
+};
+
+/* ---------- 出題小幫手 ---------- */
+const Wd = (w,pos,zh,def,ex) => ({ k:'w', w, pos, zh, def, ex });
+const fill = (box, rows, lab) => rows.map(([q,a]) => ({ k:'mc', q, a, box, lab: lab || '選出適合的字' }));
+const two = (rows, lab) => rows.map(([q,a,b]) => ({ k:'mc', q, a, o:[b], lab: lab || '二選一' }));
+const mc = (q, a, o, p, lab) => ({ k:'mc', q, a, o, p, lab: lab || (p ? '閱讀理解' : '選擇題') });
+const tf = (rows, p, lab) => rows.map(([q,v]) => ({ k:'tf', q, a: v ? 'True' : 'False', p, lab: lab || 'True or False' }));
+const both = (box, rows) => rows.map(([s1,s2,a]) => ({ k:'mc', q:`${s1}\n${s2}`, a, box, lab:'哪個字兩句都適用？' }));
+const meaning = rows => rows.map(([q,a,o]) => ({ k:'mc', q, a, o, lab:'粗體字在這裡是什麼意思？' }));
+
+const MMW = ['park','down','left','fly','box','bear','clip','bat','nails','check','wave','bark','blue','palm','ring'];
+const V3 = ['landmark','carved','clues','grand','massive','monument','national','traces'];
+const V4 = ['amount','astronomy','globe','solar system','support','surface','temperature','warmth'];
+const TF_FEAT = ['sidebar','caption','map','photograph','chart','boldface','heading','title','bar graph','illustration'];
+
+const TABS = [
+{ id:'c3', name:'Cycle 3', full:'Preserve and Protect', units:[
+  { id:'sp3', en:'Spelling: Magic “E”', zh:'拼字：Magic E 長母音', theme:'forest', spell:true,
+    notes:['A word spelled with a vowel, consonant, and final e usually has a long vowel sound: late, invite, alone.','The final e in these words is silent.'],
+    items:[
+      Wd('date','n.','日期','the month and day number in the year','The date September 11th is now famous.'),
+      Wd('lake','n.','湖','a large body of water surrounded by land','I’m sad that you can’t go swimming in Sun Moon Lake.'),
+      Wd('skate','v.','溜冰','to move on ice or a smooth surface using skates','She likes to skate on the frozen pond.'),
+      Wd('plane','n.','飛機','a vehicle that flies in the air','He got on the plane to go to Paris.'),
+      Wd('grade','n.','成績；年級','a number or letter that shows how well you did on a test; a level or year in school','She got an “A” grade on her math quiz.'),
+      Wd('fine','adj.','好的；可以的','something that is good or acceptable','The Mexican food in Taiwan is fine, but not great.'),
+      Wd('life','n.','生命；生活','the state of being alive and the things that happen around you','Her life changed a lot after she got married.'),
+      Wd('rice','n.','米；米飯','small white grain that people eat','Bento boxes are usually served with rice.'),
+      Wd('wise','adj.','有智慧的','having good judgement or knowledge from experience','He is a wise teacher who knows a lot of things.'),
+      Wd('smile','n.','微笑','a facial expression one makes when pleased or happy','She gave him a friendly smile.'),
+      Wd('rose','n.','玫瑰','a beautiful flower with thorns on its stem','He gave her a red rose for Valentine’s Day.'),
+      Wd('globe','n.','地球儀','a round model of the earth that shows the continents and oceans','He spun the globe and pointed at a random country.'),
+      Wd('smoke','n.','煙','a gray or black gas that comes from something burning','Smoke was rising up from the fire.'),
+      Wd('sneeze','v.','打噴嚏','to blow air out of your nose and mouth because of an irritation','Many people sneeze when they smell the pepper.'),
+      Wd('stripe','n.','條紋','a long narrow band of color or pattern; a line','She wore a shirt with a blue stripe.'),
+      Wd('used','v.','使用（過去式）','to have done action with an object for a purpose','The students used a blue pen to make their corrections in their textbooks.'),
+      ...fill(['globe','plane','fine','rose','stripe','rice','grade','wise'], [
+        ['He wore a yellow shirt with a blue ___ on each sleeve.','stripe'],
+        ['The ___ landed safely at the airport.','plane'],
+        ['Sarah is in ___ three this year.','grade'],
+        ['Your project looks ___ to me, so you don’t need to change anything.','fine'],
+        ['A ___ is a spherical map of Earth.','globe'],
+        ['She cooked ___ for dinner today, but tomorrow she will make pasta.','rice'],
+        ['He gave me some ___ advice.','wise'],
+        ['He gave her a red ___ on Valentine’s Day.','rose'],
+      ]),
+      ...tf([
+        ['Smoke comes from fire.',true],
+        ['A globe shows the Earth and its countries.',true],
+        ['A stripe is a type of fruit.',false],
+        ['When we greet someone, we sneeze.',false],
+        ['If I used something, it means I threw it away.',false],
+        ['A grade tells how well a student did in school.',true],
+      ], null, 'Correct or Wrong?'),
+      ...[['Please moce inside and sit down while I finish preparing lunch.','moce','come',['came','coem']],
+          ['Good cklu on your test!','cklu','luck',['lock','lucy']],
+          ['Watch your sept on the stairs because they are slippery today.','sept','step',['stop','pest']],
+          ['A lot of ragy smoke rose into the air from the chimney.','ragy','gray',['gary','gyar']]]
+        .map(([s,sc,a,o]) => ({ k:'mc', q:s.replace(sc,`【${sc}】`), a, o:[...o, a.split('').reverse().join('')].filter(x => x !== a).slice(0,3), lab:'字母重組：把【 】裡的字排回正確拼法' })),
+    ]},
+  { id:'vo3', en:'Vocabulary Words', zh:'單元字彙', theme:'autumn',
+    notes:['monument 紀念碑：為了紀念某個人或事件而建的。','landmark 地標：顯眼、可以讓人認路的建築或地點。'],
+    items:[
+      Wd('carved','v.','雕刻（carve 的過去式）','formed or written by cutting into a surface','Her name was carved on the stone.'),
+      Wd('clues','n.','線索（單數 clue）','hints that help solve a puzzle, problem, or mystery','The teacher gave us clues to help solve the puzzle.'),
+      Wd('grand','adj.','宏偉的；盛大的','amazing or large in appearance','We watched the grand parade with music and dancers.'),
+      Wd('landmark','n.','地標','a historic or important building, place, or feature that stands out from other places','Taipei 101 is a famous landmark in Taiwan.'),
+      Wd('massive','adj.','巨大的','extremely large','The elephant has a massive body.'),
+      Wd('monument','n.','紀念碑','something built in memory of a historical person, event, or special deed','The city built a monument to honor the heroes of the war.'),
+      Wd('national','adj.','國家的；全國的','something that relates to the whole country or all the people in a country','The army plays an important role in national security.'),
+      Wd('traces','n.','痕跡；微量（單數 trace）','very small amounts of something','There were traces of paint on his clothes after he helped in the art class.'),
+      ...fill(V3, [
+        ['The story gives ___ about what will happen next.','clues'],
+        ['A ___ wall surrounded the cities in medieval times.','massive'],
+        ['The Eiffel Tower is a famous ___ in Paris that tourists use to navigate the city.','landmark'],
+        ['Christmas is a ___ celebration in many countries.','national'],
+        ['The ___ honors a famous leader of the country.','monument'],
+        ['We could see ___ of snow on the mountain.','traces'],
+        ['The statue was ___ from stone.','carved'],
+        ['They had a ___ celebration at school with thousands of participants.','grand'],
+        ['The artist ___ a bird into the wood.','carved'],
+        ['The detective found ___ to solve the mystery.','clues'],
+        ['The Leaning Tower of Pisa is a famous ___ in Italy.','landmark'],
+        ['The elephant was ___ compared to the other animals.','massive'],
+        ['We visited a ___ that honored brave soldiers.','monument'],
+        ['The bald eagle is a ___ symbol of the United States.','national'],
+        ['The animal left ___ of its paws in the mud.','traces'],
+        ['The Macy’s Thanksgiving Day Parade is a ___ celebration with giant balloons.','grand'],
+        ['During the earthquake, a ___ rock broke off from the mountain.','massive'],
+        ['The new library became an important ___ in our town.','landmark'],
+      ]),
+      ...two([
+        ['The Statue of Liberty is a famous ___ in New York City.','monument','traces'],
+        ['Our family visited a ___ park during our summer vacation.','national','carved'],
+        ['The dog left ___ of mud on the floor.','traces','massive'],
+        ['The artist carefully ___ shapes into the stone.','carved','monument'],
+        ['Taipei 101 is a famous ___ in Taiwan.','landmark','massive'],
+        ['The dinosaur bones on display were ___ and very impressive.','massive','traces'],
+        ['The footprints left behind were ___ that animals had been there.','clues','monument'],
+      ], '圈出正確的字'),
+      ...two([
+        ['We used the big fountain as a ___ to find our way back.','landmark','monument'],
+        ['That huge tree is a natural ___ in the forest.','landmark','monument'],
+        ['The guide explained the symbols on the ___ dedicated to the end of the war.','monument','landmark'],
+        ['The ___ tells the story of the hero it was dedicated to.','monument','landmark'],
+        ['The lighthouse is a ___ for ships approaching the shore.','landmark','monument'],
+        ['The town built a ___ to honor the soldiers who fought in the war.','monument','landmark'],
+        ['The Sydney Opera House is a ___ you can see from many parts of the city.','landmark','monument'],
+        ['The earthquake damaged the old ___ that honored the first president of the country.','monument','landmark'],
+        ['The tall clock tower is the most recognizable ___ in our town.','landmark','monument'],
+      ], 'Monument or Landmark?'),
+    ]},
+  { id:'mm3', en:'Multiple Meaning Words', zh:'一字多義', theme:'ocean',
+    notes:['Multiple meaning words are spelled the same and sound the same but have different meanings.','例：bat 可以是「蝙蝠」也可以是「球棒」。'],
+    items:[
+      ...fill(['park','down','left','fly','box'], [
+        ['Which word means: from a higher to a lower position?','down'],
+        ['Which word means: went away from or departed?','left'],
+        ['Which word means: a place in a city with trees, grass, and playgrounds?','park'],
+        ['Which word means: to fight against someone in a boxing match?','box'],
+        ['Which word means: to move through the air using wings?','fly'],
+        ['Which word means: a flying insect with a pair of transparent wings?','fly'],
+        ['Which word means: a container, usually rectangular, often with a lid?','box'],
+        ['Which word means: to leave a car in one place for a short time?','park'],
+        ['Which word means: the side that is the opposite of right?','left'],
+        ['Which word means: unhappy; sad; discouraged?','down'],
+      ], '看定義，選單字'),
+      ...both(MMW, [
+        ['I will ___ my long hair before going out.','Please use a paper ___ to hold the papers together.','clip'],
+        ['The black ___ flew into the cave!','Swing the ___ and hit the ball!','bat'],
+        ['___ to see if the cookies are done.','Mom wrote a ___ to pay the man.','check'],
+        ['Dad used ___ to build a birdhouse.','Can you paint my ___ for me?','nails'],
+        ['The ___ slept in a cave during the winter.','I cannot ___ the loud noise anymore.','bear'],
+        ['The dog’s ___ woke everyone in the house.','The tree’s ___ is thick and rough.','bark'],
+        ['Carla feels ___ because she didn’t win the speech competition.','Sarah likes to wear ___ T-shirts.','blue'],
+        ['She held the shell in the ___ of her hand.','A tall ___ grows near the beach.','palm'],
+        ['A huge ___ crashed onto the rocks.','He gave a friendly ___ to his teacher.','wave'],
+        ['I heard the phone ___ in the kitchen.','She wears a silver ___ on her finger.','ring'],
+        ['She opened the ___ to see what was inside.','The athlete will ___ in the championship match.','box'],
+        ['He used ___ to fix the broken chair.','Her ___ were painted bright red.','nails'],
+        ['A ___ landed on the window.','We will ___ to New York tomorrow.','fly'],
+        ['The cat jumped ___ from the table.','He felt ___ after losing the game.','down'],
+        ['Please ___ your homework for mistakes.','He wrote a ___ to pay for the groceries.','check'],
+        ['She ___ her backpack at school.','He turned ___ at the corner.','left'],
+      ]),
+      ...meaning([
+        ['As the mailman delivered the mail, he heard a loud 【bark】 from inside the house.','a dog’s noise',['tree covering','the outside of a ship']],
+        ['A 【fly】 landed on my sandwich at lunch.','insect',['move through the air','a fishing lure']],
+        ['We rested under a tall 【palm】 at the beach.','type of tree',['inside of the hand','a type of fish']],
+        ['She gave a friendly 【wave】 before leaving.','a hand motion',['ocean movement','a sudden increase']],
+        ['Birds can 【fly】 high in the sky.','move through the air',['insect','a fishing lure']],
+        ['The tree’s 【bark】 protects it from insects.','tree covering',['a dog’s noise','the outside of a ship']],
+        ['I heard the phone 【ring】 loudly.','a sound',['circle jewelry','a group of people']],
+        ['A big 【wave】 crashed onto the shore.','ocean movement',['a hand motion','a sudden increase']],
+        ['The baby held the coin in his 【palm】.','inside of the hand',['type of tree','type of fish']],
+        ['She wears a gold 【ring】 on her finger.','circle jewelry',['a group of people','a sound']],
+      ]),
+    ]},
+  { id:'sk3', en:'Genre, Text Features & Central Idea', zh:'文體・文本特徵・主旨', theme:'forest',
+    notes:['Argumentative text: a nonfiction giving a claim or opinion about a topic. It uses facts and examples to get the reader to agree.','Central Idea (main idea): the most important point an author makes about a topic. There is only one main idea per paragraph.','Details tell more about the central idea.','sidebar 側欄・caption 圖說・map 地圖'],
+    items:[
+      mc('What is the genre of “Preserve and Protect”?','argumentative text',['expository text','historical fiction','narrative nonfiction']),
+      mc('An argumentative text is a ___ giving a claim or opinion about a topic.','nonfiction',['fiction','poem','fairy tale']),
+      mc('An argumentative text uses facts and examples to ___ the reader to agree.','persuade',['scare','confuse','surprise']),
+      mc('An argumentative text gives a ___ or opinion about a topic.','claim',['clam','story','song']),
+      mc('A small box on a page that gives extra information about the topic is a ___.','sidebar',['caption','map','title']),
+      mc('Words written under or next to a photograph, illustration, chart, or map that give information about it are a ___.','caption',['sidebar','map','heading']),
+      mc('A flat drawing of places is a ___.','map',['caption','sidebar','chart']),
+      mc('The central idea is ___.','the most important point an author makes about a topic',['the last word of the paragraph','the title of the book','a small detail about the topic']),
+      mc('How many main ideas does one paragraph have?','only one',['two','three','as many as you want']),
+      mc('Details ___.','tell more about the central idea',['are always in the title','tell a different topic','are the same as the genre']),
+      mc('Where can you often find the central idea?','in the first sentence',['in the caption','in the last word','in the page number']),
+      mc('A paragraph is ___.','a group of sentences about the same topic',['one single word','a list of pictures','a flat drawing of places']),
+      mc('A paragraph starts with ___.','an indent (a small space at the beginning)',['a picture','a question mark','a caption']),
+      mc('This paragraph is mainly about ___.','how dolphins can learn many different things',['how to clean a fish tank','what dolphins eat','where dolphins live'],'dolphin'),
+      mc('One detail about the main idea is that dolphins ___.','learn to play games',['live in rivers','sleep all day','are afraid of trainers'],'dolphin'),
+      mc('Where is the central idea of this paragraph?','in the first sentence',['in the last sentence','in the middle','it is not in the paragraph'],'dolphin'),
+      mc('What is the central idea / main idea?','the first zoo in the United States',['the different animals from Australia','how people felt at seeing strange animals'],'zoo'),
+      mc('A detail that tells about the central idea is ___.','the zoo had some animals from Australia',['the American animals thrilled visitors','the visitors came from all over the world'],'zoo'),
+      mc('The main idea of the paragraph is ___.','what Mount Rushmore is',['where Mount Rushmore is','the names of the presidents'],'rushmore'),
+      mc('A detail that tells about the main idea is ___.','which presidents are at Mount Rushmore',['how the four presidents were chosen','why Mount Rushmore is in South Dakota'],'rushmore'),
+      mc('The best title for this paragraph would be ___.','Mount Rushmore Carving',['The Face of Washington','Visiting South Dakota'],'rushmore'),
+      mc('What is the central idea of the paragraph?','Kids benefit in many ways from being involved in sports.',['Sports are a healthy way to spend your time.','Sports scholarships are a good way to go to college.','Every kid should be an athlete.'],'sports'),
+      ...tf([
+        ['Detail? Playing sports helps kids learn important life lessons.',true],
+        ['Detail? Many kids enjoy eating pizza on Fridays.',false],
+        ['Detail? Teammates and coaches become like family, giving kids a larger support system.',true],
+        ['Detail? Sports programs are available for almost every age and skill level.',true],
+        ['Detail? Some kids like to paint or draw in their free time.',false],
+        ['Detail? Sports can help kids afford college through scholarships.',true],
+      ],'sports','這是支持主旨的細節嗎？'),
+      mc('What is the genre of this text?','argumentative text',['narrative nonfiction','historical fiction'],'exercise'),
+      mc('What is the central idea of the paragraph?','Exercise has many benefits and should be done regularly.',['Stress is bad for your health.','Walking upstairs is good exercise.'],'exercise'),
+      mc('Which sentence best states the author’s opinion?','If you want to improve your health, you should exercise regularly.',['Exercise is important to keep our bodies in good shape.','People who exercise have more energy.'],'exercise'),
+      mc('Which of the following is NOT mentioned as a benefit of exercise?','Better sleep',['More energy','A healthier heart'],'exercise'),
+      mc('According to the text, what is one example of having more energy?','Walking up stairs more easily',['Running faster','Sleeping less'],'exercise'),
+      mc('According to the text, what does exercise help reduce?','stress',['weight','illness'],'exercise'),
+      mc('What word or words signal the conclusion of the paragraph?','For these reasons',['For example','In addition'],'exercise'),
+    ]},
+  { id:'rd3', en:'Reading Comprehension', zh:'閱讀理解', theme:'autumn', reading:true,
+    notes:['先讀文章再作答。閱讀題敵人會走得比較慢。'],
+    items:[
+      ...tf([
+        ['There are only ten national parks in the USA.',false],
+        ['Animals and plants can live in national parks and monuments.',true],
+        ['Visitors are not allowed to enjoy national parks.',false],
+        ['Scientists can learn from national parks and monuments.',true],
+        ['Everyone agrees that the rules protecting parks and monuments are good.',false],
+        ['A national monument is easier to create than a national park.',true],
+        ['National parks usually protect only one specific natural resource.',false],
+        ['The central idea in the sidebar is the differences between national parks and national monuments.',true],
+        ['National monuments often focus on one specific landmark, structure, or resource.',true],
+        ['National monuments receive more money and wildlife protection than national parks.',false],
+      ],'preserve'),
+      mc('What is the genre of this text?','argumentative text',['expository text','historical fiction','narrative nonfiction'],'rock'),
+      mc('What were the people who moved west in the 1800s called?','pioneers',['astronauts','presidents','scientists'],'rock'),
+      mc('Around what year did pioneers stop at the big rock?','1812',['1830','1800','1912'],'rock'),
+      mc('What did pioneers carve on the rock?','their names',['pictures of animals','a map','the date'],'rock'),
+      mc('About how many names covered the rock?','5,000',['130','1,812','500'],'rock'),
+      mc('What kind of site is Independence Rock today?','a historical site',['a national park','a zoo','a school'],'rock'),
+      mc('Text feature A (a flat drawing showing the Oregon Trail) is called a ___.','map',['caption','sidebar','chart'],'rock'),
+      mc('Text feature B (“The map shows the Oregon Trail and the location of Independence Rock.”) is called a ___.','caption',['map','sidebar','title'],'rock'),
+      mc('Text feature C (the small box with extra facts about the rock) is called a ___.','sidebar',['caption','map','photograph'],'rock'),
+      mc('The central idea of the paragraph is ___.','what the census is',['how Congress changes','why populations change'],'census'),
+      mc('A detail that tells more about the main idea is ___.','how the census numbers are used',['how many people now live in the U.S.','which states have the most people'],'census'),
+      mc('The best title for this paragraph would be ___.','The Census Counts',['Every Ten Years','Where People Live'],'census'),
+      mc('Which sentence best states the main idea?','Within the colony, there are three types of bees, each with its own important job.',['A queen will lay about 1,500 eggs a day.','Male bees are called drones.','Some worker bees leave the hive to collect nectar and pollen.'],'bees'),
+      mc('How many queen bees are there in a hive?','only one',['three','about 1,500','about 20,000'],'bees'),
+      mc('Drones are ___.','male bees',['female bees that lay no eggs','queen bees','baby bees'],'bees'),
+      mc('Which is NOT a job of worker bees?','laying eggs',['taking care of the babies','building honeycombs','keeping the hive cool'],'bees'),
+    ]},
+]},
+{ id:'c4', name:'Cycle 4', full:'Earth and its Neighbors', units:[
+  { id:'sp4', en:'Spelling: Long /a/', zh:'拼字：長母音 /a/', theme:'ocean', spell:true,
+    notes:['Long “a” can be spelled a-e (cake, bake), ai (rain, train), or ay (day, play).','也要注意 eigh（weigh、sleigh）和 ey（they）。'],
+    items:[
+      Wd('plain','adj.','樸素的','something simple and not fancy','She likes to wear plain clothes without any patterns or colors.'),
+      Wd('braid','v.','編辮子','to weave together three or more pieces of hair, rope, or other material','She can braid her hair into a long ponytail.'),
+      Wd('fail','v.','失敗；不及格','to not succeed or do something wrong','She will fail the test if she does not study hard.'),
+      Wd('grain','n.','穀粒','a small hard seed, like rice or wheat','We feed the horses grain to keep them healthy.'),
+      Wd('snail','n.','蝸牛','a small animal with shell that moves very slowly','I found a snail in my garden after it rained.'),
+      Wd('paint','v.','畫；上漆','to color a surface or picture with a colored liquid using a brush','He likes to paint pictures of animals and flowers.'),
+      Wd('sway','v.','搖擺','to move slowly back and forth; to swing from side to side','The trees sway in the wind.'),
+      Wd('tray','n.','托盤','a flat piece of metal, plastic, or wood that you use to carry things','She brought a tray of cookies and milk for the kids.'),
+      Wd('gray','adj.','灰色的','a color that is a mix of black and white','Clouds turn gray before it rains.'),
+      Wd('stay','v.','停留','to not leave or move away','Joe has to stay in bed until he feels better.'),
+      Wd('state','n.','州','a part of a country that has its own government and rules','Florida is a state in the United States of America.'),
+      Wd('fake','adj.','假的','not real or genuine; made to look like something else','Jane wears fake glasses to look smart.'),
+      Wd('same','adj.','相同的','not different, exactly alike','I have the same birthday as Julie, June 26th.'),
+      Wd('weigh','v.','秤重','to measure how heavy something is','I weigh myself every morning on the scale.'),
+      Wd('they','pron.','他們','more than one person or thing','They are my friends and we go to school together.'),
+      Wd('sleigh','n.','雪橇','a vehicle used for traveling over snow or ice, usually pulled by horses or reindeer','Santa Claus rides in a sleigh on Christmas Eve.'),
+      Wd('afraid','adj.','害怕的','feeling fear or worry; scared of something or someone','Jerry is afraid of spiders and screams when he sees one.'),
+      Wd('skate','v.','溜冰','to move on ice or a smooth surface using skates','He likes to skate on the frozen lake in winter.'),
+      Wd('fine','adj.','好的；可以的','something that is good or acceptable','The homework was done just fine, but not great.'),
+      Wd('globe','n.','地球儀','a round model of the earth that shows the continents and oceans','The geography teacher has a globe on her desk and likes to spin it around.'),
+      ...fill(['globe','braid','fine','grain','tray','snail','sway','sleigh','paint','afraid'], [
+        ['Rice is a type of ___ that people eat all over the world.','grain'],
+        ['He said he was ___, but I could see he was hurt.','fine'],
+        ['A ___ is a small animal with a shell that moves very slowly.','snail'],
+        ['A ___ is a model of the earth that shows all the continents and oceans.','globe'],
+        ['They love to ___ pictures of their favorite animals during art class.','paint'],
+        ['The trees ___ in the wind on a breezy day.','sway'],
+        ['She likes to ___ her hair every morning.','braid'],
+        ['He was ___ of the dark, so he slept with a night light on.','afraid'],
+        ['She carried a ___ of cookies to the living room.','tray'],
+        ['Santa Claus rides a ___ pulled by reindeer on Christmas Eve.','sleigh'],
+      ]),
+      ...fill(['grain','skate','gray','sway','braid','fake','state','weigh','they','tray'], [
+        ['The sky is dark ___ today; it might rain soon.','gray'],
+        ['A ___ of rice is very small.','grain'],
+        ['We ___ back and forth to the music.','sway'],
+        ['The waiter carried food on a ___ to the customers.','tray'],
+        ['California is a ___ in the U.S.','state'],
+        ['The diamond was ___, not real.','fake'],
+        ['I want to ___ the apples on the scale to see how heavy they are.','weigh'],
+        ['The kids are not at home. ___ are playing soccer at the park.','They'],
+        ['I like to ___ on the frozen pond in winter.','skate'],
+      ]),
+      ...tf([
+        ['A plain donut has no frosting or decorations.',true],
+        ['If you fail a race, you win first place.',false],
+        ['If you stay in one place, you do not leave.',true],
+        ['If two things are the same, they are exactly alike.',true],
+        ['To weigh means to find out how heavy something is.',true],
+        ['If something is gray, it is a color you get by mixing yellow and red.',false],
+        ['To skate means to swim underwater.',false],
+        ['If you say “they,” you are talking about more than one person.',true],
+        ['If something is fake, it is natural and real.',false],
+        ['A state is a small room inside a house.',false],
+      ], null, 'Correct or Wrong?'),
+      ...fill(['stay','gray','fail','plain','snail','paint','sway','braid','tray','grain'], [
+        ['Which word means: remain in one place?','stay'],
+        ['Which word means: color between black & white?','gray'],
+        ['Which word means: not pass an exam?','fail'],
+        ['Which word means: something simple?','plain'],
+        ['Which word means: slow-moving animal?','snail'],
+        ['Which word means: put color on something?','paint'],
+        ['Which word means: move side to side?','sway'],
+        ['Which word means: hair twisted together?','braid'],
+        ['Which word means: hold your lunch in the school cafeteria?','tray'],
+        ['Which word means: small piece of food?','grain'],
+      ], '看定義，選單字'),
+    ]},
+  { id:'vo4', en:'Vocabulary Words', zh:'單元字彙', theme:'space',
+    notes:['astronomy 天文學：研究星星和行星的學問。','solar system 太陽系：太陽和繞著它轉的行星。'],
+    items:[
+      Wd('amount','n.','數量；總額','the total or how much there is of something','She drank a small amount of water.'),
+      Wd('astronomy','n.','天文學','the study of the stars and planets','She reads books about astronomy at night.'),
+      Wd('globe','n.','全世界；地球','the world, Earth','Pollution is a problem that affects the entire globe.'),
+      Wd('solar system','n.','太陽系','a star and the planets that move around it','Next month we will study the solar system in science class.'),
+      Wd('support','n.','支持；支撐','help or assistance that someone or something needs','The chair gives support to my back.'),
+      Wd('surface','n.','表面','the outside of something','The table has a smooth surface.'),
+      Wd('temperature','n.','溫度','how hot or cold something is','The temperature is high in the summer.'),
+      Wd('warmth','n.','溫暖；熱度','the heat of something','I felt the warmth of the sun on my face.'),
+      ...fill(V4, [
+        ['What is the ___ going to be tomorrow?','temperature'],
+        ['She felt the ___ of her mother’s hug.','warmth'],
+        ['What was the total ___ of the bill?','amount'],
+        ['The ___ of the table is glass.','surface'],
+        ['We used the ___ to locate the countries.','globe'],
+        ['We showed our ___ for our school baseball team.','support'],
+        ['How many planets are in the ___?','solar system'],
+        ['We looked at stars when we studied ___.','astronomy'],
+        ['My parents always ___ me when I need help.','support'],
+        ['The duck floated on the ___ of the water.','surface'],
+        ['The ___ of homework today is not too much.','amount'],
+        ['The fire gave us ___ on a cold night.','warmth'],
+        ['Dip your toe in the water to check the ___ before you swim.','temperature'],
+        ['Earth is part of the ___.','solar system'],
+        ['We learned about the rocky planets in our solar system in ___ class.','astronomy'],
+        ['A ___ in the classroom helps students see the locations of different countries.','globe'],
+        ['The ___ inside the room was just right, neither too hot nor too cold.','temperature'],
+        ['The ___ of food on the table was enough to feed everyone.','amount'],
+      ]),
+      ...tf([
+        ['If you only ate a small amount of food, you did not eat too much.',true],
+        ['The Sun is the only part of our solar system.',false],
+        ['When people study astronomy, they study oceans.',false],
+        ['The warmth of the Sun can heat you up on a summer day.',true],
+        ['If a liquid has a high temperature, it is cold.',false],
+        ['A hen will support her chicks by giving food to them.',true],
+        ['Ducks can float on the surface of the water.',true],
+        ['A globe is usually the shape of a square.',false],
+      ]),
+    ]},
+  { id:'sf4', en:'Suffixes', zh:'字尾 -y -ly -ful -less -able', theme:'autumn',
+    notes:['A suffix is a group of letters added to the end of a word to create a new word with a different meaning.','-y = full of / like / covered in（dusty）','-ly = like / in a ___ way（quickly）','-ful = full of / causing（helpful）','-less = without（homeless）','-able = can be done（enjoyable）'],
+    items:[
+      ...[['-y','like / full of / covered in'],['-ly','in a ___ way'],['-less','without'],['-ful','full of'],['-able','can be done']]
+        .map(([s,m]) => ({ k:'mc', q:`What does the suffix ${s} mean?`, a:m, box:['like / full of / covered in','in a ___ way','without','full of','can be done'], lab:'字尾的意思' })),
+      mc('A suffix is a group of letters added to the ___ of a word.','end',['beginning','middle','top']),
+      ...[['covered in dirt','dirt','dirty'],['covered in rust','rust','rusty'],['full of curls','curl','curly'],['in a kind way','kind','kindly'],
+          ['in a quick way','quick','quickly'],['covered in snow','snow','snowy'],['full of luck','luck','lucky'],['in a soft way','soft','softly'],
+          ['full of fear','fear','fearful'],['without hope','hope','hopeless'],['full of rest','rest','restful'],['without a home','home','homeless'],
+          ['without help','help','helpless'],['without color','color','colorless'],['full of use','use','useful'],['without care','care','careless'],
+          ['causing harm','harm','harmful'],['without pain','pain','painless']]
+        .map(([m,b,a]) => ({ k:'mc', q:`Which word means “${m}”?`, a, o:[b+'y',b+'ly',b+'ful',b+'less'].filter(x => x !== a).slice(0,3), lab:'看意思，選加了字尾的字' })),
+      ...[['My bicycle was ___ because I let it get wet.','rust','rusty'],
+          ['Some people speak so ___ you can hardly hear them.','soft','softly'],
+          ['It was a white, ___ winter night.','snow','snowy'],
+          ['The truck was very ___ because it was driven through the mud.','dirt','dirty'],
+          ['The little girl had naturally ___ hair.','curl','curly'],
+          ['Janice was ___ because she did not get hurt when she slipped.','luck','lucky'],
+          ['The boy ran across the street ___ to catch the ice cream truck.','quick','quickly'],
+          ['Be careful—the roads are very ___ today.','ice','icy'],
+          ['He greeted us in a very ___ way.','friend','friendly'],
+          ['The cake tasted ___ after dinner.','heaven','heavenly'],
+          ['The painting was very ___ and bright. I loved it!','color','colorful'],
+          ['She was ___ of the roller coaster, so she didn’t ride it.','fear','fearful'],
+          ['The instructions were ___ and clear.','help','helpful'],
+          ['Eating a large amount of candy is ___ to your health.','harm','harmful'],
+          ['She was ___ to her teacher for the gift.','thank','thankful'],
+          ['He was ___ and broke the glass.','care','careless'],
+          ['This map is really ___. We continue to get lost in this city.','hope','hopeless'],
+          ['The puppy was ___ and kept running around the room.','rest','restless'],
+          ['The tool was very ___. I fixed the chair in just 2 minutes.','use','useful'],
+          ['The cut was very ___.','pain','painful'],
+          ['The machine is ___ without electricity, so it cannot turn on.','power','powerless'],
+          ['His plan was ___, and everything went exactly as he had hoped.','success','successful'],
+          ['The dentist said the procedure would be ___. (without pain)','pain','painless'],
+          ['During the tornado, people felt ___. (without power)','power','powerless']]
+        .map(([q,b,a]) => { const vs = /y$/.test(a) && !/ly$/.test(a) ? [b+'y',b+'ly',b+'ful',b+'less'] : /ly$/.test(a) ? [b+'ly',b+'y',b+'ful',b+'less'] : [b+'ful',b+'less',b+'y',b+'ly'];
+          return { k:'mc', q:`(${b}) ${q}`, a, o:vs.filter(x => x !== a).slice(0,3), lab:'加上正確的字尾' }; }),
+      ...[['I enjoyed my weekend. → My weekend was ___.','enjoy','enjoyable'],
+          ['I like the comfort of this chair. → The chair is ___.','comfort','comfortable'],
+          ['The family can afford the trip. → The trip is ___.','afford','affordable'],
+          ['Everyone loves the puppy. → The puppy is ___.','love','lovable'],
+          ['You reasoned your answer. → Your answer is ___.','reason','reasonable'],
+          ['This gift is very important to me. → This gift is ___ to me.','value','valuable'],
+          ['You can trust his story. → His story is ___.','believe','believable']]
+        .map(([q,b,a]) => ({ k:'mc', q:`(${b}) ${q}`, a, o:[b+'ful',b+'less',b+'ly'], lab:'用 -able 改寫句子' })),
+    ]},
+  { id:'sk4', en:'Genre & Text Features', zh:'文體與文本特徵', theme:'space',
+    notes:['Expository text: it gives facts and information about a topic.','Argumentative text: a nonfiction giving a claim or opinion; it uses facts and examples to get the reader to agree.','photograph 照片・chart 表格・boldface 粗體字・sidebar 側欄・caption 圖說・map 地圖'],
+    items:[
+      mc('“Earth and its Neighbors” is an ___ text.','expository',['argumentative','historical fiction','narrative nonfiction']),
+      mc('An expository text ___.','gives facts and information about a topic',['tells a made-up story','gives a claim and tries to get you to agree','is a poem about the past']),
+      ...two([
+        ['The Life of a Butterfly','expository text','argumentative text'],
+        ['Reading Books Is Better Than Watching TV','argumentative text','expository text'],
+        ['Junk Food Should Be Banned in Schools','argumentative text','expository text'],
+        ['The Water Cycle','expository text','argumentative text'],
+        ['How to Make a Sandwich','expository text','argumentative text'],
+        ['The Importance of Physical Education in Schools','argumentative text','expository text'],
+        ['The Reasons We Have Seasons','expository text','argumentative text'],
+        ['How to Take Care of a Pet','expository text','argumentative text'],
+        ['The Solar System','expository text','argumentative text'],
+        ['Why We Should Protect Endangered Species','argumentative text','expository text'],
+      ], '這個標題是哪一種文體？'),
+      ...fill(TF_FEAT, [
+        ['A picture taken with a camera of something real is a ___.','photograph'],
+        ['A list of facts arranged in rows and columns that helps readers compare information is a ___.','chart'],
+        ['Letters or words that are darker and thicker than the rest of the text are ___.','boldface'],
+        ['A small box on a page that gives extra information about the topic is a ___.','sidebar'],
+        ['A short explanation under or next to a photograph, chart, or map is a ___.','caption'],
+        ['A flat drawing of places is a ___.','map'],
+        ['The name of a book or text, which tells what the entire text is about, is the ___.','title'],
+        ['Words that tell what a section of the text is about are a ___.','heading'],
+        ['A way to show information using bars is a ___.','bar graph'],
+        ['A picture, drawing, or painting that helps explain the text is an ___.','illustration'],
+      ], '文本特徵'),
+      ...tf([
+        ['A photograph and an illustration are the same thing.',false],
+        ['A chart is mainly used to tell a story with characters and events.',false],
+        ['Boldface text is darker and thicker than the rest of the text.',true],
+        ['Boldface letters are written only under a photograph to describe the photograph.',false],
+        ['A chart uses rows and columns to help readers compare information.',true],
+        ['A photograph is usually drawn by hand using pencils or paint.',false],
+      ]),
+    ]},
+  { id:'rd4', en:'Central Idea & Reading', zh:'主旨與閱讀理解', theme:'space', reading:true,
+    notes:['先讀文章再作答。閱讀題敵人會走得比較慢。','問「main idea」時，想想：What is this paragraph mostly about?'],
+    items:[
+      mc('Who was the first man to travel into space?','Yuri Gagarin',['Alan Shepard','Neil Armstrong'],'leap'),
+      mc('How long after Yuri Gagarin’s flight did Alan Shepard go into space?','23 days',['12 days','1 year'],'leap'),
+      mc('What tools did scientists use to study space?','telescopes and satellites',['rockets','computers'],'leap'),
+      mc('What is the main idea of the first paragraph?','The first space flights showed people could travel into space.',['Astronauts lived on the Moon.','Space travel took many years.'],'leap'),
+      mc('What is the main idea of the third paragraph?','Scientists learned more and wanted to explore other planets.',['Astronauts stopped exploring space.','Space travel became dangerous.'],'leap'),
+      mc('Why did scientists want to get closer to other planets?','to learn more about them',['to stop space travel','to build homes'],'leap'),
+      mc('When did Yuri Gagarin travel into space?','April 12, 1961',['May 5, 1961','April 12, 1969','23 days later'],'leap'),
+      mc('What did astronauts collect on the Moon?','Moon rocks',['water','plants','stars'],'leap'),
+      mc('What was the surface of the Moon like?','dusty and bumpy',['wet and smooth','green and soft','hot and sandy'],'leap'),
+      mc('The main idea of the paragraph is ___.','nicknames for some U.S. presidents',['the nickname of President Eisenhower','how presidents got their nicknames'],'presidents'),
+      mc('A detail that tells more about the main idea is ___.','some nicknames have come from a president’s initials',['not all U.S. presidents have had nicknames','only popular presidents have had nicknames'],'presidents'),
+      mc('The best title for this paragraph would be ___.','Nicknames for Presidents',['Lincoln was Honest Abe','Who was Jemmy?'],'presidents'),
+      mc('What is the main idea of the paragraph?','The planets in the Solar System differ in many ways.',['Jupiter is the biggest planet.','Earth has a nitrogen and oxygen atmosphere.','Uranus is the coldest planet.'],'planets'),
+      mc('Choose the best title for the text.','How Planets in the Solar System Differ',['The Sizes of Planets in the Solar System','Planet Atmospheres Made of Different Gases','Hot and Cold Planets in Space'],'planets'),
+      mc('Which planet is the coldest? Which is the hottest?','Uranus is the coldest and Venus is the hottest.',['Venus is the coldest and Uranus is the hottest.','Mars is the coldest and Mercury is the hottest.','Neptune is the coldest and Earth is the hottest.'],'planets'),
+      mc('A detail about Moons: ___','Jupiter has moons that are larger than Mercury.',['Earth has no moon.','Mars has the biggest moon.','Saturn has no moons.'],'planets'),
+      mc('The main idea of the paragraph is ___.','different winds around the world',['winds of the western U.S.','how winds bring snow to Russia'],'winds'),
+      mc('A detail that tells more about the main idea is ___.','what a purga is and does',['where the word mistral comes from','how people dress during a khamsin'],'winds'),
+      mc('The best title for this paragraph would be ___.','Winds of the World',['Cold Winter Winds','What’s the Weather?'],'winds'),
+      mc('What is the main idea of the first numbered paragraph?','First of all, dogs are loyal and loving.',['They will protect you from harm and danger.','Many people around the world have pets.'],'dogs'),
+      mc('Which detail supports the main idea of the first numbered paragraph?','They will comfort you when you are sad or lonely.',['They will join you for walks, runs, and hikes.','They can learn to help people with disabilities.'],'dogs'),
+      mc('What is the main idea of the second numbered paragraph?','Secondly, dogs are fun and playful.',['For example, tricks like playing dead or rolling over.','Dogs are smart and trainable.'],'dogs'),
+      mc('Which detail supports the main idea of the second numbered paragraph?','They will join you for walks, runs, hikes, or any other outdoor activity.',['They will always be there for you.','They can be police dogs.'],'dogs'),
+      mc('Is this an argumentative text or an expository text?','expository — it gives facts and information about Saturn’s rings',['argumentative — it tries to get you to agree','historical fiction — it is a made-up story'],'saturn'),
+      mc('What is the central idea / main idea of the passage?','Saturn is a planet with rings around it.',['Scientists are not sure how the rings were made.','Some pieces are as big as mountains.'],'saturn'),
+      mc('What are Saturn’s rings made of?','pieces of rock and ice',['gas and fire','water and sand','one solid piece of metal'],'saturn'),
+      mc('Text feature A (the real image of Saturn’s rings) is a ___.','photograph',['chart','boldface','map'],'saturn'),
+      mc('What information does the chart give you?','the widths of Saturn’s rings',['the names of all the planets','the temperature of Saturn','how to use a telescope'],'saturn'),
+      mc('What is the central idea of Paragraph 2?','The Model T was affordable, strong, reliable, and easy to drive and fix.',['The Model T was the first car ever made.','The Model T was only popular in cities.'],'modelt'),
+      mc('What is the central idea of Paragraph 3?','Henry Ford lowered the price of cars by making them faster and cheaper to produce.',['Cars were always affordable in the United States.','People did not want to buy cars before the Model T.'],'modelt'),
+      mc('Which detail supports the idea that the Model T was reliable?','It was built with steel to handle rough roads.',['It was introduced in 1908.','It came in blue, gray, green, and red.'],'modelt'),
+      mc('Why did many people want to own a Model T?','It was dependable and easy to drive.',['It was hard to fix.','It was only for wealthy people.'],'modelt'),
+      mc('Why did Henry Ford want to lower the price of cars?','Not everyone had enough money to buy one.',['Cars were difficult to fix.','People preferred walking.'],'modelt'),
+      mc('What did Ford do first to make cars more affordable?','He found a way to make more cars to meet demand.',['He painted the cars different colors.','He sold fewer cars.'],'modelt'),
+      ...tf([
+        ['The Ford Model T was introduced in 1908.',true],
+        ['The original Model T cars were only available in black.',false],
+        ['The Model T originally cost $850 to buy.',true],
+        ['By 1918, all the cars in the United States were Model Ts.',false],
+        ['The Model T was built to handle rough roads and was easy to drive.',true],
+        ['Before the Model T, cars were affordable for most people.',false],
+        ['Henry Ford used a moving assembly line to make cars faster.',true],
+        ['Ford increased the price of the Model T so fewer people would buy it.',false],
+        ['“Everybody Wants One” is the title of the story.',false],
+        ['The Model T car was the first car ever made.',false],
+      ],'modelt'),
+    ]},
+]},
+{ id:'final', name:'期末總複習', full:'Final Exam Review', units:[] },
+];
+
+const PART = 10;                                  // 每關最多幾隻敵人（單元會依序切成好幾關）
+const SPEED = 34, EVERY = 7;                      // 一般關卡：敵人速度、幾秒出一隻
+const READ = { speed:20, every:12 };              // 閱讀單元：走慢一點，留時間讀文章
+const PASSAGE_SLOW = .45;                         // 題目附文章時，敵人再放慢
+const QUIZ = { n:20, speed:40, every:6 };         // 小考模擬：從整個 Cycle 隨機抽 n 題
+const FINAL = { n:30, speed:38, every:6.5 };      // 期末總複習：兩個 Cycle 一起抽
+const MAX_HP = 5;          // 城牆耐久
+const COMBO = 3;           // 連續答對幾題觸發投石
+const SAVE_KEY = 'pinkbook_c34_v1';
+
+/* ---------- 題目編號與關卡 ---------- */
+const ALL = [];
+TABS.forEach(tb => tb.units.forEach(u => u.items.forEach((x,i) => {
+  x.id = `${u.id}-${i}`; x.unit = u; x.tab = tb; x.area = u.theme; ALL.push(x);
+})));
+const findItem = id => ALL.find(x => x.id === id);
+
+const STAGES = [];
+TABS.forEach(tb => {
+  tb.units.forEach(u => {
+    const n = Math.ceil(u.items.length / PART), size = Math.ceil(u.items.length / n);
+    for(let k=0; k<n; k++){
+      const items = u.items.slice(k*size, (k+1)*size), from = k*size+1, to = k*size+items.length;
+      STAGES.push({ id:`${u.id}-${k+1}`, tab:tb, unit:u, items, from, to, theme:u.theme, ordered:!!u.reading,
+                    speed:u.reading ? READ.speed : SPEED, every:u.reading ? READ.every : EVERY, title:`${u.zh}　${from}–${to}` });
+    }
+  });
+});
+const noPassage = x => !x.p;
+TABS.forEach(tb => {
+  if(tb.id === 'final'){
+    STAGES.push({ id:'final-mix', tab:tb, quiz:true, n:FINAL.n, items:ALL.filter(noPassage), theme:'space', speed:FINAL.speed, every:FINAL.every, title:'期末綜合模擬', desc:`從 Cycle 3、Cycle 4 全部題目隨機抽 ${FINAL.n} 題（不含長篇閱讀）。` });
+    STAGES.push({ id:'final-read', tab:tb, quiz:true, read:true, items:ALL.filter(x => x.p), theme:'autumn', speed:READ.speed, every:READ.every, title:'期末閱讀模擬', desc:'隨機抽兩篇文章，把它們的題目全部守完。' });
+  }else{
+    const items = ALL.filter(x => x.tab === tb && noPassage(x));
+    STAGES.push({ id:`${tb.id}-quiz`, tab:tb, quiz:true, n:QUIZ.n, items, theme:'autumn', speed:QUIZ.speed, every:QUIZ.every, title:`${tb.name}　小考模擬`, desc:`從 ${tb.full} 的 ${items.length} 題隨機抽 ${QUIZ.n} 題，敵人走得比較快。` });
+  }
+});
+
+/* ---------- 存檔（只存在這台裝置的瀏覽器） ---------- */
+function load(){ try{ return JSON.parse(localStorage.getItem(SAVE_KEY)) || {}; }catch(e){ return {}; } }
+function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){} }
+const S = Object.assign({ stars:{}, wrong:{}, tab:'c3' }, load());
+
+/* ---------- 小工具 ---------- */
+const $app = document.getElementById('app');
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const shuffle = a => { a = a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const pick = (a,n) => shuffle(a).slice(0,n);
+
+function ask(msg, onYes){
+  const m = document.getElementById('modal');
+  document.getElementById('modalMsg').textContent = msg;
+  m.hidden = false;
+  document.getElementById('modalNo').onclick = () => { m.hidden = true; };
+  document.getElementById('modalYes').onclick = () => { m.hidden = true; onYes(); };
+}
+
+const canSpeak = 'speechSynthesis' in window;
+let voice = null;
+function speak(text){
+  if(!canSpeak) return;
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US'; u.rate = 0.85;
+    if(!voice) voice = speechSynthesis.getVoices().find(v => /en[-_]US/i.test(v.lang)) || null;
+    if(voice) u.voice = voice;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+/* ---------- 圖示（內嵌 SVG） ---------- */
+const IC = {
+  star:on => `<svg viewBox="0 0 24 24"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z" fill="${on?'#c9932e':'none'}" stroke="${on?'#9c6f1c':'#9aa3a0'}" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
+  shield:on => `<svg viewBox="0 0 24 24"><path d="M12 2.5l8 3v6.2c0 4.8-3.4 8.2-8 9.8-4.6-1.6-8-5-8-9.8V5.5z" fill="${on?'#e9ece4':'none'}" stroke="${on?'#e9ece4':'#6b7a7a'}" stroke-width="1.8" stroke-linejoin="round"/>${on?'<path d="M12 6v12M7.5 10.5h9" stroke="#2f4a5e" stroke-width="1.8"/>':''}</svg>`,
+  gem:on => `<svg viewBox="0 0 24 24"><path d="M12 3l7 9-7 9-7-9z" fill="${on?'#c9932e':'none'}" stroke="${on?'#c9932e':'#6b7a7a'}" stroke-width="1.8" stroke-linejoin="round"/></svg>`,
+  speaker:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4.5 4.5 0 010 6M18 6.5a8 8 0 010 11"/></svg>`,
+  pause:`<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>`,
+  play:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12-7.5z"/></svg>`,
+  back:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>`,
+  lock:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 018 0v3"/></svg>`,
+  book:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 6.5C10 5 7 4.5 3.5 5v13c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5zM12 6.5v13"/></svg>`,
+  sword:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4H20v5.5L10 19.5 4.5 14z"/><path d="M7 16.5l-3 3M5.5 13l5.5 5.5"/></svg>`,
+};
+const starsHtml = n => `<span class="stars">${[0,1,2].map(i => IC.star(i<n)).join('')}</span>`;
+
+/* =========================================================
+   戰場繪圖（Canvas）：背景先畫進離屏畫布快取，每格只畫會動的東西。
+   ========================================================= */
+// 窄螢幕（手機）用較短的戰場，畫面放大、敵人看得清楚；速度依路長等比例調整。
+const W = (window.innerWidth || 720) < 560 ? 540 : 720, H = 300, GROUND = 238, WALL_X = 158, STOP_X = WALL_X + 18;
+const DPR = Math.min(2, window.devicePixelRatio || 1);
+const PATH_K = (W - 176) / (720 - 176);
+document.documentElement.style.setProperty('--ar', `${W}/${300}`);
+const THEMES = {
+  forest:{ sky:['#9dbfc4','#e4d8b9'], glow:'rgba(255,236,200,.55)', far:'#8eab9a', mid:'#6a8c6c', near:'#4e6d50',
+           ground:'#5b7a4f', groundD:'#4a6741', path:'#b7a079', pathD:'#8f7a56', stone:'#9aa09f', stoneL:'#aab0ae', stoneD:'#626a6b',
+           gate:'#4a3a2f', win:'#2b3134', banner:'#c9932e', ink:'#1c2428', tunic:'#3f6a5a', hood:'#2f4f44',
+           enemy:['#5a4a6e','#6e4c4a','#4a5a70'], eye:'#1c2428' },
+  ocean: { sky:['#9cc1d3','#ecdfc3'], glow:'rgba(255,240,210,.55)', far:'#93a3a1', sea:'#5c8fa2', seaL:'#a7c9d1', mid:'#7d8a80', near:'#6e7d62',
+           ground:'#7a8a63', groundD:'#667554', path:'#cbb88f', pathD:'#a08e66', stone:'#a3a49b', stoneL:'#b3b4ab', stoneD:'#6e7068',
+           gate:'#4a3a2f', win:'#2b3134', banner:'#a8463a', ink:'#1c2428', tunic:'#3d5a72', hood:'#2c4356',
+           enemy:['#4f3f5c','#3e5560','#62493a'], eye:'#1c2428' },
+  autumn:{ sky:['#d9a77e','#f1d9b2'], glow:'rgba(255,214,160,.6)', far:'#a48c84', mid:'#8a5f45', near:'#5f4a40',
+           ground:'#6e6a45', groundD:'#5b583a', path:'#c2a77c', pathD:'#987e58', stone:'#9c9a94', stoneL:'#acaaa3', stoneD:'#68665f',
+           gate:'#4a3a2f', win:'#2b3134', banner:'#a8463a', ink:'#1c2428', tunic:'#6a4a3a', hood:'#4a3328',
+           enemy:['#4b3f5c','#3f4f5e','#5e3f3f'], eye:'#1c2428' },
+  space: { sky:['#18213f','#4b4c78'], glow:'rgba(190,180,255,.22)', far:'#34406a', mid:'#2a3559', near:'#212b48',
+           ground:'#283350', groundD:'#1f2842', path:'#57566f', pathD:'#3f3e55', stone:'#6d7388', stoneL:'#7b8197', stoneD:'#454a5e',
+           gate:'#2a2230', win:'#f2c45a', banner:'#c9932e', ink:'#10141e', tunic:'#4a4f7a', hood:'#33375a',
+           enemy:['#7b5a92','#5d6aa0','#8a5a6e'], eye:'#f2c45a', night:true },
+};
+
+function rngFrom(str){
+  let h = 2166136261;
+  for(const c of str){ h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); }
+  return () => { h += 0x6D2B79F5; let t = h; t = Math.imul(t ^ t>>>15, t|1); t ^= t + Math.imul(t ^ t>>>7, t|61); return ((t ^ t>>>14)>>>0) / 4294967296; };
+}
+function circle(g,x,y,r){ g.beginPath(); g.arc(x,y,r,0,Math.PI*2); }
+function ell(g,x,y,rx,ry){ g.beginPath(); g.ellipse(x,y,rx,ry,0,0,Math.PI*2); }
+function ridge(g,r,base,amp,f,x0=0,x1=W){
+  const p1 = r()*6, p2 = r()*6;
+  g.beginPath(); g.moveTo(x0,H);
+  for(let x=x0; x<=x1+6; x+=6) g.lineTo(x, base + Math.sin(x*f+p1)*amp + Math.sin(x*f*2.7+p2)*amp*.35);
+  g.lineTo(x1,H); g.closePath(); g.fill();
+}
+function pine(g,x,y,h,col,shade){
+  g.fillStyle = col;
+  for(let k=0;k<3;k++){
+    const yy = y - k*h*.28, ww = h*(.42 - k*.1);
+    g.beginPath(); g.moveTo(x, yy - h*.5); g.lineTo(x+ww, yy); g.lineTo(x-ww, yy); g.closePath(); g.fill();
+    if(shade){ g.fillStyle = shade; g.beginPath(); g.moveTo(x, yy - h*.5); g.lineTo(x+ww, yy); g.lineTo(x, yy); g.closePath(); g.fill(); g.fillStyle = col; }
+  }
+}
+function cloud(g,x,y,s){
+  g.fillStyle = 'rgba(255,255,255,.5)';
+  [[0,0,26,9],[18,-6,18,10],[-16,-3,16,8],[34,2,16,6]].forEach(([dx,dy,rx,ry]) => { ell(g,x+dx*s,y+dy*s,rx*s,ry*s); g.fill(); });
+}
+function bricks(g,x,y,w,h,r,T){
+  g.save(); g.beginPath(); g.rect(x,y,w,h); g.clip();
+  g.lineWidth = 1;
+  for(let row=0, yy=y; yy<y+h; row++, yy+=12){
+    let xx = x - (row%2 ? 12 : 2);
+    while(xx < x+w){
+      const bw = 18 + r()*12, v = r();
+      if(v < .22){ g.fillStyle = 'rgba(0,0,0,.08)'; g.fillRect(xx,yy,bw,12); }
+      else if(v < .36){ g.fillStyle = 'rgba(255,255,255,.08)'; g.fillRect(xx,yy,bw,12); }
+      g.strokeStyle = T.stoneD; g.globalAlpha = .55; g.strokeRect(xx+.5,yy+.5,bw,12); g.globalAlpha = 1;
+      xx += bw;
+    }
+  }
+  g.restore();
+}
+function drawCastle(g,T,r){
+  const base = GROUND + 8;
+  g.lineJoin = 'round'; g.strokeStyle = T.ink;
+  // 城牆
+  g.fillStyle = T.stone; g.fillRect(0,128,WALL_X,base-128);
+  bricks(g,0,128,WALL_X,base-128,r,T);
+  g.fillStyle = 'rgba(255,255,255,.12)'; g.fillRect(0,128,WALL_X,3);
+  g.lineWidth = 2; g.strokeRect(-2,128,WALL_X+2,base-128);
+  for(let x=98; x+10<=WALL_X; x+=16){ g.fillStyle = T.stone; g.fillRect(x,117,11,11); g.strokeRect(x,117,11,11); }
+  // 城門
+  g.beginPath(); g.moveTo(106,base); g.lineTo(106,200); g.arc(124,200,18,Math.PI,0); g.lineTo(142,base); g.closePath();
+  g.fillStyle = T.gate; g.fill(); g.lineWidth = 2; g.stroke();
+  g.save(); g.clip();
+  g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 1;
+  for(let x=112; x<142; x+=6){ g.beginPath(); g.moveTo(x,180); g.lineTo(x,base); g.stroke(); }
+  g.strokeStyle = '#2a2a2a'; g.lineWidth = 2.5;
+  [204,226].forEach(y => { g.beginPath(); g.moveTo(104,y); g.lineTo(144,y); g.stroke(); });
+  g.restore();
+  g.fillStyle = '#c9b48a'; circle(g,136,214,1.8); g.fill();
+  // 拱石
+  g.strokeStyle = T.stoneD; g.lineWidth = 1;
+  for(let a=Math.PI; a<=Math.PI*2+.01; a+=Math.PI/6){ g.beginPath(); g.moveTo(124+Math.cos(a)*18,200+Math.sin(a)*18); g.lineTo(124+Math.cos(a)*25,200+Math.sin(a)*25); g.stroke(); }
+  g.strokeStyle = T.ink; g.lineWidth = 2; g.beginPath(); g.arc(124,200,25,Math.PI,0); g.stroke();
+  // 塔樓
+  g.fillStyle = T.stoneL; g.fillRect(20,68,78,base-68);
+  bricks(g,20,68,78,base-68,r,T);
+  g.fillStyle = 'rgba(0,0,0,.14)'; g.fillRect(20,68,11,base-68);
+  g.lineWidth = 2; g.strokeStyle = T.ink; g.strokeRect(20,68,78,base-68);
+  for(let x=20; x+12<=98; x+=16.5){ g.fillStyle = T.stoneL; g.fillRect(x,56,12,12); g.strokeRect(x,56,12,12); }
+  g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(20,66,78,3);
+  // 窗
+  [[59,92],[59,152]].forEach(([cx,cy]) => {
+    g.beginPath(); g.moveTo(cx-5,cy+20); g.lineTo(cx-5,cy+5); g.arc(cx,cy+5,5,Math.PI,0); g.lineTo(cx+5,cy+20); g.closePath();
+    g.fillStyle = T.win; g.fill(); g.lineWidth = 1.8; g.stroke();
+    if(T.night){ const gl = g.createRadialGradient(cx,cy+10,2,cx,cy+10,26); gl.addColorStop(0,'rgba(242,196,90,.35)'); gl.addColorStop(1,'rgba(242,196,90,0)'); g.fillStyle = gl; g.fillRect(cx-28,cy-18,56,56); }
+  });
+  // 藤蔓（森林）／青苔
+  if(!T.night){
+    g.fillStyle = T === THEMES.forest ? '#4f7a4a' : '#6f7f5e';
+    for(let i=0;i<70;i++){ const x = 20 + r()*70, y = base - r()*r()*120; ell(g,x,y,2.2+r()*2,1.6+r()*1.4); g.fill(); }
+    for(let i=0;i<40;i++){ const x = r()*WALL_X, y = base - r()*r()*30; ell(g,x,y,2+r()*2,1.5); g.fill(); }
+  }
+}
+
+const bgCache = {};
+function makeBg(theme){
+  if(bgCache[theme]) return bgCache[theme];
+  const c = document.createElement('canvas'); c.width = W*DPR; c.height = H*DPR;
+  const g = c.getContext('2d'); g.scale(DPR,DPR);
+  const T = THEMES[theme], r = rngFrom('bg-'+theme);
+  let gr = g.createLinearGradient(0,0,0,GROUND); gr.addColorStop(0,T.sky[0]); gr.addColorStop(1,T.sky[1]);
+  g.fillStyle = gr; g.fillRect(0,0,W,H);
+  const gl = g.createRadialGradient(W*.75,170,10,W*.75,170,280); gl.addColorStop(0,T.glow); gl.addColorStop(1,'rgba(255,255,255,0)');
+  g.fillStyle = gl; g.fillRect(0,0,W,H);
+  if(T.night){
+    for(let i=0;i<120;i++){ const s = r()<.1 ? 2 : 1.1; g.fillStyle = `rgba(255,246,220,${.25+r()*.75})`; g.fillRect(r()*W, r()*175, s, s); }
+    const MX = W*.78; g.fillStyle = '#efe6cc'; circle(g,MX,62,19); g.fill();
+    g.fillStyle = 'rgba(0,0,0,.08)'; circle(g,MX-7,58,5); g.fill(); circle(g,MX+6,69,3.5); g.fill(); circle(g,MX+2,52,2.5); g.fill();
+    const mg = g.createRadialGradient(MX,62,18,MX,62,70); mg.addColorStop(0,'rgba(239,230,204,.25)'); mg.addColorStop(1,'rgba(239,230,204,0)');
+    g.fillStyle = mg; g.fillRect(MX-80,0,160,140);
+  }else{
+    for(let i=0;i<4;i++) cloud(g, 230 + i*(W-260)/4 + r()*50, 32 + r()*60, .7 + r()*.6);
+  }
+  if(theme === 'ocean'){
+    g.fillStyle = T.far; ridge(g,r,152,9,.012,380,W);
+    g.fillStyle = T.sea; g.fillRect(0,166,W,H-166);
+    g.fillStyle = 'rgba(255,255,255,.18)'; g.fillRect(0,166,W,2);
+    g.strokeStyle = T.seaL; g.lineWidth = 1.4; g.globalAlpha = .7;
+    for(let i=0;i<50;i++){ const x = r()*W, y = 174 + r()*44, w = 8 + r()*18; g.beginPath(); g.moveTo(x,y); g.quadraticCurveTo(x+w/2,y-3,x+w,y); g.stroke(); }
+    g.globalAlpha = 1;
+    // 帆船
+    g.fillStyle = '#3b4a52'; g.beginPath(); g.moveTo(452,182); g.lineTo(486,182); g.lineTo(480,188); g.lineTo(458,188); g.closePath(); g.fill();
+    g.fillStyle = '#efe7d3'; g.beginPath(); g.moveTo(468,180); g.lineTo(468,156); g.lineTo(482,180); g.closePath(); g.fill();
+    g.fillStyle = T.near; ridge(g,r,216,5,.02);
+  }else{
+    g.fillStyle = T.far; ridge(g,r,148,18,.008);
+    g.fillStyle = T.mid; ridge(g,r,184,11,.014);
+    if(theme === 'forest' || theme === 'autumn'){ for(let i=0;i<40;i++) pine(g, 170 + r()*560, 186 + r()*14, 18 + r()*18, T.mid, 'rgba(0,0,0,.12)'); }
+    else { for(let i=0;i<26;i++) pine(g, 180 + r()*540, 192 + r()*8, 14 + r()*14, T.near, 'rgba(0,0,0,.18)'); }
+    g.fillStyle = T.near; ridge(g,r,212,6,.02);
+  }
+  // 地面與小路
+  g.fillStyle = T.ground; g.fillRect(0,GROUND-14,W,H);
+  g.fillStyle = T.groundD; g.fillRect(0,GROUND+24,W,H);
+  g.beginPath(); g.moveTo(0,GROUND-6);
+  for(let x=0;x<=W;x+=12) g.lineTo(x, GROUND-6 + Math.sin(x*.03)*1.5);
+  for(let x=W;x>=0;x-=12) g.lineTo(x, GROUND+18 + Math.sin(x*.025+1)*2);
+  g.closePath(); g.fillStyle = T.path; g.fill();
+  g.strokeStyle = T.pathD; g.lineWidth = 1.5; g.globalAlpha = .6; g.stroke(); g.globalAlpha = 1;
+  for(let i=0;i<70;i++){ g.fillStyle = r()<.5 ? T.pathD : 'rgba(255,255,255,.18)'; ell(g, r()*W, GROUND-2 + r()*17, 1.5+r()*2.5, 1+r()*1.2); g.fill(); }
+  g.strokeStyle = T.groundD; g.lineWidth = 1.2;
+  for(let i=0;i<120;i++){ const x = r()*W, y = GROUND + 22 + r()*(H-GROUND-22), h = 3 + r()*5; g.beginPath(); g.moveTo(x-2,y-h); g.lineTo(x,y); g.lineTo(x+2,y-h*.8); g.stroke(); }
+  if(theme === 'forest'){ for(let i=0;i<26;i++){ g.fillStyle = r()<.5 ? '#e8d27a' : '#efe9dc'; circle(g, r()*W, GROUND+28 + r()*40, 1.6); g.fill(); } }
+  drawCastle(g,T,r);
+  // 紙張顆粒與暗角
+  for(let i=0;i<3200;i++){ g.fillStyle = r()<.5 ? 'rgba(0,0,0,.05)' : 'rgba(255,255,255,.05)'; g.fillRect(r()*W, r()*H, 1.3, 1.3); }
+  const vg = g.createRadialGradient(W/2,H/2,H*.45,W/2,H/2,W*.62); vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,.22)');
+  g.fillStyle = vg; g.fillRect(0,0,W,H);
+  bgCache[theme] = c;
+  return c;
+}
+
+function drawFlag(g,T,t){
+  g.strokeStyle = T.ink; g.lineWidth = 2.5; g.beginPath(); g.moveTo(59,57); g.lineTo(59,10); g.stroke();
+  g.fillStyle = T.ink; circle(g,59,9,2.6); g.fill();
+  const n = 10, L = 38, top = [], bot = [];
+  for(let i=0;i<=n;i++){ const k = i/n, w = Math.sin(t*3.2 - i*.7)*2.6*k; top.push([60+k*L, 13+w]); bot.push([60+k*L, 35+w]); }
+  g.beginPath(); top.forEach(([x,y],i) => i ? g.lineTo(x,y) : g.moveTo(x,y)); for(let i=n;i>=0;i--) g.lineTo(bot[i][0], bot[i][1]); g.closePath();
+  g.fillStyle = T.banner; g.fill(); g.strokeStyle = T.ink; g.lineWidth = 1.5; g.stroke();
+  g.fillStyle = 'rgba(0,0,0,.12)'; g.beginPath(); for(let i=0;i<=n;i++){ g[i?'lineTo':'moveTo'](bot[i][0], bot[i][1]-3); } for(let i=n;i>=0;i--) g.lineTo(bot[i][0],bot[i][1]); g.closePath(); g.fill();
+  // 旗上的書本紋章
+  const cx = top[5][0], cy = (top[5][1]+bot[5][1])/2;
+  g.fillStyle = '#f3ecd8'; g.strokeStyle = T.ink; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(cx,cy-4); g.lineTo(cx-8,cy-6); g.lineTo(cx-8,cy+4); g.lineTo(cx,cy+6); g.closePath(); g.fill(); g.stroke();
+  g.beginPath(); g.moveTo(cx,cy-4); g.lineTo(cx+8,cy-6); g.lineTo(cx+8,cy+4); g.lineTo(cx,cy+6); g.closePath(); g.fill(); g.stroke();
+}
+function drawArcher(g,T,pull){
+  const x = 132, y = 117;
+  g.lineJoin = 'round'; g.strokeStyle = T.ink; g.lineWidth = 1.6;
+  g.fillStyle = '#3b3530'; g.fillRect(x-5,y-9,3.5,9); g.fillRect(x+1.5,y-9,3.5,9);
+  g.fillStyle = T.tunic; g.beginPath(); g.moveTo(x-8,y-7); g.lineTo(x+8,y-7); g.lineTo(x+5.5,y-25); g.lineTo(x-5.5,y-25); g.closePath(); g.fill(); g.stroke();
+  g.fillStyle = '#6b4a2b'; g.fillRect(x-7,y-14,14,2.6);
+  g.fillStyle = '#7a5634'; g.fillRect(x-11,y-27,4,15); g.strokeRect(x-11,y-27,4,15);   // 箭袋
+  g.strokeStyle = '#e9e1cc'; g.lineWidth = 1; [x-10,x-8.5].forEach(ax => { g.beginPath(); g.moveTo(ax,y-27); g.lineTo(ax-1,y-32); g.stroke(); });
+  g.strokeStyle = T.ink; g.lineWidth = 1.6;
+  g.fillStyle = '#e6c3a0'; circle(g,x+1,y-30,4.8); g.fill(); g.stroke();
+  g.fillStyle = T.hood; g.beginPath(); g.arc(x,y-30.5,6.2,Math.PI*.85,Math.PI*1.95); g.lineTo(x-3,y-25); g.lineTo(x-7,y-25); g.closePath(); g.fill(); g.stroke();
+  g.fillStyle = T.ink; circle(g,x+3.4,y-30,.9); g.fill();
+  const bx = x+6, by = y-22, R = 12;
+  const tx = bx + Math.cos(-1.15)*R, ty = by + Math.sin(-1.15)*R, btx = bx + Math.cos(1.15)*R, bty = by + Math.sin(1.15)*R;
+  const mx = Math.min(tx,btx) - pull*7;
+  g.strokeStyle = '#e9e1cc'; g.lineWidth = 1; g.beginPath(); g.moveTo(tx,ty); g.lineTo(mx,by); g.lineTo(btx,bty); g.stroke();
+  g.strokeStyle = '#6b4a2b'; g.lineWidth = 2.4; g.beginPath(); g.arc(bx,by,R,-1.15,1.15); g.stroke();
+  g.strokeStyle = T.ink; g.lineWidth = 1.8; g.beginPath(); g.moveTo(x+3,y-21); g.lineTo(bx+R-1,by); g.stroke();
+  if(pull > .05){ g.strokeStyle = '#5b4026'; g.lineWidth = 1.6; g.beginPath(); g.moveTo(mx,by); g.lineTo(bx+R+8,by); g.stroke(); }
+}
+function drawEnemy(g,e,T,target){
+  if(e.state === 'gone') return;
+  const s = e.scale;
+  let alpha = 1, rot = 0, dy = 0;
+  if(e.state === 'die'){ const p = Math.min(1, e.dt/.55); alpha = 1-p; rot = p*1.1; dy = -Math.sin(p*Math.PI)*12; }
+  if(e.state === 'attack' && e.dt > .7){ alpha = Math.max(0, 1-(e.dt-.7)/.25); }
+  g.save(); g.globalAlpha = alpha;
+  g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, e.x, GROUND+8, 14*s, 3.5); g.fill();
+  if(target){
+    g.strokeStyle = '#e0aa3e'; g.lineWidth = 2.5; ell(g, e.x, GROUND+8, 19*s, 5); g.stroke();
+    const by = GROUND - 34*s - 14 + Math.sin(e.t*5)*2.5;
+    g.fillStyle = '#e0aa3e'; g.strokeStyle = T.ink; g.lineWidth = 1.5;
+    g.beginPath(); g.moveTo(e.x-6,by-6); g.lineTo(e.x+6,by-6); g.lineTo(e.x,by+2); g.closePath(); g.fill(); g.stroke();
+  }
+  g.translate(e.x, GROUND+6+dy); g.rotate(rot);
+  const moving = e.state === 'walk' && e.stun <= 0;
+  const wk = moving ? e.t*9 : 0;
+  g.fillStyle = T.ink;
+  ell(g, -5 + Math.sin(wk)*3, 0, 4.6, 2.6); g.fill();
+  ell(g,  5 - Math.sin(wk)*3, 0, 4.6, 2.6); g.fill();
+  g.translate(0, -Math.abs(Math.sin(wk))*2 - 1);
+  const h = 30*s, w = 13*s;
+  // 棍棒（拿在面向城堡的那一手）
+  g.save(); g.translate(-w*.95, -h*.42);
+  const swing = e.state === 'attack' ? -1.3 + Math.sin(Math.min(e.dt,.6)/.6*Math.PI)*1.6 : -.45 + Math.sin(wk)*.15;
+  g.rotate(swing);
+  g.fillStyle = '#7a5634'; g.strokeStyle = T.ink; g.lineWidth = 1.5;
+  g.fillRect(-1.6,-15,3.4,15); g.strokeRect(-1.6,-15,3.4,15);
+  ell(g,0,-17,4.2,5.6); g.fill(); g.stroke();
+  g.restore();
+  // 身體
+  g.beginPath(); g.moveTo(0,-h);
+  g.bezierCurveTo(w*1.25,-h, w*1.3,-3, w*.8,-2);
+  g.quadraticCurveTo(0,1,-w*.8,-2);
+  g.bezierCurveTo(-w*1.3,-3,-w*1.25,-h,0,-h);
+  g.closePath(); g.fillStyle = e.color; g.fill();
+  g.strokeStyle = T.ink; g.lineWidth = 2; g.stroke();
+  g.save(); g.clip(); g.fillStyle = 'rgba(0,0,0,.16)'; ell(g, w*.9, -h*.4, w*.6, h*.75); g.fill(); g.restore();
+  g.fillStyle = 'rgba(255,255,255,.14)'; ell(g, -1, -h*.28, w*.55, h*.2); g.fill();
+  // 角
+  g.fillStyle = '#e8dfc9'; g.lineWidth = 1.5;
+  const horn = side => { g.beginPath(); g.moveTo(side*w*.32,-h*.9); g.quadraticCurveTo(side*w*.95,-h*1.05, side*w*.78,-h*1.32); g.quadraticCurveTo(side*w*.55,-h*1.08, side*w*.08,-h*.98); g.closePath(); g.fill(); g.stroke(); };
+  if(e.horn === 0){ horn(-1); horn(1); }
+  else if(e.horn === 1){ g.beginPath(); g.moveTo(-w*.25,-h*.97); g.quadraticCurveTo(-w*.1,-h*1.35, w*.18,-h*1.38); g.quadraticCurveTo(w*.05,-h*1.1, w*.25,-h*.97); g.closePath(); g.fill(); g.stroke(); }
+  else { g.fillStyle = e.color; [-1,1].forEach(sd => { ell(g, sd*w*.7, -h*.92, w*.32, h*.2); g.fill(); g.stroke(); }); }
+  // 眼睛（看向左邊的城堡）
+  const ey = -h*.62, ex = -w*.3;
+  const stunned = e.stun > 0;
+  [[ex-4,3.3],[ex+4,3.6]].forEach(([cx,rr]) => {
+    g.fillStyle = '#f4efe2'; ell(g,cx,ey,rr,rr*1.12); g.fill(); g.strokeStyle = T.ink; g.lineWidth = 1.2; g.stroke();
+    if(stunned){ g.strokeStyle = T.ink; g.lineWidth = 1.2; g.beginPath(); g.moveTo(cx-1.8,ey-1.8); g.lineTo(cx+1.8,ey+1.8); g.moveTo(cx+1.8,ey-1.8); g.lineTo(cx-1.8,ey+1.8); g.stroke(); }
+    else { g.fillStyle = T.eye; circle(g,cx-1.1,ey+.3,1.7); g.fill(); }
+  });
+  g.strokeStyle = T.ink; g.lineWidth = 1.6;
+  g.beginPath(); g.moveTo(ex-7,ey-5.5); g.lineTo(ex-1.5,ey-3.5); g.moveTo(ex+1.5,ey-3.5); g.lineTo(ex+7.5,ey-5.8); g.stroke();
+  g.lineWidth = 1.3; g.beginPath(); g.moveTo(ex-4,-h*.33); g.lineTo(ex-2,-h*.37); g.lineTo(ex,-h*.33); g.lineTo(ex+2,-h*.37); g.lineTo(ex+4,-h*.33); g.stroke();
+  if(e.flash > 0){ g.globalAlpha = alpha * Math.min(1, e.flash/.12) * .7; g.fillStyle = '#fff'; g.beginPath(); g.moveTo(0,-h); g.bezierCurveTo(w*1.25,-h, w*1.3,-3, w*.8,-2); g.quadraticCurveTo(0,1,-w*.8,-2); g.bezierCurveTo(-w*1.3,-3,-w*1.25,-h,0,-h); g.fill(); }
+  g.restore();
+  if(stunned){
+    g.fillStyle = '#e0aa3e';
+    for(let k=0;k<3;k++){ const a = e.t*6 + k*2.1; circle(g, e.x + Math.cos(a)*10, GROUND - 32*s - 4 + Math.sin(a)*3, 2); g.fill(); }
+  }
+}
+function drawArrow(g,x,y,ang,T){
+  g.save(); g.translate(x,y); g.rotate(ang);
+  g.strokeStyle = '#5b4026'; g.lineWidth = 1.8; g.beginPath(); g.moveTo(-15,0); g.lineTo(5,0); g.stroke();
+  g.fillStyle = T.ink; g.beginPath(); g.moveTo(9,0); g.lineTo(3,-3); g.lineTo(3,3); g.closePath(); g.fill();
+  g.fillStyle = '#e9e1cc'; g.beginPath(); g.moveTo(-15,0); g.lineTo(-19,-3.5); g.lineTo(-12,0); g.lineTo(-19,3.5); g.closePath(); g.fill();
+  g.restore();
+}
+// 地圖卡片用：靜態的一格畫面
+function paintStill(cv, theme, opts={}){
+  cv.width = W*DPR; cv.height = H*DPR;
+  const g = cv.getContext('2d'); g.setTransform(DPR,0,0,DPR,0,0);
+  const T = THEMES[theme];
+  g.drawImage(makeBg(theme),0,0,W,H);
+  drawFlag(g,T,opts.t || .6);
+  drawArcher(g,T,0);
+  (opts.enemies || [{x:W*.6,horn:0,c:0,s:1},{x:W*.78,horn:2,c:1,s:.92},{x:W*.92,horn:1,c:2,s:1.05}]).forEach(o =>
+    drawEnemy(g,{x:o.x,state:'walk',t:o.x*.01,stun:0,flash:0,scale:o.s,horn:o.horn,color:T.enemy[o.c]},T,false));
+}
+
+
+/* ---------- 出題 ---------- */
+const TYPE_LABEL = { def2w:'看定義，選單字', w2def:'看單字，選定義', listen:'聽發音，選出正確拼字', listenW:'聽發音，選單字', fill:'例句填空', unscr:'字母重組' };
+const REAL = new Set([...ALL.filter(x => x.k === 'w').map(x => x.w), 'plain','plane','way','slay','grey','wait','weight','sale','tail','tale','main','mane','pain','pane','sail','rise','fin','plan','rays','gate','fail','rows','dat','sneez']);
+const wordRe = x => new RegExp('\\b' + x.w.replace(/ /g,'\\s') + '\\b', 'i');
+const canFill = x => wordRe(x).test(x.ex);
+function misspell(w){
+  const out = new Set();
+  const rules = [[/ai/,'ay'],[/ay$/,'ai'],[/ay$/,'ey'],[/a([^aeiou])e$/,'ai$1'],[/a([^aeiou])e$/,'a$1'],[/i([^aeiou])e$/,'y$1e'],[/i([^aeiou])e$/,'ie$1'],
+                 [/o([^aeiou])e$/,'oa$1'],[/eigh/,'ay'],[/eigh/,'iegh'],[/eigh/,'eih'],[/ey$/,'ay'],[/ee/,'ea'],[/e$/,''],[/ai/,'a'],[/ui/,'iu'],[/([^aeiou])$/,'$1e']];
+  rules.forEach(([re,to]) => { if(re.test(w)) out.add(w.replace(re,to)); });
+  for(let i=1;i<w.length-1;i++) out.add(w.slice(0,i) + w[i+1] + w[i] + w.slice(i+2));
+  return shuffle([...out].filter(s => s !== w && s.length >= 3 && !REAL.has(s))).slice(0,3);
+}
+function scramble(w){
+  for(let t=0;t<20;t++){ const s = shuffle(w.split('')).join(''); if(s !== w) return s; }
+  return w.split('').reverse().join('');
+}
+function makeQuestion(x, avoid){
+  if(x.k === 'tf') return { item:x, type:'tf', labels:['True','False'], answer:x.a, lab:x.lab };
+  if(x.k === 'mc'){
+    const lower = s => s.toLowerCase();
+    const others = x.o ? x.o : pick(x.box.filter(y => lower(y) !== lower(x.a)), 3);
+    const opts = x.keep ? [x.a, ...others] : shuffle([x.a, ...others]);
+    return { item:x, type:'mc', labels:opts, answer:x.a, lab:x.lab };
+  }
+  // 單字卡
+  const unitWords = x.unit.items.filter(y => y.k === 'w');
+  const spell = x.unit.spell;
+  let types = ['def2w','w2def'];
+  if(canSpeak) types.push('listen');
+  if(canFill(x)) types.push('fill','fill');
+  if(spell) types.push('unscr');
+  types = types.filter(t => t !== avoid);
+  const type = types[Math.floor(Math.random()*types.length)];
+  const others = pick(unitWords.filter(y => y.w !== x.w), 3);
+  if(type === 'listen' && spell){
+    const ms = misspell(x.w);
+    if(ms.length === 3) return { item:x, type, labels:shuffle([x.w, ...ms]), answer:x.w };
+  }
+  const opts = shuffle([x, ...others]);
+  if(type === 'w2def') return { item:x, type, labels:opts.map(o => o.def), answer:x.def };
+  return { item:x, type: type === 'listen' ? 'listenW' : type, labels:opts.map(o => o.w), answer:x.w, scr: type === 'unscr' ? scramble(x.w) : null };
+}
+const fmtQ = s => esc(s).replace(/___/g,'<span class="blank"></span>').replace(/【(.+?)】/g,'<b class="hl">$1</b>');
+const filled = (q,a) => esc(q).replace(/___/, `<b class="hl">${esc(a)}</b>`).replace(/【(.+?)】/g,'<b class="hl">$1</b>');
+
+/* =========================================================
+   遊戲主體
+   ========================================================= */
+let G = null;
+function stopGame(){ if(G){ G.dead = true; cancelAnimationFrame(G.raf); } }
+
+function startGame(cfg){
+  stopGame();
+  const T = THEMES[cfg.theme];
+  cfg = Object.assign({}, cfg, { speed: cfg.speed * PATH_K });
+  G = { cfg, T, bg:makeBg(cfg.theme), queue:cfg.ordered ? cfg.items.slice() : shuffle(cfg.items), total:cfg.items.length,
+        enemies:[], arrows:[], stuck:[], parts:[], cracks:[], boulder:null, banner:null,
+        hp:MAX_HP, right:0, killed:0, breached:0, streak:0, missed:new Set(),
+        time:0, spawnT:1.2, slowUntil:0, lock:0, cur:null, panel:'', pull:0, shake:0, paused:false, over:false, dead:false, last:0 };
+  $app.innerHTML = `
+    <div class="topbar">
+      <button class="tbtn" id="back">${IC.back}撤退</button>
+      <b>${esc(cfg.title)}</b>
+      <button class="tbtn" id="pause">${IC.pause}暫停</button>
+    </div>
+    <div class="field"><canvas id="cv" width="${W*DPR}" height="${H*DPR}" aria-label="戰場畫面"></canvas></div>
+    <div class="hud">
+      <div class="grp">城牆 <span class="pips" id="hpP"></span></div>
+      <div class="grp">連擊 <span class="pips" id="cbP"></span></div>
+      <div class="grp">剩餘敵人 <span class="num" id="left"></span></div>
+    </div>
+    <div class="qp" id="qp"></div>`;
+  G.cv = document.getElementById('cv'); G.g = G.cv.getContext('2d');
+  document.getElementById('back').onclick = () => { const was = G.paused; G.paused = true; ask('確定要撤退嗎？這一場的進度不會保留。', () => { stopGame(); showMap(); }); document.getElementById('modalNo').onclick = () => { document.getElementById('modal').hidden = true; G.paused = was; syncPause(); }; };
+  document.getElementById('pause').onclick = () => { G.paused = !G.paused; syncPause(); };
+  hud(); renderWait();
+  G.raf = requestAnimationFrame(loop);
+  scrollTo(0,0);
+}
+function syncPause(){
+  const b = document.getElementById('pause'); if(!b) return;
+  b.innerHTML = G.paused ? `${IC.play}繼續` : `${IC.pause}暫停`;
+}
+function hud(){
+  if(!G || G.dead) return;
+  const left = G.queue.length + G.enemies.filter(e => e.state === 'walk').length;
+  document.getElementById('hpP').innerHTML = Array.from({length:MAX_HP}, (_,i) => IC.shield(i < G.hp)).join('');
+  document.getElementById('cbP').innerHTML = Array.from({length:COMBO}, (_,i) => IC.gem(i < G.streak % COMBO)).join('');
+  document.getElementById('left').textContent = `${left} / ${G.total}`;
+}
+
+function spawn(){
+  const w = G.queue.shift();
+  G.enemies.push({ w, x:W+24, state:'walk', t:Math.random()*3, dt:0, stun:0, flash:0, doomed:false, lastType:null,
+                   scale:.9 + Math.random()*.22, horn:Math.floor(Math.random()*3), color:G.T.enemy[Math.floor(Math.random()*G.T.enemy.length)] });
+  hud();
+}
+function ink(x,y,col,n=14,spd=120){
+  for(let i=0;i<n;i++){ const a = Math.random()*Math.PI*2, v = spd*(.3+Math.random()*.8);
+    G.parts.push({ x, y, vx:Math.cos(a)*v, vy:Math.sin(a)*v - 60, life:.6 + Math.random()*.4, max:1, r:1.5 + Math.random()*3, col }); }
+}
+function addCrack(){
+  const pts = []; let x = 60 + Math.random()*90, y = 140 + Math.random()*80;
+  pts.push([x,y]); for(let k=0;k<5;k++){ x += (Math.random()-.5)*16; y += 5 + Math.random()*9; pts.push([x,y]); }
+  G.cracks.push(pts);
+}
+function markWrong(x){ G.missed.add(x.id); S.wrong[x.id] = (S.wrong[x.id] || 0) + 1; save(); }
+
+function update(dt){
+  G.time += dt;
+  const slow = (G.time < G.slowUntil ? .35 : 1) * (G.cur && G.cur.q.item.p ? PASSAGE_SLOW : 1);
+  G.spawnT -= dt;
+  const walkers = G.enemies.filter(e => e.state === 'walk');
+  if(G.queue.length && walkers.length < 4 && (G.spawnT <= 0 || walkers.length === 0)){ spawn(); G.spawnT = G.cfg.every; }
+  for(const e of G.enemies){
+    e.t += dt; if(e.flash > 0) e.flash -= dt;
+    if(e.state === 'walk'){
+      if(e.stun > 0) e.stun -= dt;
+      else { e.x -= G.cfg.speed * slow * dt; if(e.x <= STOP_X){ e.x = STOP_X; e.state = 'attack'; e.dt = 0; } }
+    }else if(e.state === 'attack'){
+      e.dt += dt;
+      if(e.dt > .45 && !e.hitDone){
+        e.hitDone = true; G.hp = Math.max(0, G.hp-1); G.breached++; G.shake = .4; addCrack();
+        markWrong(e.w);
+        ink(STOP_X-6, GROUND-14, '#8a8f8c', 10, 90); hud();
+      }
+      if(e.dt > .95){ e.state = 'gone'; ink(e.x, GROUND-10, 'rgba(60,60,60,.6)', 8, 60); hud(); }
+    }else if(e.state === 'die'){ e.dt += dt; if(e.dt > .55) e.state = 'gone'; }
+  }
+  for(const a of G.arrows){
+    a.t += dt;
+    if(a.t >= a.dur && !a.done){
+      a.done = true;
+      if(a.hit && a.e.state !== 'gone'){ a.e.state = 'die'; a.e.dt = 0; a.e.flash = .15; G.killed++; ink(a.e.x, GROUND-14*a.e.scale, a.e.color, 16, 140); ink(a.e.x, GROUND-14, G.T.ink, 6, 100); hud(); }
+      else if(!a.hit){ G.stuck.push({ x:a.x1, y:a.y1, ang:a.endAng, life:3 }); ink(a.x1, a.y1, G.T.pathD, 6, 50); }
+    }
+  }
+  G.arrows = G.arrows.filter(a => !a.done);
+  G.stuck.forEach(s => s.life -= dt); G.stuck = G.stuck.filter(s => s.life > 0);
+  if(G.boulder){
+    const b = G.boulder; b.t += dt;
+    if(b.t >= b.dur){
+      G.shake = .3; ink(b.x1, GROUND, G.T.pathD, 22, 160);
+      G.enemies.filter(e => e.state === 'walk').forEach(e => { e.x = Math.min(W-10, e.x + 70); e.stun = 1.8; e.flash = .12; });
+      G.boulder = null;
+    }
+  }
+  for(const p of G.parts){ p.life -= dt; p.vy += 320*dt; p.x += p.vx*dt; p.y += p.vy*dt; if(p.y > GROUND+20){ p.y = GROUND+20; p.vy *= -.3; p.vx *= .6; } }
+  G.parts = G.parts.filter(p => p.life > 0);
+  if(G.shake > 0) G.shake -= dt;
+  if(G.pull > 0) G.pull -= dt*3;
+  if(G.banner){ G.banner.t -= dt; if(G.banner.t <= 0) G.banner = null; }
+  if(!G.over){
+    if(G.hp <= 0) finish(false);
+    else if(!G.queue.length && G.enemies.every(e => e.state === 'gone') && !G.arrows.length) finish(true);
+  }
+  if(!G.over) ensureQuestion();
+}
+
+function draw(){
+  const g = G.g, T = G.T;
+  g.setTransform(DPR,0,0,DPR,0,0);
+  g.save();
+  if(G.shake > 0){ const k = G.shake/.4; g.translate((Math.random()-.5)*7*k, (Math.random()-.5)*4*k); }
+  g.drawImage(G.bg,0,0,W,H);
+  g.strokeStyle = T.ink; g.lineWidth = 1.6; g.lineJoin = 'round';
+  G.cracks.forEach(c => { g.beginPath(); c.forEach(([x,y],i) => i ? g.lineTo(x,y) : g.moveTo(x,y)); g.stroke(); });
+  drawFlag(g,T,G.time);
+  drawArcher(g,T,Math.max(0,G.pull));
+  G.stuck.forEach(s => { g.globalAlpha = Math.min(1, s.life); drawArrow(g,s.x,s.y,s.ang,T); g.globalAlpha = 1; });
+  const tgt = G.cur && G.cur.enemy;
+  [...G.enemies].sort((a,b) => b.x - a.x).forEach(e => drawEnemy(g,e,T,e === tgt && e.state === 'walk'));
+  for(const a of G.arrows){
+    const p = Math.min(1, a.t/a.dur), arc = a.arc;
+    const pos = q => [a.x0 + (a.x1-a.x0)*q, a.y0 + (a.y1-a.y0)*q - arc*Math.sin(Math.PI*q)];
+    const [x,y] = pos(p), [x2,y2] = pos(Math.min(1,p+.02)), [x0,y0] = pos(Math.max(0,p-.02));
+    a.endAng = Math.atan2(y2-y0, x2-x0);
+    drawArrow(g,x,y,a.endAng,T);
+  }
+  if(G.boulder){
+    const b = G.boulder, p = Math.min(1, b.t/b.dur);
+    const x = b.x0 + (b.x1-b.x0)*p, y = b.y0 + (b.y1-b.y0)*p - 120*Math.sin(Math.PI*p);
+    g.save(); g.translate(x,y); g.rotate(p*8);
+    g.fillStyle = T.stone; circle(g,0,0,8); g.fill(); g.strokeStyle = T.ink; g.lineWidth = 2; g.stroke();
+    g.lineWidth = 1; g.beginPath(); g.moveTo(-4,-2); g.lineTo(1,1); g.lineTo(4,-3); g.stroke();
+    g.restore();
+  }
+  for(const p of G.parts){ g.globalAlpha = Math.max(0, Math.min(1, p.life/.4)); g.fillStyle = p.col; circle(g,p.x,p.y,p.r); g.fill(); }
+  g.globalAlpha = 1;
+  g.restore();
+  if(G.banner){
+    const a = Math.min(1, G.banner.t/.3);
+    g.globalAlpha = a;
+    g.font = '900 20px "Noto Serif TC", serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    const tw = g.measureText(G.banner.text).width + 36;
+    g.fillStyle = 'rgba(238,240,234,.94)'; g.strokeStyle = T.ink; g.lineWidth = 2;
+    g.beginPath(); g.roundRect(W/2 + 60 - tw/2, 26, tw, 40, 6); g.fill(); g.stroke();
+    g.fillStyle = '#1c2428'; g.fillText(G.banner.text, W/2 + 60, 47);
+    g.globalAlpha = 1;
+  }
+  if(G.paused && !G.over){
+    g.fillStyle = 'rgba(12,17,20,.55)'; g.fillRect(0,0,W,H);
+    g.fillStyle = '#e9ece4'; g.font = '900 28px "Noto Serif TC", serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText('暫停中', W/2, H/2);
+  }
+}
+
+function loop(ts){
+  if(!G || G.dead) return;
+  const now = ts/1000, dt = Math.min(.05, G.last ? now - G.last : 0);
+  G.last = now;
+  if(!G.paused && !(G.over && G.endIn <= 0)){
+    update(dt);
+    if(G.over){ G.endIn -= dt; if(G.endIn <= 0){ const w = G.won; stopGame(); showResult(w); return; } }
+  }
+  draw();
+  G.raf = requestAnimationFrame(loop);
+}
+document.addEventListener('visibilitychange', () => { if(document.hidden && G && !G.dead && !G.over){ G.paused = true; syncPause(); } });
+
+/* ---------- 題目板 ---------- */
+function ensureQuestion(){
+  if(G.time < G.lock) return;
+  const target = G.enemies.filter(e => e.state === 'walk' && !e.doomed).sort((a,b) => a.x - b.x)[0];
+  if(!target){ G.cur = null; if(G.panel !== 'wait') renderWait(); return; }
+  if(!G.cur || G.cur.enemy !== target || G.cur.stale){
+    const q = makeQuestion(target.w, target.lastType);
+    target.lastType = q.type;
+    G.cur = { enemy:target, q };
+    renderQ();
+  }
+}
+function renderWait(){
+  G.panel = 'wait';
+  document.getElementById('qp').innerHTML = `<div class="wait"><div><b>敵軍正在接近</b><br>出現在小路上就會出題，答對讓弓箭手射擊</div></div>`;
+}
+function passageHtml(key, open){
+  const p = P[key];
+  return `<details class="psg" ${open ? 'open' : ''}><summary>${IC.book}<span>${esc(p.t)}</span></summary><div class="ptext">${p.x.split(/\n\n/).map(t => `<p>${esc(t).replace(/\n/g,'<br>')}</p>`).join('')}</div></details>`;
+}
+function renderQ(){
+  G.panel = 'q';
+  const q = G.cur.q, x = q.item;
+  let p = '';
+  if(q.type === 'def2w') p = `<div class="prompt sent">${esc(x.def)}</div>`;
+  else if(q.type === 'w2def') p = `<div class="prompt w">${esc(x.w)}<span class="pos">${esc(x.pos)}</span></div>${canSpeak ? `<button class="say" data-say="${esc(x.w)}">${IC.speaker}發音</button>` : ''}`;
+  else if(q.type === 'listen' || q.type === 'listenW') p = `<button class="bigsay" data-say="${esc(x.w)}">${IC.speaker}再聽一次</button>`;
+  else if(q.type === 'fill'){ const m = x.ex.match(wordRe(x)); p = `<div class="prompt sent">${esc(x.ex.slice(0,m.index))}<span class="blank"></span>${esc(x.ex.slice(m.index + m[0].length))}</div>`; }
+  else if(q.type === 'unscr') p = `<div class="prompt w scr">${esc(q.scr)}</div><div class="trans">把字母排回正確的單字</div>`;
+  else {
+    if(x.p) p += passageHtml(x.p, G.lastP !== x.p || G.pOpen);
+    const lines = x.q.split('\n');
+    p += lines.map(l => `<div class="prompt sent ${x.q.length > 90 ? 'long' : ''}">${fmtQ(l)}</div>`).join('');
+  }
+  const long = q.labels.some(l => l.length > 24);
+  const latin = q.type !== 'w2def';
+  document.getElementById('qp').innerHTML = `
+    <div class="qlabel">${esc(q.lab || TYPE_LABEL[q.type])}</div>
+    ${p}
+    <div class="opts ${long ? 'long' : ''} ${q.labels.length === 2 ? 'two' : ''}">${q.labels.map((l,j) => `<button class="opt ${latin && !long ? 'latin' : ''}" data-j="${j}"><span class="k">${j+1}</span>${esc(l)}</button>`).join('')}</div>
+    <div class="fb" id="fb"></div>`;
+  const d = document.querySelector('#qp .psg');
+  if(d){ G.lastP = x.p; d.ontoggle = () => { G.pOpen = d.open; }; }
+  bindSay();
+  document.querySelectorAll('#qp .opt').forEach(b => b.onclick = () => answer(+b.dataset.j));
+  if(q.type === 'listen' || q.type === 'listenW') setTimeout(() => speak(x.w), 200);
+}
+function bindSay(){ document.querySelectorAll('[data-say]').forEach(b => b.onclick = () => speak(b.dataset.say)); }
+document.addEventListener('keydown', e => {
+  if(!G || G.dead || G.over || G.paused || G.panel !== 'q') return;
+  const n = parseInt(e.key, 10); if(n >= 1 && n <= G.cur.q.labels.length) answer(n-1);
+});
+
+function answerText(x){
+  if(x.k === 'w') return `<b>${esc(x.w)}</b> <span class="pos">${esc(x.pos)}</span>　${esc(x.zh)}<br><span class="trans">${esc(x.def)}</span>`;
+  if(x.k === 'mc' && /___/.test(x.q) && !x.q.includes('\n')) return `<span class="trans latin" style="font-size:16px">${filled(x.q, x.a)}</span>`;
+  return `<b>${esc(x.a)}</b>`;
+}
+function answer(j){
+  if(!G || !G.cur || G.over || G.paused || G.time < G.lock || G.cur.answered) return;
+  const { enemy:e, q } = G.cur, x = q.item;
+  G.cur.answered = true;
+  const ok = q.labels[j] === q.answer;
+  const btns = document.querySelectorAll('#qp .opt');
+  btns.forEach((b,n) => { b.disabled = true; if(q.labels[n] === q.answer) b.classList.add('ok'); });
+  const fb = document.getElementById('fb');
+  G.pull = 1;
+  if(ok){
+    e.doomed = true;
+    const lead = e.stun > 0 ? 0 : G.cfg.speed*.45;
+    G.arrows.push({ x0:142, y0:96, x1:e.x - lead, y1:GROUND - 14*e.scale, t:0, dur:.45, arc:34, hit:true, e });
+    G.right++; G.streak++;
+    if(S.wrong[x.id]){ S.wrong[x.id]--; if(S.wrong[x.id] <= 0) delete S.wrong[x.id]; }
+    fb.innerHTML = `<span class="good">命中</span>　${answerText(x)}`;
+    G.lock = G.time + (x.k === 'w' ? .8 : 1.1);
+    if(G.streak % COMBO === 0){
+      const ws = G.enemies.filter(z => z.state === 'walk' && z !== e);
+      if(ws.length){
+        const mid = ws.reduce((s,z) => s + z.x, 0) / ws.length;
+        G.boulder = { x0:70, y0:60, x1:mid, y1:GROUND, t:0, dur:.85 };
+        G.banner = { text:`連擊 ${G.streak}　投石擊退`, t:1.6 };
+      }else G.banner = { text:`連擊 ${G.streak}`, t:1.2 };
+    }
+  }else{
+    btns[j].classList.add('no');
+    G.arrows.push({ x0:142, y0:96, x1:e.x + 26 + Math.random()*30, y1:GROUND+6, t:0, dur:.5, arc:30, hit:false, e });
+    e.x = Math.max(STOP_X, e.x - 24);
+    G.streak = 0;
+    markWrong(x);
+    fb.innerHTML = `<span class="bad">射偏了</span>　正確答案：${answerText(x)}${x.k === 'w' ? `<br><span class="trans latin" style="font-size:16px">${esc(x.ex)}</span>` : ''}`;
+    G.lock = G.time + 2.6; G.slowUntil = G.lock;
+    G.cur.stale = true;
+  }
+  save(); hud();
+  if(x.k === 'w' && q.type !== 'listen' && q.type !== 'listenW') speak(x.w);
+}
+
+function finish(won){
+  G.over = true; G.won = won; G.endIn = 1.3; G.cur = null;
+  if(!won) G.banner = { text:'城門被攻破了', t:1.3 };
+  else G.banner = { text:'守城成功', t:1.3 };
+}
+
+/* ---------- 畫面：地圖 ---------- */
+function showMap(){
+  stopGame();
+  const tb = TABS.find(t => t.id === S.tab) || TABS[0];
+  const wrongN = Object.keys(S.wrong).filter(findItem).length;
+  const idx = st => STAGES.indexOf(st);
+  $app.innerHTML = `
+    <header class="brand">
+      <div><span class="en">Pink Book Keep · Grade 3</span><h1>閱讀守城</h1></div>
+      <p>Reading Workbook Cycles 3–4 & Final Exam Review　答對題目，弓箭手就會射退敵人</p>
+    </header>
+    <nav class="weeks" aria-label="選擇範圍">${TABS.map(t => `<button class="wk ${t===tb?'on':''}" data-tab="${t.id}">${esc(t.name)}</button>`).join('')}</nav>
+    <p class="lead latin" style="font-size:18px;color:var(--onDark);font-weight:700">${esc(tb.full)}</p>
+    <div class="stages">
+      ${tb.units.map((u,ui) => `<article class="stage">
+        <canvas data-thumb="${u.theme}" aria-hidden="true"></canvas>
+        <div class="body">
+          <div class="head"><span class="no">UNIT ${ui+1}</span><h2>${esc(u.zh)}</h2></div>
+          <div class="meta"><span class="latin" style="font-size:16px">${esc(u.en)}</span><span>${u.items.length} 題</span></div>
+          <div class="parts">${STAGES.filter(st => st.unit === u).map(st => `<div class="part">
+              <span><b>第 ${st.from}–${st.to} 題</b>　${starsHtml(S.stars[st.id] || 0)}</span>
+              <button class="btn sm" data-play="${idx(st)}">${IC.sword}守城</button>
+            </div>`).join('')}</div>
+          <button class="btn alt" data-learn="${u.id}">${IC.book}預習重點${u.items.some(x => x.k === 'w') ? '與單字' : ''}${u.reading ? '與文章' : ''}</button>
+        </div>
+      </article>`).join('')}
+      ${STAGES.filter(st => st.tab === tb && st.quiz).map(st => `<article class="stage">
+        <canvas data-thumb="${st.theme}" aria-hidden="true"></canvas>
+        <div class="body">
+          <div class="head"><span class="no">${tb.id === 'final' ? 'FINAL' : 'QUIZ'}</span><h2>${esc(st.title.replace(/^.*　/,''))}</h2></div>
+          <div class="meta"><span>${esc(st.desc)}</span>${starsHtml(S.stars[st.id] || 0)}</div>
+          <button class="btn gold" data-play="${idx(st)}">${IC.sword}開始${esc(st.title.replace(/^.*　/,''))}</button>
+        </div>
+      </article>`).join('')}
+    </div>
+    <div class="row" style="margin-top:16px">
+      <button class="btn quiet" id="toWrong">錯題本（${wrongN}）</button>
+      <button class="btn quiet" id="toHelp">玩法說明</button>
+    </div>
+    <p class="foot">題目取自《Reading Workbook Grade 3 — Cycle 3, Cycle 4 & Final Exam Review》Answer Key。進度只存在這台裝置的瀏覽器，不會上傳。</p>`;
+  document.querySelectorAll('[data-thumb]').forEach(cv => paintStill(cv, cv.dataset.thumb));
+  document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { S.tab = b.dataset.tab; save(); showMap(); });
+  document.querySelectorAll('[data-learn]').forEach(b => b.onclick = () => showLearn(b.dataset.learn));
+  document.querySelectorAll('[data-play]').forEach(b => b.onclick = () => playStage(+b.dataset.play));
+  document.getElementById('toWrong').onclick = showWrong;
+  document.getElementById('toHelp').onclick = showHelp;
+  scrollTo(0,0);
+}
+function playStage(i){
+  const st = STAGES[i];
+  let items = st.items, ordered = st.ordered;
+  if(st.read){
+    const keys = pick([...new Set(st.items.map(x => x.p))], 2);
+    items = keys.flatMap(k => st.items.filter(x => x.p === k)); ordered = true;
+  }else if(st.quiz) items = pick(st.items, Math.min(st.n, st.items.length));
+  const slowRead = st.read;
+  startGame({ title:st.title, theme:st.theme, items, ordered, speed:st.speed, every:st.every, stage:i });
+}
+
+function topbar(title, back = showMap){
+  setTimeout(() => { const b = document.getElementById('back'); if(b) b.onclick = back; });
+  return `<div class="topbar"><button class="tbtn" id="back">${IC.back}返回</button><b>${esc(title)}</b><span style="width:72px"></span></div>`;
+}
+function wordRow(x, extra=''){
+  return `<div class="word">
+    <div style="min-width:0">
+      <div><span class="en">${esc(x.w)}</span><span class="pos">${esc(x.pos)}</span>　<span class="zh">${esc(x.zh)}</span>${extra}</div>
+      <div class="exz latin" style="font-size:15px">${esc(x.def)}</div>
+      <div class="ex">${esc(x.ex)}</div>
+    </div>
+    ${canSpeak ? `<button class="say" data-say="${esc(x.w)}" aria-label="播放 ${esc(x.w)} 的發音">${IC.speaker}</button>` : ''}
+  </div>`;
+}
+function itemRow(x, extra=''){
+  if(x.k === 'w') return wordRow(x, extra);
+  const q = x.k === 'mc' && /___/.test(x.q) && !x.q.includes('\n') ? filled(x.q, x.a) : fmtQ(x.q).replace(/\n/g,'<br>');
+  return `<div class="word"><div style="min-width:0">
+      <div class="exz">${esc(x.unit.zh)}${x.p ? '・' + esc(P[x.p].t) : ''}${extra}</div>
+      <div class="ex">${q}</div>
+      <div><span class="ans">答案：</span><b class="latin">${esc(x.a)}</b></div>
+    </div></div>`;
+}
+
+/* ---------- 畫面：預習 ---------- */
+function showLearn(uid){
+  const u = ALL.find(x => x.unit.id === uid).unit;
+  const words = u.items.filter(x => x.k === 'w');
+  const ps = [...new Set(u.items.map(x => x.p).filter(Boolean))];
+  const first = STAGES.findIndex(st => st.unit === u);
+  $app.innerHTML = `${topbar(u.zh)}
+    <div class="sheet notes"><h3>重點</h3><ul>${u.notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul></div>
+    ${words.length ? `<div class="sheet"><h3>單字（${words.length}）</h3>${words.map(x => wordRow(x)).join('')}</div>` : ''}
+    ${ps.length ? `<div class="sheet"><h3>文章（${ps.length} 篇）</h3>${ps.map(k => passageHtml(k, false)).join('')}</div>` : ''}
+    <button class="btn full" id="go">${IC.sword}從第 1 關開始守城</button>`;
+  document.getElementById('go').onclick = () => playStage(first);
+  bindSay(); scrollTo(0,0);
+}
+
+/* ---------- 畫面：結果 ---------- */
+function showResult(won){
+  const cfg = G ? G.cfg : null; if(!cfg) return showMap();
+  const hp = G.hp, isStage = cfg.stage !== undefined;
+  const stars = won ? (hp >= MAX_HP ? 3 : hp >= 3 ? 2 : 1) : 0;
+  const prev = isStage ? (S.stars[STAGES[cfg.stage].id] || 0) : 0;
+  if(isStage && stars > prev){ S.stars[STAGES[cfg.stage].id] = stars; save(); }
+  const nextOpen = isStage && won && cfg.stage < STAGES.length - 1 && STAGES[cfg.stage+1].unit && STAGES[cfg.stage+1].tab === STAGES[cfg.stage].tab;
+  const missed = [...G.missed].map(findItem).filter(Boolean);
+  $app.innerHTML = `
+    <section class="result">
+      <canvas id="still" aria-hidden="true"></canvas>
+      <div class="body">
+        <h2>${won ? '城守住了' : '城門被攻破了'}</h2>
+        ${isStage ? `<div style="margin:8px 0">${starsHtml(stars)}</div>` : ''}
+        ${isStage && stars > prev && prev > 0 ? '<p style="margin:0;color:var(--moss);font-weight:700">刷新最佳紀錄</p>' : ''}
+        <div class="stats">
+          <div><div class="n">${G.killed}</div><div class="l">擊退</div></div>
+          <div><div class="n">${G.breached}</div><div class="l">衝到城下</div></div>
+          <div><div class="n">${G.right}</div><div class="l">答對題數</div></div>
+        </div>
+      </div>
+    </section>
+    ${missed.length ? `<div class="sheet"><h3>這一場要再複習的題目</h3>${missed.map(x => itemRow(x)).join('')}</div>` : ''}
+    <div class="row">
+      <button class="btn alt" id="again">再守一次</button>
+      ${nextOpen ? `<button class="btn gold" id="next">前往下一關</button>` : `<button class="btn" id="map">回到地圖</button>`}
+    </div>`;
+  paintStill(document.getElementById('still'), cfg.theme, { enemies: won ? [] : [{x:200,horn:0,c:0,s:1},{x:240,horn:1,c:1,s:.95}] });
+  bindSay();
+  document.getElementById('again').onclick = () => cfg.stage !== undefined ? playStage(cfg.stage) : startGame(Object.assign({}, cfg, { speed:cfg.speed/PATH_K }));
+  const n = document.getElementById('next'); if(n) n.onclick = () => playStage(cfg.stage + 1);
+  const m = document.getElementById('map'); if(m) m.onclick = showMap;
+  scrollTo(0,0);
+}
+
+/* ---------- 畫面：錯題本 ---------- */
+function showWrong(){
+  const list = Object.entries(S.wrong).sort((a,b) => b[1]-a[1]).map(([id,n]) => [findItem(id), n]).filter(([x]) => x);
+  $app.innerHTML = `${topbar('錯題本')}
+    ${list.length
+      ? `<p class="lead">答錯或讓敵人衝到城下的題目會記在這裡。之後答對一次，次數就減 1，減到 0 就會移出錯題本。</p>
+         <div class="sheet">${list.map(([x,n]) => itemRow(x, `<span class="cnt">錯 ${n} 次</span>`)).join('')}</div>
+         <button class="btn full" id="drill">${IC.sword}用錯題守城（${Math.min(list.length,10)} 隻敵人）</button>`
+      : `<div class="sheet" style="padding:24px 16px;text-align:center">目前沒有錯題。</div>`}`;
+  bindSay();
+  const d = document.getElementById('drill');
+  if(d) d.onclick = () => {
+    const items = list.slice(0,10).map(([x]) => x);
+    const slow = items.some(x => x.p);
+    startGame({ title:'錯題特訓', theme:items[0].area, items, speed:slow ? READ.speed : 30, every:slow ? READ.every : 8 });
+  };
+  scrollTo(0,0);
+}
+
+/* ---------- 畫面：說明 ---------- */
+function showHelp(){
+  $app.innerHTML = `${topbar('玩法說明')}
+    <div class="sheet help">
+      <p>敵人會沿著小路走向城門，每隻敵人身上帶著一道題目。最前面的敵人腳下會出現<b>金色圈</b>，下方題目板出的就是牠的題目。</p>
+      <p>答對，城牆上的弓箭手會射中牠；答錯，箭會射偏，敵人還會往前衝一步。答錯後會顯示正確答案，敵人也會暫時放慢腳步，讓你看清楚。</p>
+      <p>連續答對 ${COMBO} 題，投石車會發射石塊，把所有敵人往後擊退並暈眩一下。</p>
+      <p>敵人走到城門會敲城牆一下。城牆有 ${MAX_HP} 點耐久，全部用完就失敗。守住時城牆完好拿 3 顆星，剩 3～4 點拿 2 顆星，剩 1～2 點拿 1 顆星。</p>
+      <p><b>範圍</b>：Cycle 3（Preserve and Protect）、Cycle 4（Earth and its Neighbors），涵蓋拼字、字彙、一字多義、字尾、文體、文本特徵、主旨與細節、閱讀理解。</p>
+      <p>有文章的題目會在題目上方顯示文章（可以按標題收起來），這時敵人會走得特別慢，先讀完再作答。</p>
+      <p>每個 Cycle 最後的<b>小考模擬</b>會隨機抽 ${QUIZ.n} 題、敵人比較快；<b>期末總複習</b>分頁有兩個 Cycle 混合的綜合模擬和閱讀模擬。</p>
+      <p>單字題有五種：看定義選單字、看單字選定義、聽發音選拼字、例句填空、字母重組。用電腦玩可以按鍵盤 1～4 作答。</p>
+    </div>
+    <button class="btn quiet full" id="reset">清除這台裝置的進度</button>`;
+  document.getElementById('reset').onclick = () => ask('確定要清除所有星星和錯題紀錄嗎？', () => { S.stars = {}; S.wrong = {}; save(); showMap(); });
+  scrollTo(0,0);
+}
+
+if(canSpeak) speechSynthesis.onvoiceschanged = () => { voice = null; };
+showMap();
+</script>
+</body>
+</html>
