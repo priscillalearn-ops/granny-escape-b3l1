@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
 <title>閱讀守城</title>
-<meta name="description" content="Grade 3 英文守城遊戲：Pink Book Cycles 3–4 閱讀複習＋G3 Grammar 文法。答對題目，弓箭手就會射退敵人。">
+<meta name="description" content="Grade 3 英文守城遊戲：Pink Book Cycles 3–4 閱讀複習＋G3 Grammar 文法＋全民英檢初級單字。答對題目，弓箭手就會射退敵人。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://priscillalearn-ops.github.io/granny-escape-b3l1/pink-book/">
 <meta property="og:title" content="閱讀守城｜Grade 3 Reading & Grammar">
-<meta property="og:description" content="Pink Book Cycles 3–4 閱讀複習＋G3 Grammar 文法。答對題目，弓箭手就會射退敵人。">
+<meta property="og:description" content="Pink Book 閱讀複習＋G3 Grammar 文法＋全民英檢初級單字。答對題目，弓箭手就會射退敵人。">
 <meta property="og:image" content="https://priscillalearn-ops.github.io/granny-escape-b3l1/pink-book/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -1065,6 +1065,330 @@ const GTABS = [
 ];
 TABS.splice(2, 0, ...GTABS);
 
+/* =========================================================
+   全民英檢（GEPT）初級常考單字：每行「英文|詞性|中文|例句|例句中譯」
+   ========================================================= */
+const GEPT_RAW = [
+['family','家庭與人物','Family & People','forest',`
+aunt|n.|阿姨；姑姑|My aunt lives in Tainan.|我的阿姨住在台南。
+uncle|n.|叔叔；舅舅|My uncle can drive a bus.|我的叔叔會開公車。
+cousin|n.|堂／表兄弟姊妹|My cousin is the same age as me.|我的表哥和我同年紀。
+grandmother|n.|祖母；外婆|My grandmother makes great dumplings.|我的奶奶做的水餃很好吃。
+parent|n.|父親或母親|Each parent signed the note.|每位家長都在通知單上簽了名。
+daughter|n.|女兒|Their daughter is a nurse.|他們的女兒是護理師。
+son|n.|兒子|Mr. Lin has one son.|林先生有一個兒子。
+baby|n.|嬰兒|The baby is sleeping.|小嬰兒正在睡覺。
+child|n.|小孩|Every child needs love.|每個孩子都需要愛。
+adult|n.|成年人|An adult must come with you.|必須有一位大人陪你來。
+neighbor|n.|鄰居|Our neighbor has a big dog.|我們的鄰居養了一隻大狗。
+friend|n.|朋友|Ben is my best friend.|Ben 是我最好的朋友。
+guest|n.|客人|We have a guest for dinner tonight.|我們今晚有一位客人來吃晚餐。
+husband|n.|丈夫|Her husband is a cook.|她的丈夫是廚師。
+wife|n.|妻子|His wife is a teacher.|他的妻子是老師。
+king|n.|國王|The king lived in a castle.|國王住在城堡裡。
+queen|n.|女王；皇后|The queen wore a gold crown.|女王戴著金色的皇冠。
+member|n.|成員|She is a member of the team.|她是這個隊伍的成員。
+age|n.|年齡|What is your age?|你幾歲？
+name|n.|名字|Please write your name here.|請在這裡寫上你的名字。
+birthday|n.|生日|Happy birthday to you!|祝你生日快樂！
+marry|v.|結婚；嫁；娶|They will marry next spring.|他們明年春天要結婚。
+visit|v.|拜訪|We visit Grandma every Sunday.|我們每個星期天去看奶奶。
+young|adj.|年輕的；年幼的|My sister is too young to drive.|我妹妹年紀太小，還不能開車。
+old|adj.|老的；舊的|This is an old photo of my dad.|這是我爸爸的一張舊照片。`],
+['school','學校與學習','School & Learning','autumn',`
+student|n.|學生|There are thirty students in my class.|我們班有三十位學生。
+teacher|n.|老師|Our teacher is very kind.|我們的老師很親切。
+classroom|n.|教室|Please keep the classroom clean.|請保持教室乾淨。
+lesson|n.|課；一堂課|Today’s lesson is about animals.|今天的課是關於動物。
+homework|n.|回家作業|I do my homework after dinner.|我吃完晚餐後寫作業。
+test|n.|測驗；考試|We have a math test tomorrow.|我們明天有數學考試。
+question|n.|問題|May I ask a question?|我可以問一個問題嗎？
+answer|n.|答案；回答|Do you know the answer?|你知道答案嗎？
+pencil|n.|鉛筆|Can I borrow your pencil?|我可以借你的鉛筆嗎？
+eraser|n.|橡皮擦|My eraser is on the floor.|我的橡皮擦掉在地上。
+ruler|n.|尺|Draw a line with a ruler.|用尺畫一條線。
+notebook|n.|筆記本|Write the words in your notebook.|把這些字寫在你的筆記本上。
+library|n.|圖書館|I borrow books from the library.|我從圖書館借書。
+subject|n.|科目|Math is my favorite subject.|數學是我最喜歡的科目。
+science|n.|科學；自然科|We grow beans in science class.|我們在自然課種豆子。
+history|n.|歷史|He likes to read about history.|他喜歡讀歷史。
+English|n.|英文|I study English every day.|我每天讀英文。
+grade|n.|年級；成績|She is in the third grade.|她讀三年級。
+learn|v.|學習|Kids learn fast.|小孩學得很快。
+study|v.|讀書；研究|I study hard for the test.|我為了考試努力讀書。
+read|v.|閱讀|I read a story before bed.|我睡前會讀一個故事。
+write|v.|寫|Please write a letter to your pen pal.|請寫一封信給你的筆友。
+spell|v.|拼字|How do you spell your name?|你的名字怎麼拼？
+practice|v.|練習|I practice the piano every day.|我每天練習彈鋼琴。
+remember|v.|記得|Remember to bring your book.|記得帶你的書。`],
+['food','食物與飲料','Food & Drinks','ocean',`
+breakfast|n.|早餐|I eat eggs for breakfast.|我早餐吃蛋。
+lunch|n.|午餐|We eat lunch at noon.|我們中午吃午餐。
+dinner|n.|晚餐|Dinner is ready!|晚餐準備好了！
+bread|n.|麵包|She buys bread at the bakery.|她在麵包店買麵包。
+noodle|n.|麵條|I like beef noodle soup.|我喜歡牛肉麵。
+rice|n.|米飯|Rice is a common food in Taiwan.|米飯在台灣是很常見的食物。
+egg|n.|蛋|The hen laid an egg.|母雞下了一顆蛋。
+meat|n.|肉|Tigers eat meat.|老虎吃肉。
+chicken|n.|雞；雞肉|We had fried chicken for lunch.|我們午餐吃炸雞。
+fish|n.|魚|My cat loves fish.|我的貓很愛吃魚。
+vegetable|n.|蔬菜|Eat more vegetables.|多吃蔬菜。
+fruit|n.|水果|Apples are my favorite fruit.|蘋果是我最喜歡的水果。
+banana|n.|香蕉|Monkeys like bananas.|猴子喜歡香蕉。
+candy|n.|糖果|Too much candy is bad for your teeth.|吃太多糖果對牙齒不好。
+cake|n.|蛋糕|Mom made a cake for my birthday.|媽媽為我的生日做了一個蛋糕。
+cookie|n.|餅乾|She baked some cookies.|她烤了一些餅乾。
+milk|n.|牛奶|I drink a glass of milk every morning.|我每天早上喝一杯牛奶。
+juice|n.|果汁|Would you like some orange juice?|你想喝點柳橙汁嗎？
+tea|n.|茶|Grandpa drinks green tea.|爺爺喝綠茶。
+water|n.|水|Drink more water on hot days.|天氣熱時要多喝水。
+salt|n.|鹽|Add a little salt to the soup.|在湯裡加一點鹽。
+sugar|n.|糖|I don’t put sugar in my coffee.|我的咖啡不加糖。
+hungry|adj.|飢餓的|I’m hungry. Let’s eat!|我餓了，我們吃東西吧！
+delicious|adj.|美味的|This soup is delicious.|這碗湯很好喝。
+cook|v.|煮；烹調|My dad likes to cook on weekends.|我爸爸週末喜歡下廚。`],
+['body','身體與健康','Body & Health','forest',`
+head|n.|頭|He hit his head on the door.|他的頭撞到門。
+face|n.|臉|Wash your face in the morning.|早上要洗臉。
+eye|n.|眼睛|She has big brown eyes.|她有一雙棕色的大眼睛。
+ear|n.|耳朵|Rabbits have long ears.|兔子有長長的耳朵。
+nose|n.|鼻子|The clown has a red nose.|小丑有一個紅鼻子。
+mouth|n.|嘴巴|Open your mouth, please.|請張開嘴巴。
+tooth|n.|牙齒|I lost a tooth today.|我今天掉了一顆牙。
+hair|n.|頭髮|My sister has long hair.|我姊姊留長頭髮。
+neck|n.|脖子|A giraffe has a long neck.|長頸鹿有長長的脖子。
+shoulder|n.|肩膀|He put his bag on his shoulder.|他把包包背在肩膀上。
+arm|n.|手臂|She broke her arm.|她的手臂骨折了。
+hand|n.|手|Raise your hand to ask a question.|要發問請舉手。
+finger|n.|手指|We have ten fingers.|我們有十根手指。
+leg|n.|腿|A spider has eight legs.|蜘蛛有八隻腳。
+foot|n.|腳|My foot hurts.|我的腳很痛。
+heart|n.|心；心臟|Your heart beats faster when you run.|跑步時心跳會變快。
+doctor|n.|醫生|You should see a doctor.|你應該去看醫生。
+nurse|n.|護理師|The nurse took my temperature.|護理師幫我量體溫。
+hospital|n.|醫院|She works at a hospital.|她在醫院工作。
+fever|n.|發燒|He has a high fever.|他發高燒。
+cold|n.|感冒|I have a cold today.|我今天感冒了。
+medicine|n.|藥|Take this medicine after meals.|飯後吃這個藥。
+sick|adj.|生病的|Tom is sick at home.|Tom 生病在家。
+healthy|adj.|健康的|Eat well and stay healthy.|好好吃飯，保持健康。
+tired|adj.|疲倦的|I’m tired after the long walk.|走了很長的路後我很累。`],
+['animals','動物與自然','Animals & Nature','forest',`
+animal|n.|動物|What is your favorite animal?|你最喜歡什麼動物？
+bird|n.|鳥|A bird is singing in the tree.|一隻鳥在樹上唱歌。
+bear|n.|熊|The bear is looking for honey.|熊在找蜂蜜。
+elephant|n.|大象|An elephant has a long nose.|大象有長長的鼻子。
+monkey|n.|猴子|The monkey climbed the tree.|猴子爬上了樹。
+rabbit|n.|兔子|The rabbit eats carrots.|兔子吃紅蘿蔔。
+tiger|n.|老虎|The tiger is a big cat.|老虎是一種大型貓科動物。
+lion|n.|獅子|The lion is the king of animals.|獅子是萬獸之王。
+horse|n.|馬|She can ride a horse.|她會騎馬。
+pig|n.|豬|The pig is rolling in the mud.|豬在泥巴裡打滾。
+duck|n.|鴨子|A duck is swimming in the pond.|一隻鴨子在池塘裡游泳。
+frog|n.|青蛙|The frog jumped into the water.|青蛙跳進了水裡。
+snake|n.|蛇|Some snakes are dangerous.|有些蛇很危險。
+insect|n.|昆蟲|An ant is a small insect.|螞蟻是一種小昆蟲。
+tree|n.|樹|There is a big tree in the park.|公園裡有一棵大樹。
+flower|n.|花|She picked a flower for her mom.|她摘了一朵花送給媽媽。
+grass|n.|草；草地|Cows eat grass.|牛吃草。
+river|n.|河|We went fishing in the river.|我們去河邊釣魚。
+mountain|n.|山|Yushan is a high mountain.|玉山是一座高山。
+sea|n.|海|Fish live in the sea.|魚住在海裡。
+island|n.|島|Taiwan is an island.|台灣是一座島。
+forest|n.|森林|Many animals live in the forest.|很多動物住在森林裡。
+sky|n.|天空|The sky is blue today.|今天的天空是藍色的。
+moon|n.|月亮|The moon is bright tonight.|今晚的月亮很亮。
+star|n.|星星|I can see many stars at night.|晚上我可以看到很多星星。`],
+['weather','天氣與時間','Weather & Time','ocean',`
+weather|n.|天氣|How is the weather today?|今天天氣如何？
+sunny|adj.|晴朗的|It’s sunny, so let’s go out.|天氣晴朗，我們出去吧。
+cloudy|adj.|多雲的|It is cloudy this morning.|今天早上多雲。
+rainy|adj.|下雨的|I stay home on rainy days.|下雨天我待在家。
+windy|adj.|颳風的|It’s windy outside.|外面風很大。
+snow|n.|雪|The mountain is covered with snow.|山上覆蓋著雪。
+hot|adj.|熱的|Summer in Taiwan is very hot.|台灣的夏天很熱。
+warm|adj.|溫暖的|Spring is warm.|春天很溫暖。
+cool|adj.|涼爽的|It’s cool in the fall.|秋天很涼爽。
+spring|n.|春天|Flowers bloom in spring.|花在春天綻放。
+summer|n.|夏天|We swim in summer.|我們夏天去游泳。
+fall|n.|秋天|Leaves turn red in the fall.|秋天葉子會變紅。
+winter|n.|冬天|It’s cold in winter.|冬天很冷。
+season|n.|季節|There are four seasons in a year.|一年有四個季節。
+morning|n.|早上|I get up at seven in the morning.|我早上七點起床。
+afternoon|n.|下午|We play ball in the afternoon.|我們下午打球。
+evening|n.|傍晚；晚上|We take a walk in the evening.|我們傍晚去散步。
+night|n.|夜晚|Owls come out at night.|貓頭鷹晚上才出來。
+today|adv.|今天|What day is today?|今天星期幾？
+tomorrow|adv.|明天|See you tomorrow!|明天見！
+yesterday|adv.|昨天|I was sick yesterday.|我昨天生病了。
+week|n.|星期；週|There are seven days in a week.|一個星期有七天。
+month|n.|月|My birthday is next month.|我的生日在下個月。
+year|n.|年|She is ten years old.|她十歲。
+minute|n.|分鐘|Please wait a minute.|請等一下。`],
+['places','地點與交通','Places & Transportation','autumn',`
+park|n.|公園|Let’s play in the park.|我們去公園玩吧。
+market|n.|市場|Mom buys fruit at the market.|媽媽在市場買水果。
+store|n.|商店|The store opens at nine.|這家店九點開門。
+restaurant|n.|餐廳|We ate at a Japanese restaurant.|我們在一家日本餐廳吃飯。
+bank|n.|銀行|My dad works at a bank.|我爸爸在銀行工作。
+post office|n.|郵局|I mailed a letter at the post office.|我在郵局寄了一封信。
+museum|n.|博物館|We saw dinosaur bones at the museum.|我們在博物館看到恐龍骨頭。
+zoo|n.|動物園|There are pandas at the zoo.|動物園裡有貓熊。
+airport|n.|機場|We got to the airport early.|我們很早就到機場了。
+station|n.|車站|Meet me at the train station.|在火車站跟我會合。
+street|n.|街道|Look both ways before you cross the street.|過馬路前要左右看。
+city|n.|城市|Taipei is a big city.|台北是一座大城市。
+country|n.|國家；鄉下|Japan is a country near Taiwan.|日本是台灣附近的國家。
+bus|n.|公車|I take the bus to school.|我搭公車上學。
+train|n.|火車|The train is fast.|火車很快。
+bike|n.|腳踏車|He rides his bike to the park.|他騎腳踏車去公園。
+car|n.|汽車|My mom has a red car.|我媽媽有一輛紅色的車。
+taxi|n.|計程車|We took a taxi home.|我們搭計程車回家。
+boat|n.|小船|We rowed a boat on the lake.|我們在湖上划船。
+airplane|n.|飛機|The airplane flies over the clouds.|飛機飛過雲層。
+MRT|n.|捷運|The MRT is clean and fast.|捷運又乾淨又快。
+left|n.|左邊|Turn left at the corner.|在轉角左轉。
+right|n.|右邊|The bank is on your right.|銀行在你的右手邊。
+near|prep.|在…附近|My school is near my home.|我的學校在我家附近。
+far|adj.|遙遠的|Is the zoo far from here?|動物園離這裡遠嗎？`],
+['home','家與日常用品','Home & Things','ocean',`
+house|n.|房子|They live in a big house.|他們住在一間大房子。
+bedroom|n.|臥室|My bedroom is upstairs.|我的臥室在樓上。
+kitchen|n.|廚房|Mom is cooking in the kitchen.|媽媽在廚房煮飯。
+bathroom|n.|浴室；廁所|Where is the bathroom?|廁所在哪裡？
+living room|n.|客廳|We watch TV in the living room.|我們在客廳看電視。
+door|n.|門|Please close the door.|請關門。
+window|n.|窗戶|Open the window, please.|請打開窗戶。
+table|n.|桌子|Put the cups on the table.|把杯子放在桌上。
+chair|n.|椅子|Sit on the chair.|坐在椅子上。
+bed|n.|床|I go to bed at nine.|我九點上床睡覺。
+sofa|n.|沙發|The cat is sleeping on the sofa.|貓在沙發上睡覺。
+lamp|n.|燈；檯燈|Turn on the lamp.|打開檯燈。
+clock|n.|時鐘|The clock is on the wall.|時鐘掛在牆上。
+phone|n.|電話；手機|Can I use your phone?|我可以用你的手機嗎？
+computer|n.|電腦|I use the computer to do homework.|我用電腦寫作業。
+box|n.|盒子；箱子|Put the toys in the box.|把玩具放進箱子裡。
+bottle|n.|瓶子|He drank a bottle of water.|他喝了一瓶水。
+cup|n.|杯子|Would you like a cup of tea?|你想來杯茶嗎？
+bowl|n.|碗|I ate two bowls of rice.|我吃了兩碗飯。
+spoon|n.|湯匙|Eat the soup with a spoon.|用湯匙喝湯。
+key|n.|鑰匙|I can’t find my key.|我找不到我的鑰匙。
+umbrella|n.|雨傘|Take an umbrella. It may rain.|帶把傘，可能會下雨。
+toy|n.|玩具|The boy has many toys.|那個男孩有很多玩具。
+gift|n.|禮物|Thank you for the gift.|謝謝你的禮物。
+clean|v.|打掃；清潔|I help clean the house on Sunday.|我星期天幫忙打掃家裡。`],
+['clothes','衣服與顏色','Clothes & Colors','autumn',`
+clothes|n.|衣服|I need some new clothes.|我需要一些新衣服。
+shirt|n.|襯衫|He is wearing a white shirt.|他穿著一件白襯衫。
+T-shirt|n.|T 恤|I like this yellow T-shirt.|我喜歡這件黃色 T 恤。
+pants|n.|長褲|These pants are too long.|這條長褲太長了。
+shorts|n.|短褲|Kids wear shorts in summer.|孩子們夏天穿短褲。
+skirt|n.|裙子|She has a pink skirt.|她有一件粉紅色的裙子。
+dress|n.|洋裝|She wore a dress to the party.|她穿洋裝去參加派對。
+coat|n.|外套；大衣|Put on your coat. It’s cold.|穿上外套，天氣很冷。
+jacket|n.|夾克|My jacket is in the car.|我的夾克在車上。
+sweater|n.|毛衣|Grandma made me a sweater.|奶奶幫我織了一件毛衣。
+hat|n.|帽子|Wear a hat in the sun.|在大太陽下要戴帽子。
+cap|n.|鴨舌帽|He has a baseball cap.|他有一頂棒球帽。
+shoe|n.|鞋子|These shoes are new.|這雙鞋是新的。
+sock|n.|襪子|I can’t find my other sock.|我找不到另一隻襪子。
+glove|n.|手套|Wear gloves in winter.|冬天要戴手套。
+bag|n.|袋子；包包|My bag is heavy.|我的包包很重。
+wear|v.|穿；戴|I wear a uniform to school.|我穿制服上學。
+red|adj.|紅色的|She has a red bike.|她有一台紅色的腳踏車。
+yellow|adj.|黃色的|Bananas are yellow.|香蕉是黃色的。
+green|adj.|綠色的|The grass is green.|草是綠色的。
+blue|adj.|藍色的|The sea is blue.|大海是藍色的。
+purple|adj.|紫色的|Grapes are purple.|葡萄是紫色的。
+brown|adj.|棕色的|The bear is brown.|那隻熊是棕色的。
+black|adj.|黑色的|My cat is black.|我的貓是黑色的。
+white|adj.|白色的|Snow is white.|雪是白色的。`],
+['hobbies','運動與休閒','Sports & Hobbies','space',`
+sport|n.|運動|Basketball is my favorite sport.|籃球是我最喜歡的運動。
+basketball|n.|籃球|They play basketball after school.|他們放學後打籃球。
+baseball|n.|棒球|Baseball is popular in Taiwan.|棒球在台灣很受歡迎。
+soccer|n.|足球|He kicks the soccer ball hard.|他用力踢足球。
+tennis|n.|網球|She plays tennis on Saturday.|她星期六打網球。
+swim|v.|游泳|Fish can swim fast.|魚游得很快。
+run|v.|跑|I run in the park every morning.|我每天早上在公園跑步。
+jump|v.|跳|Kangaroos can jump far.|袋鼠可以跳很遠。
+dance|v.|跳舞|She likes to dance to music.|她喜歡隨著音樂跳舞。
+sing|v.|唱歌|We sing songs in music class.|我們在音樂課唱歌。
+draw|v.|畫畫|I like to draw cats.|我喜歡畫貓。
+music|n.|音樂|I listen to music on the bus.|我在公車上聽音樂。
+movie|n.|電影|Let’s see a movie tonight.|我們今晚去看電影吧。
+game|n.|遊戲；比賽|We won the game!|我們贏了比賽！
+picnic|n.|野餐|We had a picnic in the park.|我們在公園野餐。
+camp|v.|露營|We camp in the mountains in summer.|我們夏天去山上露營。
+trip|n.|旅行|We took a trip to Hualien.|我們去花蓮旅行。
+hobby|n.|嗜好|My hobby is reading.|我的嗜好是閱讀。
+piano|n.|鋼琴|She plays the piano well.|她鋼琴彈得很好。
+team|n.|隊伍|Our team has nine players.|我們的隊伍有九位球員。
+win|v.|贏|I hope we win the race.|我希望我們贏得比賽。
+lose|v.|輸；遺失|Don’t be sad if you lose.|輸了也不要難過。
+fun|n.|樂趣|We had a lot of fun at the beach.|我們在海邊玩得很開心。
+favorite|adj.|最喜愛的|What is your favorite color?|你最喜歡什麼顏色？
+weekend|n.|週末|What do you do on the weekend?|你週末都做什麼？`],
+['verbs','常用動詞','Common Verbs','forest',`
+buy|v.|買|I want to buy a new book.|我想買一本新書。
+sell|v.|賣|They sell fruit at the market.|他們在市場賣水果。
+give|v.|給|Please give me the salt.|請把鹽遞給我。
+take|v.|拿；帶走|Take your umbrella with you.|把你的雨傘帶著。
+bring|v.|帶來|Bring your book tomorrow.|明天把你的書帶來。
+find|v.|找到|I can’t find my pen.|我找不到我的筆。
+look|v.|看|Look at the blackboard.|看黑板。
+listen|v.|聽|Listen to your teacher.|聽老師說話。
+speak|v.|說（語言）|Can you speak English?|你會說英文嗎？
+tell|v.|告訴|Tell me a story.|講個故事給我聽。
+ask|v.|問|Ask your mom first.|先問你媽媽。
+help|v.|幫助|Can you help me?|你可以幫我嗎？
+open|v.|打開|Open your books to page ten.|把書翻到第十頁。
+close|v.|關上|Close your eyes.|閉上你的眼睛。
+wait|v.|等待|Wait for me!|等等我！
+start|v.|開始|The class starts at eight.|上課八點開始。
+finish|v.|完成|Finish your dinner first.|先把晚餐吃完。
+stop|v.|停止|Stop talking, please.|請不要再說話了。
+walk|v.|走路|I walk to school.|我走路上學。
+sit|v.|坐|Sit down, please.|請坐下。
+stand|v.|站|Stand in line, please.|請排隊站好。
+sleep|v.|睡覺|Babies sleep a lot.|嬰兒睡很多。
+wash|v.|洗|Wash your hands before eating.|吃飯前要洗手。
+call|v.|打電話；叫|I will call you tonight.|我今晚會打電話給你。
+want|v.|想要|I want a glass of water.|我想要一杯水。`],
+['adjectives','常用形容詞','Common Adjectives','space',`
+happy|adj.|快樂的|I’m happy to see you.|很高興見到你。
+sad|adj.|難過的|She is sad because her dog is lost.|她很難過，因為她的狗走丟了。
+angry|adj.|生氣的|Dad is angry with me.|爸爸在生我的氣。
+afraid|adj.|害怕的|I’m afraid of the dark.|我怕黑。
+busy|adj.|忙碌的|Mom is busy today.|媽媽今天很忙。
+easy|adj.|容易的|The test was easy.|這次考試很簡單。
+difficult|adj.|困難的|This question is difficult.|這個問題很難。
+heavy|adj.|重的|This box is too heavy.|這個箱子太重了。
+fast|adj.|快的|A cheetah is very fast.|獵豹跑得非常快。
+slow|adj.|慢的|The turtle is slow.|烏龜很慢。
+tall|adj.|高的|My brother is tall.|我哥哥很高。
+short|adj.|矮的；短的|The pencil is short.|這支鉛筆很短。
+long|adj.|長的|The river is very long.|這條河非常長。
+big|adj.|大的|An elephant is big.|大象很大。
+small|adj.|小的|An ant is small.|螞蟻很小。
+new|adj.|新的|I have a new bike.|我有一台新腳踏車。
+beautiful|adj.|美麗的|The flowers are beautiful.|這些花很漂亮。
+cute|adj.|可愛的|The puppy is so cute.|小狗好可愛。
+quiet|adj.|安靜的|Please be quiet in the library.|在圖書館請保持安靜。
+noisy|adj.|吵鬧的|The street is noisy.|這條街很吵。
+dirty|adj.|髒的|My shoes are dirty.|我的鞋子很髒。
+full|adj.|滿的；飽的|I’m full. I can’t eat more.|我飽了，吃不下了。
+right|adj.|正確的|Your answer is right.|你的答案是對的。
+wrong|adj.|錯誤的|Sorry, that’s the wrong answer.|抱歉，那是錯的答案。
+expensive|adj.|昂貴的|This watch is expensive.|這支手錶很貴。`],
+];
+const GEPT_UNITS = GEPT_RAW.map(([id,zh,en,theme,raw]) => ({
+  id:'ge-'+id, zh, en, theme, zhq:true,
+  notes:['全民英檢初級常考單字，每個字都有例句。','題型：看英文選中文、看中文選英文、聽發音選單字、例句填空。'],
+  items: raw.trim().split('\n').map(l => { const [w,pos,zhw,ex,exZh] = l.split('|'); return { k:'w', w, pos, zh:zhw, def:'', ex, exZh }; }),
+}));
+TABS.splice(TABS.findIndex(t => t.id === 'final'), 0, { id:'gept', name:'全民英檢', full:'GEPT 初級常考單字（300 字）', units:GEPT_UNITS });
+
 const PART = 10;                                  // 每關最多幾隻敵人（單元會依序切成好幾關）
 const SPEED = 34, EVERY = 7;                      // 一般關卡：敵人速度、幾秒出一隻
 const READ = { speed:20, every:12 };              // 閱讀單元：走慢一點，留時間讀文章
@@ -1451,7 +1775,7 @@ function paintStill(cv, theme, opts={}){
 
 
 /* ---------- 出題 ---------- */
-const TYPE_LABEL = { def2w:'看定義，選單字', w2def:'看單字，選定義', listen:'聽發音，選出正確拼字', listenW:'聽發音，選單字', fill:'例句填空', unscr:'字母重組' };
+const TYPE_LABEL = { def2w:'看定義，選單字', w2def:'看單字，選定義', listen:'聽發音，選出正確拼字', listenW:'聽發音，選單字', fill:'例句填空', unscr:'字母重組', w2zh:'看英文，選中文', zh2w:'看中文，選英文' };
 const REAL = new Set([...ALL.filter(x => x.k === 'w').map(x => x.w), 'plain','plane','way','slay','grey','wait','weight','sale','tail','tale','main','mane','pain','pane','sail','rise','fin','plan','rays','gate','fail','rows','dat','sneez']);
 const wordRe = x => new RegExp('\\b' + x.w.replace(/ /g,'\\s') + '\\b', 'i');
 const canFill = x => wordRe(x).test(x.ex);
@@ -1479,18 +1803,22 @@ function makeQuestion(x, avoid){
   // 單字卡
   const unitWords = x.unit.items.filter(y => y.k === 'w');
   const spell = x.unit.spell;
-  let types = ['def2w','w2def'];
+  const zhq = !x.def;
+  let types = zhq ? ['w2zh','zh2w'] : ['def2w','w2def'];
   if(canSpeak) types.push('listen');
   if(canFill(x)) types.push('fill','fill');
   if(spell) types.push('unscr');
   types = types.filter(t => t !== avoid);
   const type = types[Math.floor(Math.random()*types.length)];
-  const others = pick(unitWords.filter(y => y.w !== x.w), 3);
+  // 中文意思有重疊的字（例如都含「大的」）不互相當誘答
+  const clash = y => zhq && y.zh.split(/[；、]/).some(a => x.zh.split(/[；、]/).some(b => a === b || (a.length > 1 && b.length > 1 && (a.includes(b) || b.includes(a)))));
+  const others = pick(unitWords.filter(y => y.w !== x.w && !clash(y)), 3);
   if(type === 'listen' && spell){
     const ms = misspell(x.w);
     if(ms.length === 3) return { item:x, type, labels:shuffle([x.w, ...ms]), answer:x.w };
   }
   const opts = shuffle([x, ...others]);
+  if(type === 'w2zh') return { item:x, type, labels:opts.map(o => o.zh), answer:x.zh };
   if(type === 'w2def') return { item:x, type, labels:opts.map(o => o.def), answer:x.def };
   return { item:x, type: type === 'listen' ? 'listenW' : type, labels:opts.map(o => o.w), answer:x.w, scr: type === 'unscr' ? scramble(x.w) : null };
 }
@@ -1697,9 +2025,10 @@ function renderQ(){
   const q = G.cur.q, x = q.item;
   let p = '';
   if(q.type === 'def2w') p = `<div class="prompt sent">${esc(x.def)}</div>`;
-  else if(q.type === 'w2def') p = `<div class="prompt w">${esc(x.w)}<span class="pos">${esc(x.pos)}</span></div>${canSpeak ? `<button class="say" data-say="${esc(x.w)}">${IC.speaker}發音</button>` : ''}`;
+  else if(q.type === 'zh2w') p = `<div class="prompt zh">${esc(x.zh)}<span class="pos">${esc(x.pos)}</span></div>`;
+  else if(q.type === 'w2def' || q.type === 'w2zh') p = `<div class="prompt w">${esc(x.w)}<span class="pos">${esc(x.pos)}</span></div>${canSpeak ? `<button class="say" data-say="${esc(x.w)}">${IC.speaker}發音</button>` : ''}`;
   else if(q.type === 'listen' || q.type === 'listenW') p = `<button class="bigsay" data-say="${esc(x.w)}">${IC.speaker}再聽一次</button>`;
-  else if(q.type === 'fill'){ const m = x.ex.match(wordRe(x)); p = `<div class="prompt sent">${esc(x.ex.slice(0,m.index))}<span class="blank"></span>${esc(x.ex.slice(m.index + m[0].length))}</div>`; }
+  else if(q.type === 'fill'){ const m = x.ex.match(wordRe(x)); p = `<div class="prompt sent">${esc(x.ex.slice(0,m.index))}<span class="blank"></span>${esc(x.ex.slice(m.index + m[0].length))}</div>${x.exZh ? `<div class="trans">${esc(x.exZh)}</div>` : ''}`; }
   else if(q.type === 'unscr') p = `<div class="prompt w scr">${esc(q.scr)}</div><div class="trans">把字母排回正確的單字</div>`;
   else {
     if(x.p) p += passageHtml(x.p, G.lastP !== x.p || G.pOpen);
@@ -1707,7 +2036,7 @@ function renderQ(){
     p += lines.map(l => `<div class="prompt sent ${x.q.length > 90 ? 'long' : ''}">${fmtQ(l)}</div>`).join('');
   }
   const long = q.labels.some(l => l.length > 24);
-  const latin = q.type !== 'w2def';
+  const latin = q.type !== 'w2def' && q.type !== 'w2zh';
   document.getElementById('qp').innerHTML = `
     <div class="qlabel">${esc(q.lab || TYPE_LABEL[q.type])}</div>
     ${p}
@@ -1726,7 +2055,7 @@ document.addEventListener('keydown', e => {
 });
 
 function answerText(x){
-  if(x.k === 'w') return `<b>${esc(x.w)}</b> <span class="pos">${esc(x.pos)}</span>　${esc(x.zh)}<br><span class="trans">${esc(x.def)}</span>`;
+  if(x.k === 'w') return `<b>${esc(x.w)}</b> <span class="pos">${esc(x.pos)}</span>　${esc(x.zh)}${x.def ? `<br><span class="trans">${esc(x.def)}</span>` : ''}`;
   if(x.k === 'mc' && /___/.test(x.q) && !x.q.includes('\n')) return `<span class="trans latin" style="font-size:16px">${filled(x.q, x.a)}</span>`;
   return `<b>${esc(x.a)}</b>`;
 }
@@ -1784,7 +2113,7 @@ function showMap(){
   $app.innerHTML = `
     <header class="brand">
       <div><span class="en">Reading & Grammar Keep · Grade 3</span><h1>閱讀守城</h1></div>
-      <p>Pink Book Cycles 3–4・G3 Grammar　答對題目，弓箭手就會射退敵人</p>
+      <p>Pink Book Cycles 3–4・G3 Grammar・全民英檢初級單字　答對題目，弓箭手就會射退敵人</p>
     </header>
     <nav class="weeks" aria-label="選擇範圍">${TABS.map(t => `<button class="wk ${t===tb?'on':''}" data-tab="${t.id}">${esc(t.name)}</button>`).join('')}</nav>
     <p class="lead latin" style="font-size:18px;color:var(--onDark);font-weight:700">${esc(tb.full)}</p>
@@ -1842,8 +2171,9 @@ function wordRow(x, extra=''){
   return `<div class="word">
     <div style="min-width:0">
       <div><span class="en">${esc(x.w)}</span><span class="pos">${esc(x.pos)}</span>　<span class="zh">${esc(x.zh)}</span>${extra}</div>
-      <div class="exz latin" style="font-size:15px">${esc(x.def)}</div>
+      ${x.def ? `<div class="exz latin" style="font-size:15px">${esc(x.def)}</div>` : ''}
       <div class="ex">${esc(x.ex)}</div>
+      ${x.exZh ? `<div class="exz">${esc(x.exZh)}</div>` : ''}
     </div>
     ${canSpeak ? `<button class="say" data-say="${esc(x.w)}" aria-label="播放 ${esc(x.w)} 的發音">${IC.speaker}</button>` : ''}
   </div>`;
@@ -1939,7 +2269,8 @@ function showHelp(){
       <p><b>範圍</b>：Cycle 3（Preserve and Protect）、Cycle 4（Earth and its Neighbors），涵蓋拼字、字彙、一字多義、字尾、文體、文本特徵、主旨與細節、閱讀理解；<b>Grammar 1、Grammar 2</b> 是 G3 Grammar 的 Units 1–6（主詞述語、名詞、複數、所有格、動詞時態、代名詞、形容詞、副詞）。</p>
       <p>有文章的題目會在題目上方顯示文章（可以按標題收起來），這時敵人會走得特別慢，先讀完再作答。</p>
       <p>每個分頁最後的<b>小考模擬</b>會隨機抽 ${QUIZ.n} 題、敵人比較快；<b>期末總複習</b>分頁有兩個 Cycle 混合的綜合模擬和閱讀模擬。</p>
-      <p>單字題有五種：看定義選單字、看單字選定義、聽發音選拼字、例句填空、字母重組。用電腦玩可以按鍵盤 1～4 作答。</p>
+      <p><b>全民英檢</b>分頁收錄初級常考單字 300 字（12 個主題），題型是看英文選中文、看中文選英文、聽發音選單字、例句填空。</p>
+      <p>Pink Book 的單字題有五種：看定義選單字、看單字選定義、聽發音選拼字、例句填空、字母重組。用電腦玩可以按鍵盤 1～4 作答。</p>
     </div>
     <button class="btn quiet full" id="reset">清除這台裝置的進度</button>`;
   document.getElementById('reset').onclick = () => ask('確定要清除所有星星和錯題紀錄嗎？', () => { S.stars = {}; S.wrong = {}; save(); showMap(); });
