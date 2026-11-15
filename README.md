@@ -6,7 +6,7 @@
 **小遊戲（單字跑酷）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/parkour/
 **小遊戲（駕照ヨシ！汽車筆試）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/driving/
 **小遊戲（腦與心智萬聖夜 Neuro Halloween）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/neuro-halloween/
-**閱讀守城（Pink Book Grade 3・Cycles 3–4 期末複習＋G3 Grammar Units 1–6）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/pink-book/
+**閱讀守城（Pink Book Grade 3・Cycles 3–4 期末複習＋G3 Grammar Units 1–6＋全民英檢初級單字 300 字）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/pink-book/
 **單字守城（藍思分級・小六雛形）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/lexile-quest/（老師需求確認表：`lexile-quest/訪談表.md`）
 
 ## 獨立的週評量版本（不跟上面的題庫混在一起）
