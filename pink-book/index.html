@@ -720,6 +720,341 @@ const TABS = [
 { id:'final', name:'期末總複習', full:'Final Exam Review', units:[] },
 ];
 
+/* =========================================================
+   文法：G3 Grammar（McGraw-Hill Grade 3 Units 1–6）Answer Key
+   ========================================================= */
+const shuffle = a => { a = a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const pick = (a,n) => shuffle(a).slice(0,n);
+const words = s => s.replace(/[“”".,!?:;()]/g,' ').split(/\s+/).filter(Boolean);
+const uniq = a => [...new Set(a)];
+// 從句子裡挑其他字當誘答
+function sentOpts(s, a, n=2){
+  const ans = a.toLowerCase().split(/,\s*/);
+  const pool = uniq(words(s).filter(w => !ans.includes(w.toLowerCase()) && !a.toLowerCase().split(' ').includes(w.toLowerCase()) && w.length > 1 && !/^(the|a|an|of|to|in|on|at|and)$/i.test(w)));
+  return shuffle(pool).slice(0,n);
+}
+const Q = (q, a, o, lab) => ({ k:'mc', q, a, o, lab: lab || '選出正確答案' });
+const FX = (q, a, fixed, lab) => ({ k:'mc', q, a, fixed, lab });
+const opts2 = (rows, lab) => rows.map(([q,a,b]) => ({ k:'mc', q, a, o:[b], lab: lab || '選出正確的字' }));
+const pickW = (rows, lab) => rows.map(([s,a]) => ({ k:'mc', q:s, a, o:sentOpts(s,a), lab }));
+const partOf = (rows, which) => rows.map(([s,p]) => {
+  const full = `${s} ${p}`, sw = s.split(' '), pw = p.replace(/\.$/,'').split(' ');
+  const pr = p.replace(/\.$/,'');
+  const a = which === 'subj' ? s : pr, other = which === 'subj' ? pr : s;
+  const third = which === 'subj' ? (sw.length > 1 ? sw[sw.length-1] : pw[0]) : (pw.length > 1 ? pw[0] : sw[0]);
+  return { k:'mc', q:full, a, o:uniq([other, third]).filter(x => x !== a), lab: which === 'subj' ? '哪一個是完整主詞 complete subject？' : '哪一個是完整述語 complete predicate？' };
+});
+const cp = rows => rows.map(([s,a]) => FX(s, a, ['common','proper'], '【 】裡的名詞是 common 還是 proper？'));
+function capVariants(a){
+  const ws = a.split(' ');
+  const lower = a.toLowerCase();
+  const first = ws.map((w,i) => i ? w.toLowerCase() : w).join(' ');
+  const every = ws.map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
+  return uniq([every, first, lower]).filter(x => x !== a).slice(0,2);
+}
+const caps = rows => rows.map(([s,a]) => ({ k:'mc', q:s, a, o:capVariants(a), lab:'選出正確大寫的專有名詞' }));
+function plWrong(w, a, extra=[]){
+  const c = extra.length ? [...extra, w+'s'] : [w+'s', w+'es', w.replace(/y$/,'ies'), w.replace(/y$/,'ys'), w+'ies', w];
+  return shuffle(uniq(c).filter(x => x !== a)).slice(0,2);
+}
+const plural = (rows, lab) => rows.map(([w,a,extra]) => ({ k:'mc', q:`What is the plural of “${w}”?`, a, o:plWrong(w,a,extra), lab: lab || '選出正確的複數' }));
+const pluralIn = (rows) => rows.map(([s,w,a,extra]) => ({ k:'mc', q:s.replace(`(${w})`,`(${w}) ___`), a, o:plWrong(w,a,extra), lab:'寫出括號裡名詞的複數' }));
+function possWrong(b, a){
+  const c = /s$/.test(b) && !/us$/.test(b) ? [b+"'s", b.slice(0,-1)+"'s", b] : [b+"'s", b+"s'", b+"s", b+"'"];
+  return shuffle(uniq(c).filter(x => x !== a)).slice(0,2);
+}
+const poss = (rows, lab) => rows.map(([q,b,a]) => ({ k:'mc', q, a, o:possWrong(b,a), lab: lab || '選出正確的所有格' }));
+const SN = ['singular','plural'], YN = ['yes','no'], PF = ['present','future'], AL = ['action','linking'];
+
+const GTABS = [
+{ id:'g1', name:'Grammar 1', full:'Grammar · Grade 3 · Units 1–3', units:[
+  { id:'gsp', en:'Subjects & Predicates', zh:'主詞與述語', theme:'forest',
+    notes:['A sentence is a group of words that expresses a complete thought.','Every sentence has two parts: the subject and the predicate.','The complete subject tells what or whom the sentence is about（句子在講誰／什麼）。','The complete predicate tells what the subject is or does（主詞是什麼、做什麼）。'],
+    items:[
+      Q('The subject of a sentence tells ___.','what or whom the sentence is about',['what the subject does','when the sentence happens']),
+      Q('The predicate of a sentence tells ___.','what the subject is or does',['what or whom the sentence is about','the name of a place']),
+      Q('A sentence is a group of words that ___.','expresses a complete thought',['has only one word','always asks a question']),
+      ...partOf([['The pet store','is busy on Saturday.'],['People','smile at the puppies and kittens.'],['The goldfish','swim in a big tank.'],['Furry rabbits','hop around.'],['A long snake','coils in its cage.'],
+                 ['Pet supplies','are on the shelves.'],['The owner','answers a lot of questions.'],['A little boy','points to a sleeping puppy.'],['The brown puppy','wakes up and barks.'],['A family','buys the puppy and goes home.']],'subj'),
+      ...partOf([['Bears','live in many different habitats.'],['Polar bears','live in cold places.'],['These bears','live on thick ice sheets.'],['Heavy fur','keeps the polar bear warm.'],['A grizzly bear','is large and fierce.'],
+                 ['The grizzly','likes to catch fish to eat.'],['Grizzlies','hibernate when it gets cold.'],['The sun bear','is a small bear.'],['Sun bears','live in warmer climates.'],['The sun bear','steals honey from beehives.']],'pred'),
+      Q('My mom and I saw the Golden Gate Bridge last summer.','saw the Golden Gate Bridge last summer',['My mom and I','last summer'],'哪一個是述語 predicate？'),
+      Q('The bridge in San Francisco is a famous sight.','is a famous sight',['in San Francisco','The bridge'],'哪一個是述語 predicate？'),
+      Q('Thousands of people drive across the bridge every day.','drive across the bridge every day',['of people','Thousands'],'哪一個是述語 predicate？'),
+      Q('We took lots of pictures of the famous bridge.','took lots of pictures of the famous bridge',['of pictures','the famous bridge'],'哪一個是述語 predicate？'),
+      ...[['A desert environment ___','gets little rainfall.'],['Many animals of the desert ___','sleep during the day and are active at night.'],['Spiny cactus plants ___','are able to store water.']]
+        .map(([q,a]) => ({ k:'mc', q, a, box:['gets little rainfall.','sleep during the day and are active at night.','are able to store water.'], lab:'把主詞配上正確的述語' })),
+    ]},
+  { id:'gno', en:'Common & Proper Nouns', zh:'普通名詞與專有名詞', theme:'ocean',
+    notes:['A noun names a person, place, or thing.','A common noun names any person, place, or thing（dog、park）。','A proper noun names a special person, place, or thing and begins with a capital letter（Mr. Ames、Gable Park）。','Short words such as of and and are usually not capitalized（Boxes of Bananas）。'],
+    items:[
+      Q('A proper noun always begins with ___.','a capital letter',['a small letter','the word “the”']),
+      ...cp([['【William】 raked the leaves for Mr. Ames.','proper'],['William raked the 【leaves】 for Mr. Ames.','common'],['William raked the leaves for 【Mr. Ames】.','proper'],
+             ['Sasha bought a large 【pumpkin】 at the Janesville Fall Festival.','common'],['Sasha bought a large pumpkin at the 【Janesville Fall Festival】.','proper'],
+             ['Jess planted 【trees】 in Gable Park.','common'],['Jess planted trees in 【Gable Park】.','proper'],
+             ['A 【storm】 blew a huge tree down on Second Street.','common'],['A storm blew a huge tree down on 【Second Street】.','proper'],
+             ['【Mom】 plants colorful flowers in her planters.','proper'],['Mom plants colorful flowers in her 【planters】.','common'],
+             ['Flowers start to pop up as early as 【March】 in our neighborhood.','proper'],['Flowers start to pop up as early as March in our 【neighborhood】.','common'],
+             ['My family visits a different 【state】 each summer.','common'],['Last year we went to 【South Dakota】.','proper'],['We got to see 【Mount Rushmore】.','proper'],
+             ['Thomas Jefferson is one of the 【presidents】 on the monument.','common'],['At night we watched a 【play】 about the people who carved it.','common']]),
+      ...caps([['We went to the park on ___.','Saturday'],['Later we walked to ___.','Oakville Market'],['The owner is ___.','Mr. Simpson'],['The store only closes on ___.','New Year’s Day'],
+               ['What time does ___ close?','Hill Street Library'],['The title of my favorite book is ___.','Boxes of Bananas'],['Is ___ next month?','Mother’s Day'],['I will buy ___ a book.','Mom'],
+               ['She likes to read books about ___.','Antarctica'],['My dad hiked up ___ once.','Green Mountain']]),
+      ...fill(['picnic','Thanksgiving Day','Fourth of July','Uncle Stan','leaders'], [
+        ['People like to attend a fireworks show on the ___.','Fourth of July'],
+        ['A ___ is a meal that is eaten outside.','picnic'],
+        ['Does your family eat pumpkin pie on ___?','Thanksgiving Day'],
+        ['On President’s Day we honor our country’s ___.','leaders'],
+        ['My ___ plays tricks on us on April Fool’s Day.','Uncle Stan'],
+      ]),
+    ]},
+  { id:'gpl', en:'Singular & Plural Nouns', zh:'單數與複數名詞', theme:'autumn',
+    notes:['Add -s to most nouns（coat → coats）。','Add -es if the noun ends in -s, -ch, -sh, or -x（box → boxes）。','Consonant + y：change y to i and add -es（puppy → puppies）。','Irregular：man → men, woman → women, child → children, mouse → mice, tooth → teeth, foot → feet, goose → geese, life → lives, knife → knives。','Same form：sheep, deer, fish, moose, salmon, trout, scissors。','Collective nouns name groups：family, jury, army。'],
+    items:[
+      ...plural([['coat','coats'],['wish','wishes'],['box','boxes'],['bench','benches'],['horse','horses'],['tree','trees'],['sock','socks'],['patch','patches'],['bus','buses'],['cupcake','cupcakes'],
+                 ['library','libraries'],['puppy','puppies'],['party','parties'],['sky','skies'],['army','armies']]),
+      ...pluralIn([['I saw two (fox) in the woods.','fox','foxes'],['We learned the names of many different (rock).','rock','rocks'],['The wind blew several (branch) out of the tree.','branch','branches'],
+                   ['Mom made new (dress) for the dolls.','dress','dresses'],['I brought some (peach) for our snack.','peach','peaches'],
+                   ['Dad bought camping (supply) for our trip.','supply','supplies'],['We saw two yellow (canary) in the park.','canary','canaries'],['Our class invited all of our (family) to the party.','family','families'],
+                   ['I read a book about some (pony) that live on an island.','pony','ponies'],['Mom needs lots of (cherry) for the pie.','cherry','cherries'],
+                   ['All the (couch) are on sale at Adam’s Furniture Store.','couch','couches',['couchez']],['I found five (penny) on the floor.','penny','pennies',['pennyies']],
+                   ['Will you help me stack the (box) on the truck?','box','boxes',['boxies']],['My class recycles the milk (carton).','carton','cartons',['cartones']]]),
+      Q('Which noun is singular?','flower',['toasters','birdhouses','windows'],'哪一個是單數名詞？'),
+      Q('Which noun is singular?','glass',['buttons','apples','sticks'],'哪一個是單數名詞？'),
+      Q('Which noun is singular?','fence',['tractors','camels','classes'],'哪一個是單數名詞？'),
+      Q('Which noun is singular?','bench',['cakes','lizards','planets'],'哪一個是單數名詞？'),
+      ...plural([['man','men',['mans']],['child','children',['childs','childrens']],['mouse','mice',['mouses','mices']],['woman','women',['womans','womens']],['life','lives',['lifes']],
+                 ['tooth','teeth',['tooths','teeths']],['foot','feet',['foots','feets']],['goose','geese',['gooses','geeses']],['knife','knives',['knifes']],
+                 ['sheep','sheep',['sheeps']],['deer','deer',['deers']],['moose','moose',['mooses','meese']],['salmon','salmon',['salmons']],['fish','fish',['fishs','fishies']]], '特殊複數'),
+      ...[['There are four people in my family.','family'],['A jury makes important decisions in a court room.','jury'],['That movie is about a brave army.','army']]
+        .map(([s,a]) => Q(s, a, sentOpts(s,a), '哪一個是集合名詞 collective noun？')),
+      ...[['We saw five 【deer】 behind our house.','plural'],['Do we have enough 【scissors】 for everyone?','plural'],['I painted a picture of a beautiful 【trout】.','singular'],['The 【fish】 have been jumping all afternoon.','plural'],
+          ['The 【mice】 ran under the clock.','plural'],['There are many 【trout】 in this lake.','plural'],['My baby sister just got her first 【tooth】.','singular'],['Let’s put all of our 【scissors】 in this basket.','plural'],['I would like to hear that 【woman】 sing again.','singular']]
+        .map(([s,a]) => FX(s, a, SN, '【 】裡的名詞是單數還是複數？')),
+      ...[['I saw some shark 【teeth】 at the science museum.','yes'],['Put on some socks if your 【foots】 are cold.','no'],['【Fishs】 have special gills to help them breathe.','no'],['The 【sheep】 are grazing in the field.','yes'],
+          ['You might see lots of 【moose】 at the wildlife park.','yes'],['We can help with the 【childrens】 at the party.','no'],['We will need forks, spoons, and 【knifes】.','no'],['We learned about the 【salmon】 in the Columbia River.','yes'],['We watched the three 【mans】 chop down the old tree.','no']]
+        .map(([s,a]) => FX(s, a, YN, '【 】裡的複數寫對了嗎？')),
+      ...[['I think astronauts have exciting 【lifes】.','lives','lifes'],['The 【childs】 had fun building a snowman.','children','childrens'],['How many 【mouses】 did you see?','mice','mouse'],['Be careful with the sharp 【knifes】.','knives','knife'],
+          ['The 【womans】 helped with the toy drive.','women','womens'],['The 【gooses】 are making too much noise!','geese','goose'],['【Salmons】 like to swim upstream.','Salmon','Salmones'],['Did you know ducks have webbed 【feets】?','feet','foot'],
+          ['Brush your 【teeths】 before going to bed.','teeth','tooths'],['I want to read a book about 【mooses】.','moose','meese']]
+        .map(([s,a,b]) => Q(s, a, [b], '改錯：【 】裡的複數應該寫成？')),
+    ]},
+  { id:'gpo', en:'Possessive Nouns', zh:'名詞所有格', theme:'forest',
+    notes:['A possessive noun shows who or what owns or has something.','Singular noun：add ’s（the pig’s tail）。','Plural noun ending in s：add only ’（the rabbits’ den）。','Plural noun not ending in s：add ’s（the children’s room）。'],
+    items:[
+      ...poss([['the ears of the rabbit → the ___ ears','rabbit',"rabbit's"],['the trunk of the elephant → the ___ trunk','elephant',"elephant's"],['the neck of the giraffe → the ___ neck','giraffe',"giraffe's"],['the whiskers of the cat → the ___ whiskers','cat',"cat's"],
+               ['the nose of the puppy → the ___ nose','puppy',"puppy's"],['the teeth of the puppy → the ___ teeth','puppy',"puppy's"]]),
+      ...poss([['the den of the rabbits → the ___ den','rabbits',"rabbits'"],['the cage of the parrots → the ___ cage','parrots',"parrots'"],['the pond of the ducks → the ___ pond','ducks',"ducks'"],['the home of the family → the ___ home','family',"family's"],
+               ['the lodge of the beavers → the ___ lodge','beavers',"beavers'"],['the nest of the bluebirds → the ___ nest','bluebirds',"bluebirds'"],['the burrow of the chipmunks → the ___ burrow','chipmunks',"chipmunks'"],
+               ['the cave of the bears → the ___ cave','bears',"bears'"],['the web of the spiders → the ___ web','spiders',"spiders'"],['the room of the children → the ___ room','children',"children's"]]),
+      ...poss([['The (children) ___ book reports are about animals.','children',"children's"],['The (horse) ___ mane is soft and silky.','horse',"horse's"],['(Porcupines) ___ quills are pointy and sharp.','Porcupines',"Porcupines'"],
+               ['A (rabbit) ___ tail is like a cotton ball.','rabbit',"rabbit's"],['Some (fish) ___ scales are silvery.','fish',"fish's"],['A (hippopotamus) ___ mouth is huge.','hippopotamus',"hippopotamus's"],
+               ['(Squirrels) ___ tails are long and furry.','Squirrels',"Squirrels'"],['A (turtle) ___ shell protects its soft body.','turtle',"turtle's"],['(Fireflies) ___ lights send messages to other fireflies.','Fireflies',"Fireflies'"],['A (frog) ___ tongue can catch insects.','frog',"frog's"]]),
+      Q('A (bird) ___ song is a beautiful thing to hear.',"bird's",["birds's",'bird',"birds'"],'選出正確的所有格'),
+      Q('The (geese) ___ honks could be heard all over the barnyard.',"geese's",['geese','geeseses',"geese'"],'選出正確的所有格'),
+      Q('A (monkey) ___ chatter can be noisy and loud.',"monkey's",["monkeys'","monkeys's",'monkey'],'選出正確的所有格'),
+      Q('(Whales) ___ songs have been recorded for many years.',"Whales'",["Whale's","Whales's",'Whales'],'選出正確的所有格'),
+      Q('A (wolf) ___ howl can sound scary on a dark night.',"wolf's",['wolfs',"wolfs'",'wolves'],'選出正確的所有格'),
+    ]},
+  { id:'gsv', en:'Subject-Verb Agreement', zh:'主詞與動詞一致（現在式）', theme:'ocean',
+    notes:['A present-tense verb tells what happens now.','Singular subject（he, she, it, Dan）：add -s（wants）。','Ends in -sh, -ch, -ss, -zz, -x：add -es（washes, fixes）。','Consonant + y：change y to i and add -es（hurries, flies）。','Plural subject, I, you, or a compound subject（Jack and Shanda）：no -s。'],
+    items:[
+      ...opts2([['Brandon ___ to make some money.','wants','want'],['He ___ of some ideas.','thinks','think'],['His parents ___ to him about his plans.','talk','talks'],['They ___ him decide.','help','helps'],['Brandon ___ to walk dogs.','plans','plan'],
+                ['He ___ some flyers.','makes','make'],['Brandon ___ his neighbors.','visits','visit'],['He ___ them how he can help with their pets.','tells','tell'],['Many people ___ Brandon to walk their dogs.','call','calls'],['The dogs ___ Brandon very much.','like','likes']]),
+      ...[['wash','Dan','washes'],['fix','Mom','fixes'],['toss','They','toss'],['teach','Mr. Alvarez','teaches'],['mix','We','mix'],['hurry','Thomas','hurries'],['buzz','The bee','buzzes'],['guess','Jon','guesses'],['wish','They','wish'],['fly','Lana','flies']]
+        .map(([v,s,a]) => Q(`(${v}) ${s} ___.`, a, uniq([v, v+'s', v+'es', v.replace(/y$/,'ies'), v.replace(/y$/,'ys')]).filter(x => x !== a).slice(0,2), '寫出和主詞一致的動詞')),
+      ...opts2([['The garden club members ___ at noon.','meet','meets'],['Jack and Shanda ___ the meeting.','lead','leads'],['Lisa ___ a report on the flower sale.','gives','give'],['I ___ the club that we made fifty dollars.','tell','tells'],
+                ['The members ___ loudly.','cheer','cheers'],['Carson ___ about the community garden.','asks','ask'],['We ___ him the new pictures.','show','shows'],['Carl and Sandy ___ out free seed packets.','give','gives'],
+                ['The members ___ them for the seeds.','thank','thanks'],['The meeting ___ at 1:00 p.m.','ends','end']]),
+      Q('The teacher ___','speaks',['speak','speakes','speakses']), Q('Malika ___','guesses',['guess','guesss','gueses']),
+      Q('Nate ___','worries',['worry','worrys','worryes']), Q('Sarah ___','watches',['watch','watchs','watchses']),
+      ...opts2([['He ___ a basket of books to her.','carries','carry'],['She ___ how to shelve books.','teaches','teach'],['They ___ all afternoon.','work','works'],['Jeffrey ___ the book cart to the desk.','pushes','push'],['Mrs. Trent ___ Jeffrey for his help.','thanks','thank']]),
+    ]},
+  { id:'gpt', en:'Past-Tense Verbs', zh:'過去式動詞', theme:'autumn',
+    notes:['A past-tense verb tells about an action that already happened.','Add -ed（walk → walked）；ends in e：add -d（like → liked）。','Consonant + y：change y to i and add -ed（cry → cried）。','One vowel + one consonant：double the consonant（hop → hopped, stop → stopped）。','Abbreviations：Street → St.　Mister → Mr.　President → Pres.'],
+    items:[
+      ...pickW([['We walked to Ocean Park.','walked'],['Mom looked for an empty bench.','looked'],['She liked to watch us play.','liked'],['I played with my little sister in the sand.','played'],['We packed sand into her bucket.','packed'],
+                ['Then we formed a sand castle.','formed'],['My friend waved to me.','waved'],['She watched us build the castle.','watched'],['We asked her to play with us.','asked'],['She helped us make a bigger castle.','helped']], '哪一個是過去式動詞？'),
+      ...opts2([['Dad and I ___ a movie about birds.','watched','watchd'],['The baby birds ___ for something to eat.','cried','cryed'],['Some penguins ___ down an icy hill.','rolled','rolld'],['One small bird ___ along a tree branch.','hopped','hoped'],
+                ['A duck family ___ in the water.','splashed','splashd'],['Swans ___ gracefully on a lake.','floated','floatied'],['Baby geese ___ to catch their mother.','hurried','hurryed'],['Tiny robins ___ for more worms.','begged','beged'],['Woodpeckers ___ to find insects in a tree.','tried','tryed']], '選出正確的過去式'),
+      ...[['We (hike) ___ through Logan Forest last week.','hike','hiked'],['The sky (turn) ___ dark.','turn','turned'],['We (hurry) ___ into a cave.','hurry','hurried'],['The rain (pour) ___ for an hour.','pour','poured'],
+          ['We (wait) ___ for it to end.','wait','waited'],['The rain (stop) ___ at last.','stop','stopped'],['We (trudge) ___ home through the mud.','trudge','trudged']]
+        .map(([q,v,a]) => Q(q, a, uniq([v+'ed', v+'d', v.replace(/y$/,'yed'), v+'s']).filter(x => x !== a).slice(0,2), '寫出過去式')),
+      Q('There is a new library on ___ near the toy store.','Park St.',['Park st','park St'],'選出正確的縮寫'),
+      Q('Mom knows ___ Drake, the new librarian.','Mr.',['mister','mr'],'選出正確的縮寫'),
+      Q('Next week, ___ Carlson plans to visit the library.','Pres.',['pres','Pres'],'選出正確的縮寫'),
+      ...[['come','An author ___ to our school yesterday.','came'],['sing','I ___ a song for our school talent show.','sang'],['do','Cam ___ the same juggling act as last year.','did'],['eat','We ___ our lunch outside today.','ate'],
+          ['go','My friend ___ camping last week.','went'],['say','Our teacher ___ that everyone did a great job.','said'],['run','My sister ___ a marathon last year.','ran'],['give','We ___ a box of canned goods to the shelter.','gave'],
+          ['begin','The play ___ at noon.','began'],['bring','Sam ___ his pet hamster to school.','brought']]
+        .map(([v,q,a]) => Q(`(${v}) ${q}`, a, [v+'ed', v], '不規則動詞過去式')),
+    ]},
+  { id:'gfu', en:'Future-Tense Verbs', zh:'未來式動詞', theme:'space',
+    notes:['A future-tense verb tells about an action that is going to happen.','Use will + verb（will play）。will 後面的動詞用原形，不加 -s、-ed。','Book titles：capitalize the important words（Frogs in a Pond）。'],
+    items:[
+      ...[['Carla waits in the car for her dad.','present'],['Dad will drop Carla off at school.','future'],['Dad gets in the car.','present'],['They will go down Elm Street.','future'],['Carla sees the school up ahead.','present'],
+          ['Dad will stop at the parents’ drop-off.','future'],['Carla asks Dad for lunch money.','present'],['Dad gives Carla some money and a smile.','present'],['Carla will go to her classroom.','future'],['Dad will drive to work.','future']]
+        .map(([s,a]) => FX(s, a, PF, '現在式還是未來式？')),
+      ...[['We 【plant】 new flowers in the yard.','will plant','plant'],['The rain 【falls】 into our new rain barrel.','will fall','fall'],['We 【water】 the flowers with the water that we collect.','will water','water'],
+          ['Dad 【uses】 the rain in the bird bath, too.','will use','use'],['The birds 【like】 their new bird bath.','will like','like']]
+        .map(([s,a,v]) => Q(s, a, [`will ${v}s`.replace('ss','s'), `will ${v}ed`.replace('eed','ed')], '改成未來式')),
+      ...[['The Panthers (play) ___ the Greenwood Bears.','play','will play'],['The athletes (practice) ___ all week.','practice','will practice'],['Fans (come) ___ from all over the state.','come','will come'],
+          ['The band (marches) ___ onto the field.','march','will march'],['The fans (go) ___ wild when the players come out.','go','will go'],['The snack stand (sells) ___ a lot of food.','sell','will sell'],['The fans (cheer) ___ their home team.','cheer','will cheer']]
+        .map(([q,v,a]) => Q(q, a, [`will ${v}${/(ch|sh|s|x)$/.test(v) ? 'es' : 's'}`, `${v}ed`.replace('eed','ed')], '寫出未來式')),
+      Q('“I 【hoped】 you can come to my birthday party,” Tad said.','hope',['will hoped','hopes'],'改錯：動詞應該寫成？'),
+      Q('“I 【will asked】 my mom,” said Shanna.','will ask',['will asks','asked'],'改錯：動詞應該寫成？'),
+      Q('“I 【will looked】 for that book at the library,” said Tad.','will look',['will looks','looked'],'改錯：動詞應該寫成？'),
+      Q('“You 【will likes】 it,” said Shanna.','will like',['will liked','likes'],'改錯：動詞應該寫成？'),
+      Q('“It 【will makes】 you laugh.”','will make',['will made','makes'],'改錯：動詞應該寫成？'),
+      ...caps([['Have you read the book, ___?','Frogs in a Pond'],['I’m reading ___.','A Cricket Asks a Question'],['I am looking for the book, ___.','Friends in France'],['You can read ___ when I finish.','The Green and Blue Monster']]).map(x => Object.assign(x, { lab:'選出正確大寫的書名' })),
+    ]},
+]},
+{ id:'g2', name:'Grammar 2', full:'Grammar · Grade 3 · Units 4–6', units:[
+  { id:'glv', en:'Linking Verbs', zh:'連綴動詞 be', theme:'forest',
+    notes:['An action verb tells what the subject does（plays, coaches）。','A linking verb does not show action. It connects the subject to a noun or adjective（is, am, are, was, were）。','I → am / was；he, she, it, one person → is / was；we, they, you → are / were。','Sentences end with . ? or ! and begin with a capital letter.'],
+    items:[
+      ...[['Lee 【is】 my older brother.','linking'],['He 【plays】 baseball for the Comets.','action'],['My family 【goes】 to see every game.','action'],['We 【are】 so proud of him.','linking'],['Lee 【is】 one of the best athletes on the team.','linking'],
+          ['My dad 【was】 a football quarterback in college.','linking'],['Now he 【coaches】 football for a local team.','action'],['Mom 【is】 an amazing tennis player.','linking'],['I 【am】 a pretty good swimmer.','linking'],['We 【are】 a very active family.','linking']]
+        .map(([s,a]) => FX(s, a, AL, 'action verb 還是 linking verb？')),
+      ...opts2([['I ___ in the school play.','am','is'],['My friend Jason ___ also in the play.','is','am'],['I ___ an astronaut who gets lost in space.','am','is'],['The play ___ funny and exciting.','is','am'],
+                ['Jason ___ silly and forgetful during yesterday’s rehearsal.','was','were'],['I ___ the serious astronaut.','am','is'],['He ___ always getting into trouble on the space ship.','is','am'],
+                ['Mr. Conley ___ the director of the play.','is','am'],['He ___ happy with everyone’s hard work.','is','am'],['My family ___ excited to see the play next week.','is','am']], '填入 am、is 或 was'),
+      ...pickW([['The trees are so colorful this fall.','are'],['Fall is my favorite season.','is'],['Apples are ripe in the fall.','are'],['Last fall Mom was a pastry chef at Jane’s Orchard Cafe.','was'],
+                ['Apple pies and tarts were on the menu.','were'],['Pumpkin pies were also big sellers.','were'],['I am a big fan of pumpkin pies!','am']], '哪一個是連綴動詞？'),
+      Q('Which sentence is written correctly?','Do you want to see the new movie?',['do you want to see the new movie.','Do you want to see the new movie!'],'選出寫對的句子'),
+      Q('Which sentence is written correctly?','Come to the theater at noon today.',['come to the theater at noon today','Come to the theater at noon today?'],'選出寫對的句子'),
+      Q('Which sentence is written correctly?','Wow, they are giving away free tickets!',['wow, they are giving away free tickets','Wow, they are giving away free tickets?'],'選出寫對的句子'),
+    ]},
+  { id:'gct', en:'Contractions with Not', zh:'not 的縮寫', theme:'ocean',
+    notes:['A contraction is a shortened form of two words. An apostrophe ( ’ ) takes the place of missing letters.','is not = isn’t　has not = hasn’t　was not = wasn’t　are not = aren’t','do not = don’t　does not = doesn’t　did not = didn’t　have not = haven’t','特別記：will not = won’t　cannot = can’t'],
+    items:(() => {
+      const PAIRS = [['is not',"isn't"],['did not',"didn't"],['has not',"hasn't"],['was not',"wasn't"],['are not',"aren't"],['cannot',"can't"],['will not',"won't"],['have not',"haven't"],['do not',"don't"],['does not',"doesn't"]];
+      const exp = PAIRS.map(p => p[0]);
+      const bad = { "isn't":["is'nt","isnt'"], "didn't":["did'nt","didnt'"], "hasn't":["has'nt","hasnt'"], "wasn't":["was'nt","wasnt'"], "aren't":["are'nt","arent'"], "can't":["cann't","ca'nt"], "won't":["willn't","wo'nt"], "haven't":["have'nt","havent'"], "don't":["do'nt","dont'"], "doesn't":["does'nt","doesnt'"] };
+      return [
+        ...[["Tim’s book 【isn’t】 on the bookshelf.",'is not'],["He 【hasn’t】 finished reading it yet.",'has not'],["He 【won’t】 stop looking until he finds it.",'will not'],["I looked in my room but it 【wasn’t】 there.",'was not'],
+            ["Tim 【hasn’t】 looked under the chair.",'has not'],["Our dog, Pal, 【won’t】 help us find it.",'will not'],["Tim 【wasn’t】 expecting to find it in Pal’s bed.",'was not'],
+            ["I 【haven’t】 seen my grandmother in six months.",'have not'],["She 【didn’t】 get to visit in November.",'did not'],["My family 【isn’t】 planning a trip until June.",'is not'],["Dad 【hasn’t】 bought our tickets yet.",'has not']]
+          .map(([s,a]) => Q(s, a, pick(exp.filter(x => x !== a), 2), '這個縮寫是哪兩個字？')),
+        ...PAIRS.map(([w,c]) => Q(`What is the contraction for “${w}”?`, c, bad[c], '寫出縮寫')),
+        ...[['I did see the parade last Saturday. → I ___ see the parade last Saturday.',"didn't",["doesn't","don't"]],
+            ['The marching band does practice every day. → The marching band ___ practice every day.',"doesn't","didn't".split(',').concat(["don't"])],
+            ['The big floats are made with lots of flowers. → The big floats ___ made with lots of flowers.',"aren't",["isn't","don't"]],
+            ['A clown on a funny bike did get lots of attention. → A clown ___ get lots of attention.',"didn't",["doesn't","isn't"]],
+            ['My friend does like to wave at everyone. → My friend ___ like to wave at everyone.',"doesn't",["don't","isn't"]]]
+          .map(([q,a,o]) => Q(q, a, o, '改成 not 的縮寫')),
+      ];
+    })()},
+  { id:'ghv', en:'Main & Helping Verbs', zh:'主要動詞與助動詞・不規則動詞', theme:'autumn',
+    notes:['A main verb tells what the subject is or does. A helping verb helps the main verb（has baked）。','Helping verbs：have, has, had, is, are, am, was, were, will。','Irregular forms with have/has/had：go → gone, give → given, grow → grown, sing → sung, see → seen, come → come, do → done, eat → eaten, win → won, sit → sat, say → said。'],
+    items:[
+      ...[['Jenna has read a book about recycling.','has','read'],['Nate and Jenna have talked to our class about helping.','have','talked'],['Mr. Hart’s class had started recycling last year.','had','started'],
+          ['Our class has asked Mr. Hart’s class to tell us what they do.','has','asked'],['We have decided that we want to help his class.','have','decided'],['Mr. Hart’s class had visited the recycling center in town.','had','visited'],
+          ['Our teacher has planned a field trip there, too.','has','planned'],['We had hoped our principal would come with us.','had','hoped'],['The mayor has announced that Wednesday is Recycling Day.','has','announced'],['We have made lots of posters about the big day.','have','made']]
+        .map(([s,h,m],i) => i % 2 ? Q(s, m, [h, sentOpts(s, h + ', ' + m, 1)[0]], '哪一個是主要動詞 main verb？') : Q(s, h, [m, sentOpts(s, h + ', ' + m, 1)[0]], '哪一個是助動詞 helping verb？')),
+      ...opts2([['Next week my family ___ visit Mount Rushmore.','will','are'],['We ___ planning to leave Tuesday.','are','am'],['I ___ reading a book about the monument.','am','is'],['My dad ___ telling us about his first trip there.','was','will'],
+                ['The car trip ___ take ten hours.','will','is'],['We ___ hoping to camp nearby.','were','is'],['My mom ___ taking her camera equipment.','is','am'],['Dad ___ having the car serviced.','is','will'],
+                ['My sister and I ___ buy lots of postcards.','will','are'],['I ___ going to remember this trip always.','am','were']], '選出正確的助動詞'),
+      ...[['My family has 【goed】 to the seashore often.','gone',['went']],['My teacher has 【gived】 a speech at the White House.','given',['gave']],['The puppy has 【growed】 a lot this past year.','grown',['grew']],
+          ['The birds had 【singed】 all morning.','sung',['sang']],['Dad and I have 【seened】 that movie twice.','seen',['saw']],['Have you ever (go) ___ to a national park?','gone',['went','goed']],
+          ['At Yellowstone National Park, my family (see) ___ lots of wildlife.','saw',['seen','seed']],['Dad had (bring) ___ his best camera.','brought',['bringed','brung']],
+          ['My friend, Andi, had (come) ___ with us, too.','come',['came','comed']],['I (give) ___ Andi the seat next to the window.','gave',['given','gived']]]
+        .map(([q,a,o]) => Q(q, a, o, '寫出正確的動詞形式')),
+      ...[['Last week my mom 【comed】 to our school.','came','comed'],['She 【gived】 a speech about being a volunteer.','gave','gived'],['She has always 【sayed】 how important it is to help others.','said','sayed'],
+          ['She has 【gave】 many hours of her time.','given','gave'],['I have 【seed】 her go out many times to rescue an animal.','seen','seed'],['She has 【sitted】 with several sick animals.','sat','sitted'],
+          ['…until they 【has eated】 a meal.','have eaten','has eaten'],['My mom has 【winned】 the Volunteer of the Year Award.','won','winned']]
+        .map(([s,a,b]) => Q(s, a, [b], '改錯：【 】應該寫成？')),
+      Q('My class has ___ on a field trip to the transportation museum.','gone',['go','went']), Q('We have ___ lots of ways that people used to travel.','seen',['see','saw']),
+      Q('People have ___ to this country by foot, boat, air, and rail.','come',['came','comes']), Q('My grandpa had ___ some work on a steam locomotive long ago.','done',['do','did']),
+      Q('An airline company in town has ___ lots of money to the museum.','given',['gives','gave']), Q('We ___ lunch in the dining car of a real train yesterday.','ate',['eat','eaten']),
+      Q('A woman from the museum ___ some songs about rail travel.','sang',['sing','singed']), Q('Later we ___ to see a film about Amelia Earhart.','went',['go','gone']),
+      Q('I ___ a book report about her last year.','wrote',['write','writed']), Q('My class ___ an amazing time on our field trip.','had',['has','have']),
+    ]},
+  { id:'gpr', en:'Subject & Object Pronouns', zh:'主格與受格代名詞', theme:'space',
+    notes:['Subject pronouns（當主詞）：I, you, he, she, it, we, they','Object pronouns（放在動詞或介系詞後面）：me, you, him, her, it, us, them','He / she / it + 動詞加 -s（She reads）；I / you / we / they + 原形（We like）。'],
+    items:[
+      ...opts2([['My friend Ted and ___ started a lawn service.','I','me'],['___ made a list of all the services we will offer.','We','Us'],['___ am good at raking and cleaning up.','I','Me'],['___ is good at planting and weeding.','He','Him'],
+                ['We asked the Smiths, “Would ___ like our help?”','you','them'],['___ signed up for a one month trial.','They','Them'],['Dad said that ___ is very proud of us.','he','him'],['___ hope to have at least five customers.','We','Us'],['Ted and ___ plan to work hard.','I','me']], '選出正確的代名詞'),
+      ...opts2([['Dad helped ___ build a tree house.','us','we'],['I hope ___ can come see it.','you','we'],['I asked ___ to help me clean up.','her','she'],['We can help ___ put away the tools.','him','he'],['Mom saw ___ reading a book.','them','they'],
+                ['Marcus went to the store with ___.','me','I'],['I told ___ that we had to choose paint.','him','he'],['“I will show ___ the color I like best,” I said.','you','your'],['He showed ___ five shades of green.','me','I'],['“Do you like this color, or is ___ too bright?” I asked.','it','them']], '選出正確的代名詞'),
+      ...[['My grandmother took 【my brother and me】 to Washington, D.C.','us',['we','them']],['【The Smithsonian】 is an amazing place to spend the day.','It',['They','He']],['【My grandmother, brother, and I】 got to tour the White House.','We',['Us','They']],
+          ['【My brother】 asked my grandmother if she had ever been there before.','He',['Him','She']],['My brother asked 【my grandmother】 if she had ever been there before.','her',['she','him']],['Our grandmother said that she took 【our dad】 there.','him',['he','her']]]
+        .map(([s,a,o]) => Q(s, a, o, '用代名詞代替【 】')),
+      Q('An emperor penguin is an interesting animal.','It is an interesting animal.',['They is an interesting animal.','Them is an interesting animal.','Her is an interesting animal.'],'選出正確代換的句子'),
+      Q('Mary Grant spent a lot of time studying the penguins.','She spent a lot of time studying them.',['Her spent a lot of time studying it.','We spent a lot of time studying him.','Her spent a lot of time studying them.'],'選出正確代換的句子'),
+      Q('My brother bought a book by Mary Grant.','He bought a book by her.',['Him bought a book by her.','He bought a book by she.','She bought a book by him.'],'選出正確代換的句子'),
+      Q('I borrowed the book from my brother.','I borrowed it from him.',['I borrowed it from he.','I borrowed him from it.','I borrowed us from it.'],'選出正確代換的句子'),
+    ]},
+  { id:'gpv', en:'Pronoun-Verb Agreement', zh:'代名詞與動詞一致', theme:'forest',
+    notes:['He, she, it + 動詞加 -s / -es（He looks, She teaches）。','I, you, we, they + 動詞不加 -s（I like, They hike）。'],
+    items:[
+      ...opts2([['She ___ a story to us every day.','reads','read'],['It ___ us laugh to hear funny stories.','makes','make'],['It ___ us twenty minutes to walk to the library.','takes','take'],['He ___ for books about monkeys.','looks','look'],['She ___ him find the books that he wants.','helps','help'],
+                ['We ___ helping Mom with our garden.','like','likes'],['She ___ lettuce, tomatoes, and cucumbers.','grows','grow'],['I ___ pull the weeds, and my brother waters.','help','helps'],['He ___ how to plant seeds, too.','knows','know'],['Do you ___ a garden at your house?','want','wants'],
+                ['We ___ hard, but it is worth it.','work','works'],['She ___ salads for our neighbors.','makes','make'],['They ___ our fresh vegetables.','love','loves'],['We ___ vegetables at the Farmer’s Market, too.','sell','sells'],['She ___ us keep the money that we make.','lets','let'],
+                ['I ___ Career Day at school.','like','likes'],['We ___ speakers talk about their jobs.','hear','hears'],['He ___ on jets and airplanes.','works','work'],['I ___ that would be a hard job to do.','think','thinks'],['They ___ our class about the importance of reading.','tell','tells'],
+                ['I ___ a speaker dressed like an astronaut.','see','sees'],['She ___ what she does on space walks.','explains','explain'],['I ___ to be a writer when I grow up.','hope','hopes'],['It ___ people laugh to read funny stories.','makes','make'],['We ___ to the speakers when they leave.','wave','waves'],
+                ['He ___ the newspaper on our front porch.','tosses','toss'],['We ___ the newspaper every day.','read','reads'],['She ___ a newspaper column about pets.','writes','write'],['It ___ people how to take care of animals.','tells','tell'],['He ___ doing the crossword puzzle.','enjoys','enjoy'],
+                ['They ___ their newspapers when they finish.','recycle','recycles'],['I ___ at the movie reviews.','look','looks'],['We ___ at the comic strips in the Sunday paper.','laugh','laughs'],['She ___ out the recipes in the food section.','cuts','cut'],['Do you ___ the newspaper delivered to your house?','get','gets']], '選出和代名詞一致的動詞'),
+      ...[['I see a huge spider web on my bike!','I sees a huge spider web on my bike!'],['He paints pictures of sailboats on the lake.','He paint pictures of sailboats on the lake.'],['They hike the Grand Canyon every August.','They hikes the Grand Canyon every August.'],
+          ['It rains almost every afternoon in Florida.','It rain almost every afternoon in Florida.'],['Do you swim at the Oak Park Water Club?','Do you swims at the Oak Park Water Club?']]
+        .map(([a,b]) => Q('Which sentence is correct?', a, [b], '選出代名詞和動詞一致的句子')),
+    ]},
+  { id:'gad', en:'Adjectives, Articles & Comparing', zh:'形容詞・冠詞・比較級', theme:'ocean',
+    notes:['An adjective describes a noun（a brown horse）。Some tell how many（twenty, several, both）。','Articles：a（子音開頭）、an（母音開頭 an egg）、the（特定的）。','-er compares two things; -est compares more than two（bigger than / the biggest）。','y → i（funny → funniest）；drop e（nice → nicer）；double consonant（big → bigger, red → reddest）。','good → better → best　bad → worse → worst　many → more → most'],
+    items:[
+      ...pickW([['Gramps has a brown horse.','brown'],['Rex is the name of this big animal.','big'],['I am a good helper when I visit Gramps.','good'],['I take Rex out for long rides.','long'],['I feed Rex juicy apples.','juicy'],
+                ['Gramps lets me polish the heavy saddle.','heavy'],['In June I will help him paint the old barn.','old'],['Gramps let me pick out the new color.','new'],
+                ['I helped Mom clean the messy garage.','messy'],['I carried out twenty bags filled with junk.','twenty'],['We took the heavy bags to the recycling center.','heavy'],['We filled several bins with tools and supplies.','several'],['Now we have room to park both cars in the garage!','both']], '哪一個是形容詞？'),
+      ...opts2([['I went to see ___ first game of the World Series.','the','an'],['I wrote ___ essay about my exciting day.','an','a'],['I took ___ baseball with me in hopes of getting it signed.','a','an'],['After ___ game, I looked around for my favorite pitcher.','the','an'],
+                ['I told him that I was ___ big fan.','a','an'],['He asked me if I was ___ good student.','a','an'],['He said that I was ___ awesome kid.','an','a'],
+                ['Dad will pick us up at ___ skating rink.','the','an'],['I found ___ blue backpack in the gym.','a','an'],['Did you see ___ movie, “Whale’s Tail”?','the','a'],['Will we need ___ egg to make this cake?','an','the']], '選出正確的冠詞'),
+      ...opts2([['This pumpkin is ___ than the one I grew last year.','bigger','biggest'],['Is the sun the ___ of all the planets?','closest','closer'],['This is the ___ orange I’ve ever eaten.','sweetest','sweeter'],['That clap of thunder was even ___ than the last one.','louder','loudest'],
+                ['The yellow kitten is ___ than the striped one.','furrier','furriest'],['The rabbit was ___ than the tortoise.','quicker','quickest'],['Of all my friends, Nick is the ___.','funniest','funnier'],['The ___ idea of all is to study for the test.','smartest','smarter'],
+                ['A river is usually much ___ than a creek.','wider','widest'],['That was the ___ joke ever!','silliest','sillier'],
+                ['I like corn ___ than green beans.','better','best'],['Our city has ___ sunny days than rainy ones.','more','most'],['That was the ___ movie I’ve ever seen.','worst','worse'],['I think the Eagles are the ___ team in the state.','best','better'],
+                ['I did ___ on the last test than this one.','better','best'],['My cold is ___ today than it was yesterday.','worse','worst'],['Of all my friends, Maria has the ___ video games.','most','more'],['I think Mrs. Casa is the ___ teacher in the world.','best','better'],
+                ['We had ___ snow days this year than last year.','more','most'],['I just played my ___ game ever.','worst','worse'],
+                ['It is ___ tonight than it was last night.','darker','darkest'],['That is the ___ book I’ve ever read.','funniest','funnier'],['It’s ___ fun to play baseball than to watch it on television.','more','most'],
+                ['We get ___ breezes at the shore than farther inland.','cooler','coolest'],['I think I have the ___ luck of anyone!','worst','worse'],['Do you think Carmen’s has ___ ice cream than the Frozen Scoop?','better','best']], '-er 還是 -est？'),
+      ...[['big','-er','bigger',['biger','bigest']],['sunny','-er','sunnier',['sunnyer','sunnyest']],['blue','-er','bluer',['blueer','bluest']],['silly','-er','sillier',['sillyer','silliest']],['nice','-er','nicer',['niceer','nicest']],
+          ['funny','-est','funniest',['funnyest','funnier']],['safe','-est','safest',['safeest','safer']],['fat','-est','fattest',['fatest','fatter']],['tiny','-est','tiniest',['tinyest','tinier']],['red','-est','reddest',['redest','redder']]]
+        .map(([w,s,a,o]) => Q(`Add ${s} to “${w}”.`, a, o, '加 -er / -est 的拼法')),
+      ...[['Yesterday was the (hot) ___ day all summer.','hottest',['hotter','hotest']],['Shane was (fast) ___ than Tom.','faster',['fastest','fastter']],['It is (rainy) ___ today than it was yesterday.','rainier',['rainyer','rainiest']],
+          ['This coat is (big) ___ than my old coat.','bigger',['biger','biggest']],['Tomorrow will be the (short) ___ day of the year.','shortest',['shorter','shortter']],
+          ['That spider is the ___ one I’ve ever seen.','tiniest',['tinyest']],['It is not much ___ than the head of a pin.','bigger',['biger']],['It has the ___ spots on its back.','reddest',['redest']],['Its web is ___ at the top than at the bottom.','wider',['wideer']]]
+        .map(([q,a,o]) => Q(q, a, o, '選出正確的比較級／最高級')),
+    ]},
+  { id:'gav', en:'Adverbs', zh:'副詞', theme:'autumn',
+    notes:['An adverb describes an action verb. It tells how, where, or when.','How：most end in -ly（carefully, quickly）。','Where：there, ahead, outside, around, up, far, here, away, nearby, everywhere','When：first, soon, always, early, next, today, later, tomorrow, then','Adjective describes a noun（a quick dog）；adverb describes a verb（runs quickly）。'],
+    items:[
+      ...pickW([['Mom and I walked carefully down to the edge of the pond.','carefully'],['We eagerly ate our picnic lunch.','eagerly'],['Mom silently pointed to a turtle sunning itself on a rock.','silently'],['The turtle quickly woke up.','quickly'],['It looked around worriedly.','worriedly'],
+                ['Then it lazily closed his eyes and went back to sleep.','lazily'],['Next, a frog noisily jumped into the water.','noisily'],['It swam briskly across the pond.','briskly'],['In the tree above us, a bird sang sweetly.','sweetly'],['We watched as it gracefully flew away.','gracefully']], '哪一個是表示「how」的副詞？'),
+      ...pickW([['My family goes outside on weekends if the weather is nice.','outside'],['Last week, we hiked far into the woods.','far'],['There were several hills that we climbed up.','up'],['We saw a big lake ahead of us.','ahead'],['We ate our lunch there.','there']], '哪一個是表示「where」的副詞？'),
+      ...pickW([['My dad always bakes a big cake for the school bake sale.','always'],['First, he buys all the ingredients for the cake.','First'],['Next, he mixes everything together.','Next'],['Then he bakes the cake in the oven.','Then'],['He decorates the cake later, when it has cooled.','later']], '哪一個是表示「when」的副詞？'),
+      ...opts2([['The dragon is an ___ part of a Chinese New Year parade.','important','importantly'],['People dressed as a dragon dance ___ down the street.','boldly','bold'],['The costume is made of ___ silk.','colorful','colorfully'],
+                ['The dragon weaves ___ in and out of the crowd.','quickly','quick'],['The people shout ___ to get the dragon’s attention.','loudly','loud'],['___ children wave to the dragon.','Happy','Happily'],
+                ['Some children bring ___ dragon puppets to the parade.','beautiful','beautifully'],['They call ___ to the dancing dragon.','excitedly','excited'],['The dragon ___ puts on a great show.','gladly','glad'],['People cheer ___ as the dragon dances away.','noisily','noisy']], '形容詞還是副詞？'),
+      ...[['The airplane landed (smooth) ___ on the runway.','smoothly',['smooth','smoothy']],['The cat prowled (quiet) ___ through the house.','quietly',['quiet','quietlly']],['My brother played the drums (loud) ___.','loudly',['loud','loudy']],
+          ['The big dog (noisy) ___ turned over the trash can.','noisily',['noisyly','noisy']],['I (quick) ___ cleaned my room before Mom got home.','quickly',['quick','quickily']],['The mother (soft) ___ sang her baby to sleep.','softly',['soft','softy']],['The snail crawled (slow) ___ across the sidewalk.','slowly',['slow','slowy']]]
+        .map(([q,a,o]) => Q(q, a, o, '把形容詞改成副詞')),
+      Q('Today my grandmother will visit us.','Today',['my','grandmother','visit'],'哪一個是副詞？'), Q('She always comes on Saturday.','always',['She','comes','on'],'哪一個是副詞？'), Q('I hope she arrives early!','early',['I','hope','arrives'],'哪一個是副詞？'),
+    ]},
+  { id:'gpp', en:'Possessive Adjectives & Pronouns', zh:'所有格形容詞與所有格代名詞', theme:'space',
+    notes:['Possessive adjectives come before a noun：my, your, his, her, its, our, their（her backpack）。','Possessive pronouns stand alone：mine, yours, his, hers, its, ours, theirs（The book is hers.）。'],
+    items:[
+      ...pickW([['My family won a trip to Chicago.','My'],['We wrote an essay telling our reasons for wanting to go.','our'],['Dad spent most of his childhood there.','his'],['Mom used to visit her grandmother in Chicago.','her'],
+                ['Mom and Dad want us to see their favorite landmarks.','their'],['I found the camera but I think its battery is dead.','its'],['Mom will take our car to the shop before we leave.','our'],['This will be my first trip to Chicago.','my']], '哪一個是所有格形容詞？'),
+      ...opts2([['The students in ___ class are painting pictures of sea life.','our','ours'],['I am almost finished with ___.','mine','my'],['Have you finished ___?','yours','your'],['Staci showed me ___ painting.','her','hers'],['Calvin showed me ___, too.','his','their'],
+                ['I liked both of ___.','theirs','their'],['Every painting has ___ own unique look.','its','ours'],['___ painting of the starfish is great.','Your','Yours'],['Karen said she really liked ___.','mine','my'],['I think ___ class worked really hard.','our','ours'],
+                ['Mrs. Avery talked about ___ childhood in Paris.','her','hers'],['We had ___ first snowfall of the year today.','our','ours'],['Jim finished his work first and then Stephanie finished ___.','hers','her'],['My parents had ___ friends over for dinner.','their','theirs'],
+                ['Is this my baseball glove or is it ___?','yours','your'],['Mom picked up the beach towels and said, “These are ___.”','ours','our'],['Bob looked for ___ friend in the lunchroom.','his','its'],['___ favorite fruit is the apple.','My','Mine']], '所有格形容詞還是所有格代名詞？'),
+      ...[['Jana left 【Jana’s】 backpack on the bus.','her',['hers','his']],['Frank and Pia studied 【Frank’s and Pia’s】 spelling words together.','their',['theirs','our']],['Tim asked Clara, “Is this 【Clara’s】 notebook?”','your',['yours','her']],
+          ['Jason gave me 【Jason’s】 camera and asked me to take a picture.','his',['her','its']],['“I think these are 【my red gloves】.”','mine',['my','me']]]
+        .map(([s,a,o]) => Q(s, a, o, '用所有格代換【 】')),
+    ]},
+]},
+];
+TABS.splice(2, 0, ...GTABS);
+
 const PART = 10;                                  // 每關最多幾隻敵人（單元會依序切成好幾關）
 const SPEED = 34, EVERY = 7;                      // 一般關卡：敵人速度、幾秒出一隻
 const READ = { speed:20, every:12 };              // 閱讀單元：走慢一點，留時間讀文章
@@ -751,7 +1086,7 @@ TABS.forEach(tb => {
 const noPassage = x => !x.p;
 TABS.forEach(tb => {
   if(tb.id === 'final'){
-    STAGES.push({ id:'final-mix', tab:tb, quiz:true, n:FINAL.n, items:ALL.filter(noPassage), theme:'space', speed:FINAL.speed, every:FINAL.every, title:'期末綜合模擬', desc:`從 Cycle 3、Cycle 4 全部題目隨機抽 ${FINAL.n} 題（不含長篇閱讀）。` });
+    STAGES.push({ id:'final-mix', tab:tb, quiz:true, n:FINAL.n, items:ALL.filter(x => noPassage(x) && (x.tab.id === 'c3' || x.tab.id === 'c4')), theme:'space', speed:FINAL.speed, every:FINAL.every, title:'期末綜合模擬', desc:`從 Pink Book Cycle 3、Cycle 4 全部題目隨機抽 ${FINAL.n} 題（不含長篇閱讀）。` });
     STAGES.push({ id:'final-read', tab:tb, quiz:true, read:true, items:ALL.filter(x => x.p), theme:'autumn', speed:READ.speed, every:READ.every, title:'期末閱讀模擬', desc:'隨機抽兩篇文章，把它們的題目全部守完。' });
   }else{
     const items = ALL.filter(x => x.tab === tb && noPassage(x));
@@ -767,8 +1102,6 @@ const S = Object.assign({ stars:{}, wrong:{}, tab:'c3' }, load());
 /* ---------- 小工具 ---------- */
 const $app = document.getElementById('app');
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const shuffle = a => { a = a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
-const pick = (a,n) => shuffle(a).slice(0,n);
 
 function ask(msg, onYes){
   const m = document.getElementById('modal');
@@ -779,18 +1112,30 @@ function ask(msg, onYes){
 }
 
 const canSpeak = 'speechSynthesis' in window;
+/* 發音：挑一個自然的美式英語聲音。
+   iPad / Mac 的英文聲音清單裡有很多「特效聲」（Albert、Bad News、Bubbles、Zarvox…）和機器腔（Eddy、Flo、Grandma…），
+   以前直接拿第一個 en-US 聲音，常常會抽到這些，發音聽起來怪怪的。現在先排除它們，再依序挑比較自然的聲音。 */
+const NOVELTY = /Albert|Bad News|Bahh|Bells|Boing|Bubbles|Cellos|Good News|Jester|Organ|Superstar|Trinoids|Whisper|Wobble|Zarvox|Fred|Junior|Ralph|Kathy|Eddy|Flo|Grandma|Grandpa|Reed|Rocko|Sandy|Shelley|Hysterical|Deranged|Pipe Organ/i;
+const PREFER = [/Google US English/i, /Microsoft (Aria|Jenny|Ava|Andrew|Emma|Brian|Guy|Michelle).*Natural/i, /Samantha/i, /(Enhanced|Premium)/i, /Allison|Ava|Susan|Nicky|Joelle|Evan|Nathan|Zoe/i, /Microsoft (Zira|David|Mark)/i];
 let voice = null;
+function pickVoice(){
+  const all = speechSynthesis.getVoices().filter(v => !NOVELTY.test(v.name));
+  const us = all.filter(v => /^en[-_]US/i.test(v.lang));
+  for(const re of PREFER){ const v = us.find(v => re.test(v.name)); if(v) return v; }
+  return us.find(v => v.localService) || us[0] || all.find(v => /^en[-_](GB|AU|CA)/i.test(v.lang)) || null;
+}
 function speak(text){
   if(!canSpeak) return;
   try{
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'en-US'; u.rate = 0.85;
-    if(!voice) voice = speechSynthesis.getVoices().find(v => /en[-_]US/i.test(v.lang)) || null;
-    if(voice) u.voice = voice;
+    u.lang = 'en-US'; u.rate = 0.9; u.pitch = 1;
+    if(!voice) voice = pickVoice();
+    if(voice){ u.voice = voice; u.lang = voice.lang; }
     speechSynthesis.speak(u);
   }catch(e){}
 }
+if(canSpeak) try{ speechSynthesis.getVoices(); }catch(e){}
 
 /* ---------- 圖示（內嵌 SVG） ---------- */
 const IC = {
@@ -1114,6 +1459,7 @@ function makeQuestion(x, avoid){
   if(x.k === 'tf') return { item:x, type:'tf', labels:['True','False'], answer:x.a, lab:x.lab };
   if(x.k === 'mc'){
     const lower = s => s.toLowerCase();
+    if(x.fixed) return { item:x, type:'mc', labels:x.fixed.slice(), answer:x.a, lab:x.lab };
     const others = x.o ? x.o : pick(x.box.filter(y => lower(y) !== lower(x.a)), 3);
     const opts = x.keep ? [x.a, ...others] : shuffle([x.a, ...others]);
     return { item:x, type:'mc', labels:opts, answer:x.a, lab:x.lab };
@@ -1425,8 +1771,8 @@ function showMap(){
   const idx = st => STAGES.indexOf(st);
   $app.innerHTML = `
     <header class="brand">
-      <div><span class="en">Pink Book Keep · Grade 3</span><h1>閱讀守城</h1></div>
-      <p>Reading Workbook Cycles 3–4 & Final Exam Review　答對題目，弓箭手就會射退敵人</p>
+      <div><span class="en">Reading & Grammar Keep · Grade 3</span><h1>閱讀守城</h1></div>
+      <p>Pink Book Cycles 3–4・G3 Grammar　答對題目，弓箭手就會射退敵人</p>
     </header>
     <nav class="weeks" aria-label="選擇範圍">${TABS.map(t => `<button class="wk ${t===tb?'on':''}" data-tab="${t.id}">${esc(t.name)}</button>`).join('')}</nav>
     <p class="lead latin" style="font-size:18px;color:var(--onDark);font-weight:700">${esc(tb.full)}</p>
@@ -1456,7 +1802,7 @@ function showMap(){
       <button class="btn quiet" id="toWrong">錯題本（${wrongN}）</button>
       <button class="btn quiet" id="toHelp">玩法說明</button>
     </div>
-    <p class="foot">題目取自《Reading Workbook Grade 3 — Cycle 3, Cycle 4 & Final Exam Review》Answer Key。進度只存在這台裝置的瀏覽器，不會上傳。</p>`;
+    <p class="foot">題目取自《Reading Workbook Grade 3 — Cycle 3, Cycle 4 & Final Exam Review》與《G3 Grammar》Answer Key。進度只存在這台裝置的瀏覽器，不會上傳。</p>`;
   document.querySelectorAll('[data-thumb]').forEach(cv => paintStill(cv, cv.dataset.thumb));
   document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { S.tab = b.dataset.tab; save(); showMap(); });
   document.querySelectorAll('[data-learn]').forEach(b => b.onclick = () => showLearn(b.dataset.learn));
@@ -1578,9 +1924,9 @@ function showHelp(){
       <p>答對，城牆上的弓箭手會射中牠；答錯，箭會射偏，敵人還會往前衝一步。答錯後會顯示正確答案，敵人也會暫時放慢腳步，讓你看清楚。</p>
       <p>連續答對 ${COMBO} 題，投石車會發射石塊，把所有敵人往後擊退並暈眩一下。</p>
       <p>敵人走到城門會敲城牆一下。城牆有 ${MAX_HP} 點耐久，全部用完就失敗。守住時城牆完好拿 3 顆星，剩 3～4 點拿 2 顆星，剩 1～2 點拿 1 顆星。</p>
-      <p><b>範圍</b>：Cycle 3（Preserve and Protect）、Cycle 4（Earth and its Neighbors），涵蓋拼字、字彙、一字多義、字尾、文體、文本特徵、主旨與細節、閱讀理解。</p>
+      <p><b>範圍</b>：Cycle 3（Preserve and Protect）、Cycle 4（Earth and its Neighbors），涵蓋拼字、字彙、一字多義、字尾、文體、文本特徵、主旨與細節、閱讀理解；<b>Grammar 1、Grammar 2</b> 是 G3 Grammar 的 Units 1–6（主詞述語、名詞、複數、所有格、動詞時態、代名詞、形容詞、副詞）。</p>
       <p>有文章的題目會在題目上方顯示文章（可以按標題收起來），這時敵人會走得特別慢，先讀完再作答。</p>
-      <p>每個 Cycle 最後的<b>小考模擬</b>會隨機抽 ${QUIZ.n} 題、敵人比較快；<b>期末總複習</b>分頁有兩個 Cycle 混合的綜合模擬和閱讀模擬。</p>
+      <p>每個分頁最後的<b>小考模擬</b>會隨機抽 ${QUIZ.n} 題、敵人比較快；<b>期末總複習</b>分頁有兩個 Cycle 混合的綜合模擬和閱讀模擬。</p>
       <p>單字題有五種：看定義選單字、看單字選定義、聽發音選拼字、例句填空、字母重組。用電腦玩可以按鍵盤 1～4 作答。</p>
     </div>
     <button class="btn quiet full" id="reset">清除這台裝置的進度</button>`;
