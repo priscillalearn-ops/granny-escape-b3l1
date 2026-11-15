@@ -4,6 +4,7 @@
 
 **遊戲網址**：https://priscillalearn-ops.github.io/granny-escape-b3l1/
 **小遊戲（單字跑酷）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/parkour/
+**小遊戲（阿嬤的房子 3D，第一人稱）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/house3d/
 **小遊戲（駕照ヨシ！汽車筆試）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/driving/
 **小遊戲（腦與心智萬聖夜 Neuro Halloween）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/neuro-halloween/
 **閱讀守城（Pink Book Grade 3・Cycles 3–4 期末複習＋G3 Grammar Units 1–6）**：https://priscillalearn-ops.github.io/granny-escape-b3l1/pink-book/
@@ -132,6 +133,22 @@
 - 🔥 **連對獎勵**：連續答對 3 題 → 阿嬤愣 3 秒、小弟全部震住 4 秒（`answer()` 裡的 `G.streak`）。
 - 🤡 紅鼻子無敵道具：8 秒無敵，撞到阿嬤讓她愣 4 秒；每答對 5 題充能一次
 - 自動存檔（存在玩家自己的瀏覽器），結束後有錯題複習
+
+## 🏚️ 阿嬤的房子 3D（house3d/）
+
+用 [three.js](https://threejs.org/) 做的第一人稱 3D 版：在阿嬤家 6 個房間裡走，每一道門都要先答對題目才會打開。
+
+- **題庫沿用現有格式**：直接讀 `../parkour/units.js`（和單字跑酷同一份，由 `tools/build_units.py` 從主站產生），
+  每題是 `[題目, [四個選項], 正解索引, 解析]`，選範圍畫面跟跑酷一樣。主站題庫更新後重跑 `tools/build_units.py`，3D 版也會一起更新。
+- 流程：客廳 → 書房 → 臥室 → 浴室 → 廚房 → 玄關，門 1～5 各答對 1 題，玄關的大門要**連續**答對 3 題（答錯歸零）。
+- 阿嬤一開始在客廳搖椅上睡覺，打開門 1 就會醒來追人（只會走已經打開的門）。答錯 → 阿嬤變快；作答時她會用一半速度繼續走；
+  被抓到扣一顆 ❤️，阿嬤會被丟回房子最遠的地方。三顆用完就失敗。
+- 操作：電腦點畫面鎖定滑鼠，滑鼠轉頭、WASD 走、Shift 跑、E／左鍵開門、1～4 作答，Esc 暫停；
+  手機左下搖桿走（推到底＝跑）、右半邊滑動轉頭、靠近門按「🚪 開門」。
+- **需要網路**：three.js 從 jsDelivr CDN 載入（`three@0.170.0`，寫在 `<script type="importmap">`），所以這一頁不是零相依。
+  載不到時標題畫面會顯示提示。
+- 房子的地圖是 `index.html` 裡的 `MAP` 字串陣列（`#` 牆、`1`～`5` 門、`X` 大門、字母是家具），改字就能改格局。
+- 最快逃脫時間存在 `localStorage` 的 `house3d_best_v1`，選的範圍存在 `house3d_pick_v1`（第一次會沿用跑酷選過的範圍）。
 
 ## 🏃 單字跑酷（parkour/）
 

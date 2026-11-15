@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Priscilla English｜阿嬤的房子 3D</title>
+<meta property="og:title" content="阿嬤的房子 3D｜英文單字逃脫">
+<meta property="og:description" content="第一人稱走進恐怖阿嬤的家，每一道門都要先答對英文題才能打開。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700;900&family=Special+Elite&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#07060a; --panel:#14101a; --panel2:#1d1724; --line:#3a2b3f;
+  --ink:#ede6f2; --dim:#a294ae; --red:#e0344a; --amber:#ffb547; --green:#4ad07a; --blue:#63b3ff;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);overflow:hidden;
+  font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+  -webkit-user-select:none;user-select:none}
+#app{position:fixed;inset:0}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+
+body:not(.playing) #hud,body:not(.playing) #mini,body:not(.playing) #cross{display:none}
+#hud{position:absolute;left:0;right:0;top:0;z-index:3;display:flex;gap:6px;align-items:center;flex-wrap:wrap;
+  padding:8px 10px;padding-top:max(8px,env(safe-area-inset-top));font-size:13px;pointer-events:none;
+  background:linear-gradient(rgba(10,7,14,.85),rgba(10,7,14,0))}
+.pill{background:rgba(29,23,36,.88);border:1px solid var(--line);border-radius:999px;padding:4px 10px;white-space:nowrap}
+.pill b{color:var(--amber)}
+#hearts{letter-spacing:1px}
+#mini{position:absolute;right:10px;top:46px;z-index:3;border:1px solid var(--line);border-radius:8px;
+  background:rgba(10,7,14,.75);pointer-events:none;width:133px;height:91px}
+#cross{position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;
+  background:rgba(255,255,255,.7);z-index:2;pointer-events:none}
+#prompt{position:absolute;left:50%;bottom:26%;transform:translateX(-50%);z-index:3;pointer-events:none;
+  background:rgba(10,8,14,.9);border:1px solid var(--amber);border-radius:12px;padding:8px 14px;font-size:15px;
+  display:none;white-space:nowrap}
+#prompt.on{display:block}
+#toast{position:absolute;left:50%;top:58px;transform:translateX(-50%);
+  background:rgba(10,8,14,.94);border:1px solid var(--line);border-left:3px solid var(--amber);
+  padding:8px 14px;border-radius:10px;font-size:14px;max-width:88%;text-align:center;
+  opacity:0;transition:opacity .2s;pointer-events:none;z-index:6;line-height:1.5}
+@media (max-width:620px){ #toast{top:150px} }
+#toast.show{opacity:1}
+#toast.bad{border-left-color:var(--red)}
+#toast.good{border-left-color:var(--green)}
+#flash{position:absolute;inset:0;background:#7c1020;opacity:0;pointer-events:none;z-index:4;transition:opacity .15s}
+#vig{position:absolute;inset:0;pointer-events:none;z-index:2;opacity:0;transition:opacity .3s;
+  background:radial-gradient(ellipse at center,rgba(0,0,0,0) 45%,rgba(140,10,30,.75) 100%)}
+
+/* 手機操作 */
+#joy{position:absolute;left:18px;bottom:calc(22px + env(safe-area-inset-bottom));width:120px;height:120px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);z-index:3;display:none;touch-action:none}
+#knob{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;
+  background:rgba(255,255,255,.22);border:2px solid rgba(255,255,255,.35)}
+#act{position:absolute;right:20px;bottom:calc(36px + env(safe-area-inset-bottom));z-index:3;display:none;
+  background:linear-gradient(#8c1c30,#5d1020);color:#ffe9ee;border:1px solid #b02a44;border-radius:50%;
+  width:84px;height:84px;font-size:15px;font-weight:700;font-family:inherit}
+body.touch #joy{display:block}
+body.touch #act.on{display:block}
+body.touch #cross{display:none}
+
+/* 題目視窗 */
+#quiz{position:absolute;inset:0;z-index:8;display:none;align-items:center;justify-content:center;
+  background:rgba(5,4,9,.55);padding:14px}
+#quiz.on{display:flex}
+#qbox{width:100%;max-width:620px;max-height:100%;overflow:auto;background:var(--panel);border:1px solid var(--line);
+  border-top:3px solid var(--red);border-radius:14px;padding:14px 16px;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+#qhead{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:12px;color:var(--dim);margin-bottom:8px}
+#qsrc{border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+#qtext{font-size:17px;line-height:1.6;margin-bottom:12px;white-space:pre-wrap}
+#qopts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:520px){ #qopts{grid-template-columns:1fr} #qtext{font-size:16px} }
+.opt{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:11px 12px;color:var(--ink);
+  font-size:16px;text-align:left;cursor:pointer;font-family:inherit;line-height:1.35}
+.opt i{font-style:normal;color:var(--dim);margin-right:6px;font-size:13px}
+.opt:hover{border-color:var(--amber)}
+.opt.right{border-color:var(--green);background:#123222;color:#c9f7d8}
+.opt.wrong{border-color:var(--red);background:#3a1119;color:#ffd0d8}
+.opt:disabled{cursor:default}
+#qexp{margin-top:10px;font-size:14px;line-height:1.6;color:var(--dim);min-height:1em}
+#qexp b{color:var(--green)}
+#qwarn{font-size:12px;color:#ff9aa9;margin-top:6px}
+
+.screen{position:absolute;inset:0;z-index:10;background:rgba(5,4,9,.96);display:none;
+  overflow:auto;padding:22px 16px;text-align:center}
+.screen.on{display:block}
+.screen h1{font-family:"Noto Serif TC",serif;font-size:clamp(26px,6vw,42px);letter-spacing:2px;margin-bottom:6px}
+.screen h1 small{display:block;font-family:"Special Elite",serif;font-size:13px;color:var(--dim);letter-spacing:3px;margin-top:6px}
+.card{max-width:640px;margin:14px auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  padding:14px 16px;text-align:left;font-size:14px;line-height:1.75}
+.card b{color:var(--amber)}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.btn{background:linear-gradient(#8c1c30,#5d1020);color:#ffe9ee;border:1px solid #b02a44;border-radius:12px;
+  padding:12px 22px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block}
+.btn:hover{filter:brightness(1.12)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.ghost{background:var(--panel2);border-color:var(--line);color:var(--ink);font-size:14px;padding:10px 16px}
+.sub{color:var(--dim);font-size:13px;line-height:1.7}
+.chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:8px 0}
+.chip{background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer}
+.chip.on{background:#2a1e0c;border-color:var(--amber);color:#ffd9a0;font-weight:700}
+.ulist{max-width:640px;margin:0 auto;text-align:left}
+.ghead{color:var(--dim);font-size:12px;margin:12px 2px 6px;letter-spacing:1px}
+.u{display:flex;gap:10px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);
+  border-radius:12px;padding:10px 12px;margin-bottom:7px;cursor:pointer}
+.u.on{border-color:var(--amber);background:#1e1810}
+.u input{margin-top:3px;accent-color:#e0344a;width:17px;height:17px}
+.u .nm{font-size:14px;font-weight:700}
+.u .mt{font-size:12px;color:var(--dim);margin-top:2px}
+.wq{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--red);border-radius:10px;
+  padding:9px 11px;margin:7px 0;font-size:13px;line-height:1.6;text-align:left}
+.wq .ans{color:var(--green);font-weight:700}
+#best{color:var(--amber);font-weight:700}
+#scPause{background:rgba(5,4,9,.7);cursor:pointer}
+#scPause h1{margin-top:28vh}
+#loadErr{color:#ff9aa9}
+</style>
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js" } }
+</script>
+</head>
+<body>
+<div id="app">
+  <canvas id="gl"></canvas>
+  <div id="vig"></div>
+  <div id="cross"></div>
+  <div id="hud">
+    <span class="pill" id="hearts">❤️❤️❤️</span>
+    <span class="pill">🚪 <b id="doorsN">0</b>/<span id="doorsT">6</span></span>
+    <span class="pill">✅ <b id="okN">0</b>／❌ <b id="ngN">0</b></span>
+    <span class="pill">⏱ <b id="clock">0:00</b></span>
+    <span class="pill" id="roomName">📍 客廳</span>
+  </div>
+  <canvas id="mini" width="266" height="182"></canvas>
+  <div id="prompt"></div>
+  <div id="toast"></div>
+  <div id="flash"></div>
+  <div id="joy"><div id="knob"></div></div>
+  <button id="act">🚪<br>開門</button>
+
+  <div id="quiz">
+    <div id="qbox">
+      <div id="qhead"><span id="qsrc">題目</span><span id="qdoor"></span></div>
+      <div id="qtext"></div>
+      <div id="qopts"></div>
+      <div id="qexp"></div>
+      <div id="qwarn">⚠️ 作答時阿嬤還是會慢慢走過來…</div>
+    </div>
+  </div>
+
+  <!-- 標題 -->
+  <div class="screen on" id="scTitle">
+    <h1>阿嬤的房子 3D<small>PRISCILLA ENGLISH · GRANNY'S HOUSE</small></h1>
+    <div class="card">
+      <b>【故事】</b>你被關在阿嬤家，她正在客廳的搖椅上打瞌睡。房子裡的每一道門都上了「英文鎖」，
+      <b>答對題目</b>門才會打開。一打開第一道門，阿嬤就會醒來追你！<br><br>
+      <b>【目標】</b>穿過 6 個房間，從玄關的<b>大門</b>逃出去（大門要連續答對 <b>3 題</b>）。<br>
+      答錯 → 阿嬤變快；被阿嬤抓到 → 扣一顆 ❤️，三顆都沒了就失敗。<br><br>
+      <b>【操作】</b>電腦：點畫面鎖定滑鼠，<b>滑鼠</b>轉頭、<b>WASD／方向鍵</b>走、<b>Shift</b> 跑、<b>E</b> 或點左鍵開門、<b>1～4</b> 選答案。<br>
+      手機：<b>左下搖桿</b>走（推到底＝跑）、<b>右半邊滑動</b>轉頭、靠近門按 <b>🚪 開門</b>。<br><br>
+      <b>【題庫】</b>跟「恐怖阿嬤的英文逃脫」用同一份，可以自己挑課。
+    </div>
+    <div class="row"><button class="btn" id="btnPick" disabled>載入中…</button></div>
+    <div class="row">
+      <a class="btn ghost" href="https://priscillalearn-ops.github.io/granny-escape-b3l1/">👵 回到恐怖阿嬤逃脫</a>
+      <a class="btn ghost" href="https://priscillalearn-ops.github.io/granny-escape-b3l1/parkour/">🏃 單字跑酷</a>
+    </div>
+    <div class="sub" style="margin-top:12px">最快逃脫：<span id="best">—</span></div>
+    <div class="sub" id="loadErr"></div>
+  </div>
+
+  <!-- 選範圍 -->
+  <div class="screen" id="scPick">
+    <h1 style="font-size:clamp(20px,5vw,30px)">這次要考哪個範圍？</h1>
+    <div class="sub">先選版本或年級縮小範圍，再勾要考的課（可以複選）。</div>
+    <div class="chips" id="fPub"></div>
+    <div class="chips" id="fGrade"></div>
+    <div class="chips" id="presets"></div>
+    <div class="ulist" id="ulist"></div>
+    <div class="row">
+      <button class="btn" id="btnGo">進入阿嬤家</button>
+      <button class="btn ghost" id="btnBack">回上一頁</button>
+    </div>
+    <div class="sub" id="pickInfo" style="margin:10px 0 24px"></div>
+  </div>
+
+  <!-- 暫停（電腦版滑鼠解鎖時） -->
+  <div class="screen" id="scPause">
+    <h1>暫停中<small>CLICK TO CONTINUE</small></h1>
+    <div class="sub">點一下畫面繼續（滑鼠會被鎖定，按 Esc 可以暫停）</div>
+  </div>
+
+  <!-- 結束 -->
+  <div class="screen" id="scEnd">
+    <h1 id="endTitle">被阿嬤抓到了…</h1>
+    <div class="sub" id="endMsg"></div>
+    <div class="card" id="endCard"></div>
+    <div class="row">
+      <button class="btn" id="btnAgain">再玩一次</button>
+      <button class="btn ghost" id="btnRepick">換範圍</button>
+      <a class="btn ghost" href="https://priscillalearn-ops.github.io/granny-escape-b3l1/">👵 回阿嬤逃脫</a>
+    </div>
+    <div id="wrongList" style="max-width:640px;margin:14px auto 30px"></div>
+  </div>
+</div>
+
+<!-- 題庫：和單字跑酷共用同一份（由 tools/build_units.py 從主遊戲 index.html 產生） -->
+<script src="../parkour/units.js"></script>
+<script type="module">
+/* ============================================================
+   Priscilla English｜阿嬤的房子 3D
+   - three.js 由 CDN 載入（importmap）
+   - 題庫（UNITS／PRESETS）沿用 ../parkour/units.js，格式：
+     [題目, [選項×4], 正解索引, 解析]
+   ============================================================ */
+import * as THREE from 'three';
+
+const $=id=>document.getElementById(id);
+const UNITS=window.UNITS||[], PRESETS=window.PRESETS||[];
+const PUBS=["龍騰","三民乙版","學測","多益"], GRADES=["高一","高二","高三"];
+const PICK_KEY="house3d_pick_v1", BEST_KEY="house3d_best_v1";
+const IS_TOUCH=("ontouchstart" in window)||matchMedia("(pointer:coarse)").matches;
+if(IS_TOUCH) document.body.classList.add("touch");
+
+/* ---------- 小工具 ---------- */
+let toastT=0;
+function toast(msg,ms=1800,cls=""){
+  const t=$("toast"); t.innerHTML=msg; t.className="show "+cls;
+  clearTimeout(toastT); toastT=setTimeout(()=>t.className="",ms);
+}
+function flash(){ const f=$("flash"); f.style.opacity=.55; setTimeout(()=>f.style.opacity=0,180); }
+const esc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const fmtT=s=>{ s=Math.floor(s); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); };
+
+/* ---------- 題庫 ---------- */
+let BANK=[], SELECTED=[];
+function buildBank(ids){
+  BANK=[];
+  const us=UNITS.filter(u=>ids.includes(u.id));
+  (us.length?us:[UNITS[0]]).forEach(u=>{
+    ["v","g","c"].forEach(t=>(u[t]||[]).forEach(q=>{
+      if(Array.isArray(q)&&Array.isArray(q[1])&&q[1].length>=2) BANK.push({q,src:(u.src&&u.src[t])||u.short});
+    }));
+  });
+  SELECTED=ids.slice();
+}
+let askOrder=[], askPos=0;
+function pickQ(){
+  if(askPos>=askOrder.length){
+    askOrder=BANK.map((_,i)=>i).sort(()=>Math.random()-.5); askPos=0;
+  }
+  const e=BANK[askOrder[askPos++]], q=e.q;
+  const order=q[1].map((_,k)=>k).sort(()=>Math.random()-.5);
+  return {text:q[0], opts:order.map(k=>q[1][k]), ans:order.indexOf(q[2]), full:q[1][q[2]], exp:q[3]||"", src:e.src};
+}
+
+/* ---------- 音效（WebAudio，自己合成） ---------- */
+let AC=null, master=null, drone=null;
+function audioInit(){
+  if(AC) { if(AC.state==="suspended") AC.resume(); return; }
+  try{
+    AC=new (window.AudioContext||window.webkitAudioContext)();
+    master=AC.createGain(); master.gain.value=.5; master.connect(AC.destination);
+    // 低沉的背景嗡嗡聲
+    const o=AC.createOscillator(), o2=AC.createOscillator(), g=AC.createGain(), f=AC.createBiquadFilter();
+    o.type="sawtooth"; o.frequency.value=48; o2.type="sine"; o2.frequency.value=72.5;
+    f.type="lowpass"; f.frequency.value=180; g.gain.value=.05;
+    o.connect(f); o2.connect(f); f.connect(g); g.connect(master); o.start(); o2.start();
+    drone=g;
+  }catch(e){ AC=null; }
+}
+function tone(freq,dur,type="sine",vol=.2,slide=0,delay=0){
+  if(!AC) return;
+  const t=AC.currentTime+delay, o=AC.createOscillator(), g=AC.createGain();
+  o.type=type; o.frequency.setValueAtTime(freq,t);
+  if(slide) o.frequency.exponentialRampToValueAtTime(Math.max(20,freq+slide),t+dur);
+  g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(g); g.connect(master); o.start(t); o.stop(t+dur+.02);
+}
+const sfx={
+  ok(){ tone(660,.14,"triangle",.22); tone(990,.22,"triangle",.2,0,.11); },
+  bad(){ tone(140,.35,"square",.12,-60); },
+  creak(){ tone(220,.9,"sawtooth",.06,-150); tone(330,.6,"sawtooth",.04,-200,.15); },
+  beat(v){ tone(60,.14,"sine",.5*v); tone(52,.16,"sine",.4*v,0,.16); },
+  hurt(){ tone(90,.6,"sawtooth",.25,-50); tone(600,.3,"square",.08,-450); },
+  wake(){ tone(180,1.2,"sawtooth",.12,-120); tone(95,1.4,"square",.08,-40,.2); },
+  win(){ [523,659,784,1046].forEach((f,i)=>tone(f,.3,"triangle",.2,0,i*.12)); },
+  step(){ tone(80+Math.random()*30,.07,"triangle",.07); }
+};
+
+/* ============================================================
+   地圖：每格 2 公尺
+   # 牆   . 地板   S 起點   G 阿嬤的搖椅（阿嬤從這裡醒來）
+   1～5 一般門（照順序）   X 大門（要連續答對 3 題）
+   家具（都擋路）：K 書櫃 T 桌子 B 床 W 衣櫃 L 立燈 P 盆栽 D 五斗櫃
+                   C 馬桶 O 流理台 F 冰箱 U 浴缸 N 洗手台 R 鞋櫃
+   ============================================================ */
+const MAP=[
+  "###################",
+  "#G..L.#KK..T#BB..W#",
+  "#.....#.....#BB...#",
+  "#..S..1.....2.....#",
+  "#T....#.....#.....#",
+  "#T...P#K...K#D....#",
+  "###############3###",
+  "#R...W#P...P#.....#",
+  "#.....#.....#....C#",
+  "X.....5.....4.....#",
+  "#.....#.TT..#.....#",
+  "#RR..P#OOOOF#UU..N#",
+  "###################"
+];
+const ROOMS=[ // [名字, c0, r0, c1, r1, 燈光顏色]
+  ["客廳",1,1,5,5,0xffb070],["書房",7,1,11,5,0xffd9a0],["臥室",13,1,17,5,0xff8fa0],
+  ["浴室",13,7,17,11,0xa8d8ff],["廚房",7,7,11,11,0xfff0c0],["玄關",1,7,5,11,0xff9a60]
+];
+const TS=2, WALL_H=2.8, DOOR_H=2.25, EYE=1.55, PR=.33;
+const W=MAP[0].length, H=MAP.length;
+const FURN="KTBWLPDCOFUNR";
+const tileAt=(c,r)=>(r<0||r>=H||c<0||c>=W)?"#":MAP[r][c];
+const roomOf=(c,r)=>ROOMS.find(R=>c>=R[1]&&c<=R[3]&&r>=R[2]&&r<=R[4]);
+
+/* ---------- three.js 場景 ---------- */
+const canvas=$("gl");
+const renderer=new THREE.WebGLRenderer({canvas,antialias:!IS_TOUCH,powerPreference:"high-performance"});
+renderer.setPixelRatio(Math.min(devicePixelRatio,IS_TOUCH?1.25:1.75));
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x050409);
+scene.fog=new THREE.FogExp2(0x07050a,.055);
+const camera=new THREE.PerspectiveCamera(72,1,.05,60);
+camera.rotation.order="YXZ";
+scene.add(camera);
+scene.add(new THREE.HemisphereLight(0x8a78a8,0x2a1a14,1.3));
+
+function resize(){
+  const w=innerWidth,h=innerHeight;
+  renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix();
+}
+addEventListener("resize",resize); resize();
+
+/* ---------- 程式畫的貼圖 ---------- */
+function canvasTex(w,h,draw,rep){
+  const c=document.createElement("canvas"); c.width=w; c.height=h;
+  draw(c.getContext("2d"),w,h);
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace;
+  t.anisotropy=4;
+  if(rep){ t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(rep[0],rep[1]); }
+  return t;
+}
+function noise(g,w,h,n,a){ for(let i=0;i<n;i++){ g.fillStyle=`rgba(0,0,0,${Math.random()*a})`; g.fillRect(Math.random()*w,Math.random()*h,2+Math.random()*4,2+Math.random()*4); } }
+const texWall=canvasTex(256,256,(g,w,h)=>{
+  g.fillStyle="#5b4a52"; g.fillRect(0,0,w,h);
+  for(let x=0;x<w;x+=32){ g.fillStyle="#65525b"; g.fillRect(x,0,14,h); }
+  g.fillStyle="#6f5a3e"; for(let y=16;y<h;y+=64) for(let x=8;x<w;x+=32){ g.beginPath(); g.arc(x+15,y+(x/32%2)*32,3,0,7); g.fill(); }
+  noise(g,w,h,500,.18);
+  const gr=g.createLinearGradient(0,h*.7,0,h); gr.addColorStop(0,"rgba(30,15,10,0)"); gr.addColorStop(1,"rgba(30,15,10,.55)");
+  g.fillStyle=gr; g.fillRect(0,0,w,h);
+});
+const texFloor=canvasTex(256,256,(g,w,h)=>{
+  for(let y=0;y<h;y+=32){ for(let x=-((y/32)%2)*64;x<w;x+=128){
+    const v=70+Math.random()*30; g.fillStyle=`rgb(${v+30},${v},${v-30})`; g.fillRect(x,y,128,32);
+    g.strokeStyle="rgba(20,10,5,.7)"; g.lineWidth=2; g.strokeRect(x,y,128,32);
+  }}
+  noise(g,w,h,700,.15);
+},[W/2,H/2]);
+const texCeil=canvasTex(128,128,(g,w,h)=>{ g.fillStyle="#2a2326"; g.fillRect(0,0,w,h); noise(g,w,h,300,.3);
+  g.fillStyle="rgba(60,40,20,.35)"; g.beginPath(); g.arc(80,50,30,0,7); g.fill(); },[W/2,H/2]);
+const texDoor=canvasTex(128,256,(g,w,h)=>{
+  g.fillStyle="#5a3520"; g.fillRect(0,0,w,h);
+  g.strokeStyle="#3a2010"; g.lineWidth=6; g.strokeRect(14,14,w-28,h*.42); g.strokeRect(14,h*.5,w-28,h*.46);
+  for(let i=0;i<40;i++){ g.strokeStyle=`rgba(30,15,5,${Math.random()*.3})`; g.lineWidth=1;
+    g.beginPath(); const x=Math.random()*w; g.moveTo(x,0); g.lineTo(x+Math.random()*6-3,h); g.stroke(); }
+});
+const texExit=canvasTex(128,256,(g,w,h)=>{
+  g.fillStyle="#6b1420"; g.fillRect(0,0,w,h);
+  g.strokeStyle="#3d0910"; g.lineWidth=6; for(let y=10;y<h;y+=40) g.strokeRect(10,y,w-20,32);
+  g.fillStyle="#d8b04a"; g.fillRect(w-26,h*.5,10,24);
+});
+
+/* ---------- 牆、地板、天花板 ---------- */
+const matWall=new THREE.MeshLambertMaterial({map:texWall});
+const wallTiles=[];
+for(let r=0;r<H;r++) for(let c=0;c<W;c++) if(MAP[r][c]==="#") wallTiles.push([c,r]);
+const wallMesh=new THREE.InstancedMesh(new THREE.BoxGeometry(TS,WALL_H,TS),matWall,wallTiles.length);
+const m4=new THREE.Matrix4();
+wallTiles.forEach(([c,r],i)=>{ m4.makeTranslation(c*TS,WALL_H/2,r*TS); wallMesh.setMatrixAt(i,m4); });
+scene.add(wallMesh);
+
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(W*TS,H*TS),new THREE.MeshLambertMaterial({map:texFloor}));
+floor.rotation.x=-Math.PI/2; floor.position.set((W-1)*TS/2,0,(H-1)*TS/2); scene.add(floor);
+const ceil=new THREE.Mesh(new THREE.PlaneGeometry(W*TS,H*TS),new THREE.MeshLambertMaterial({map:texCeil}));
+ceil.rotation.x=Math.PI/2; ceil.position.set((W-1)*TS/2,WALL_H,(H-1)*TS/2); scene.add(ceil);
+
+/* 外面的月光（大門打開後看得到） */
+const outside=new THREE.Mesh(new THREE.PlaneGeometry(TS*1.2,WALL_H),new THREE.MeshBasicMaterial({color:0xbfd4ff}));
+outside.rotation.y=Math.PI/2; outside.position.set(-TS*.55,WALL_H/2,9*TS); scene.add(outside);
+
+/* ---------- 房間燈（會閃） ---------- */
+const lights=ROOMS.map(R=>{
+  const cx=(R[1]+R[3])/2*TS, cz=(R[2]+R[4])/2*TS;
+  const L=new THREE.PointLight(R[5],22,16,1.3); L.position.set(cx,WALL_H-.35,cz); scene.add(L);
+  const bulb=new THREE.Mesh(new THREE.SphereGeometry(.11,10,8),new THREE.MeshBasicMaterial({color:R[5]}));
+  bulb.position.copy(L.position); scene.add(bulb);
+  const cord=new THREE.Mesh(new THREE.CylinderGeometry(.01,.01,.3),new THREE.MeshBasicMaterial({color:0x111111}));
+  cord.position.set(cx,WALL_H-.16,cz); scene.add(cord);
+  return {L,bulb,base:22,flick:0};
+});
+/* 手電筒 */
+const torch=new THREE.SpotLight(0xfff1d6,22,18,.55,.6,1.2);
+torch.position.set(0,-.15,0); camera.add(torch); camera.add(torch.target); torch.target.position.set(0,-.3,-3);
+
+/* ---------- 家具 ---------- */
+const lamb=c=>new THREE.MeshLambertMaterial({color:c});
+const box=(w,h,d,c,x=0,y=0,z=0)=>{ const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),lamb(c)); m.position.set(x,y+h/2,z); return m; };
+function wallDir(c,r){ // 家具靠哪一面牆 → 朝向房間中間
+  if(tileAt(c,r-1)==="#") return 0; if(tileAt(c,r+1)==="#") return Math.PI;
+  if(tileAt(c-1,r)==="#") return Math.PI/2; return -Math.PI/2;
+}
+function makeFurn(ch,c,r){
+  const g=new THREE.Group(); g.position.set(c*TS,0,r*TS);
+  const inner=new THREE.Group(); g.add(inner); inner.rotation.y=wallDir(c,r);
+  const back=-TS/2+.35; // 往牆邊靠
+  switch(ch){
+    case "K":{ inner.add(box(1.7,2.1,.6,0x4a2c18,0,0,back));
+      for(let s=0;s<4;s++){ inner.add(box(1.6,.04,.55,0x2e1a0c,0,.45+s*.45,back));
+        for(let b=0;b<9;b++) inner.add(box(.13,.32+Math.random()*.08,.42,[0x8a2a2a,0x2a5a7a,0x6a6a2a,0x3a2a5a,0x9a6a3a][(b+s)%5],-.7+b*.17,.49+s*.45,back+.04)); }
+      break; }
+    case "T": inner.add(box(1.4,.08,1.0,0x5a3a22,0,.72,0)); [[-.6,-.4],[.6,-.4],[-.6,.4],[.6,.4]].forEach(([x,z])=>inner.add(box(.08,.72,.08,0x3a2414,x,0,z)));
+      inner.add(box(.18,.22,.18,0xd8d0c0,.2,.8,.1)); break;
+    case "B": inner.add(box(1.9,.45,1.9,0x5a3a22,0,0,0)); inner.add(box(1.8,.2,1.8,0xc9b8c0,0,.45,0)); inner.add(box(1.9,1.1,.12,0x4a2c18,0,0,-.95)); break;
+    case "W": inner.add(box(1.6,2.3,.7,0x3e2616,0,0,back)); inner.add(box(.04,2.1,.02,0x1e1008,0,.1,back+.36)); break;
+    case "L":{ inner.add(box(.06,1.5,.06,0x222222,0,0,0)); const sh=new THREE.Mesh(new THREE.ConeGeometry(.35,.4,12,1,true),new THREE.MeshBasicMaterial({color:0xffcf7a,side:THREE.DoubleSide}));
+      sh.position.y=1.6; inner.add(sh); break; }
+    case "P":{ inner.add(box(.5,.5,.5,0x7a4a30,0,0,0)); const lf=new THREE.Mesh(new THREE.IcosahedronGeometry(.55,0),lamb(0x2a4a24)); lf.position.y=1.0; inner.add(lf); break; }
+    case "D": inner.add(box(1.4,1.0,.6,0x5a3420,0,0,back)); for(let i=0;i<3;i++) inner.add(box(1.3,.02,.02,0x1e1008,0,.25+i*.3,back+.31));
+      inner.add(box(.9,.7,.04,0x8899aa,0,1.15,back-.1)); break;
+    case "C": inner.add(box(.45,.45,.6,0xe8e8e8,0,0,back+.15)); inner.add(box(.45,.5,.2,0xe8e8e8,0,.4,back-.15)); break;
+    case "O": inner.add(box(TS,.9,.7,0x6a6a70,0,0,back)); inner.add(box(TS,.05,.74,0x2a2a2e,0,.9,back)); break;
+    case "F": inner.add(box(.9,1.9,.75,0xd8dcd8,0,0,back)); inner.add(box(.04,.5,.04,0x888888,.35,1.1,back+.4)); break;
+    case "U": inner.add(box(1.9,.6,1.0,0xeeeeee,0,0,back+.15)); inner.add(box(1.7,.05,.8,0x5a7a6a,0,.56,back+.15)); break;
+    case "N": inner.add(box(.7,.85,.5,0xdddddd,0,0,back)); inner.add(box(.6,.7,.04,0x99aabb,0,1.2,back-.2)); break;
+    case "R": inner.add(box(1.7,.9,.45,0x4a3020,0,0,back)); inner.add(box(.3,.12,.25,0x221111,-.4,.9,back)); break;
+  }
+  scene.add(g);
+}
+let startTile=[3,3], grannyHome=[1,1];
+for(let r=0;r<H;r++) for(let c=0;c<W;c++){
+  const ch=MAP[r][c];
+  if(FURN.includes(ch)) makeFurn(ch,c,r);
+  if(ch==="S") startTile=[c,r];
+  if(ch==="G") grannyHome=[c,r];
+}
+/* 阿嬤的搖椅 */
+const chair=new THREE.Group();
+chair.add(box(.8,.08,.8,0x4a2a18,0,.45,0)); chair.add(box(.8,1.1,.08,0x4a2a18,0,.45,-.38));
+[-.36,.36].forEach(x=>{ const rk=new THREE.Mesh(new THREE.TorusGeometry(.6,.03,6,16,1.2),lamb(0x2e1a0c));
+  rk.rotation.y=Math.PI/2; rk.rotation.z=-Math.PI/2-.6; rk.position.set(x,.62,0); chair.add(rk); });
+chair.position.set(grannyHome[0]*TS,0,grannyHome[1]*TS); chair.rotation.y=Math.PI*.75; scene.add(chair);
+
+/* ---------- 門 ---------- */
+const doors=[]; // {c,r,n,exit,open,ang,pivot,need,sign}
+function signTex(txt,col){
+  return canvasTex(256,96,(g,w,h)=>{
+    g.fillStyle="rgba(15,10,18,.9)"; g.fillRect(0,0,w,h); g.strokeStyle=col; g.lineWidth=6; g.strokeRect(3,3,w-6,h-6);
+    g.fillStyle=col; g.font="bold 44px 'Noto Serif TC','PingFang TC',serif"; g.textAlign="center"; g.textBaseline="middle"; g.fillText(txt,w/2,h/2+2);
+  });
+}
+for(let r=0;r<H;r++) for(let c=0;c<W;c++){
+  const ch=MAP[r][c]; if(!/[1-9X]/.test(ch)) continue;
+  const exit=ch==="X";
+  const alongZ=tileAt(c,r-1)==="#"&&tileAt(c,r+1)==="#"; // 牆是南北向 → 門板沿 z 軸
+  const grp=new THREE.Group(); grp.position.set(c*TS,0,r*TS); if(alongZ) grp.rotation.y=Math.PI/2;
+  // 門楣（門上方的牆）
+  const lint=new THREE.Mesh(new THREE.BoxGeometry(TS,WALL_H-DOOR_H,TS),matWall); lint.position.y=(WALL_H+DOOR_H)/2; grp.add(lint);
+  // 門框
+  [-1,1].forEach(s=>grp.add(box(.12,DOOR_H,.3,0x2a1608,s*(TS/2-.06),0,0)));
+  // 門板（樞紐在左邊）
+  const pivot=new THREE.Group(); pivot.position.set(-TS/2+.12,0,0); grp.add(pivot);
+  const pw=TS-.24;
+  const panel=new THREE.Mesh(new THREE.BoxGeometry(pw,DOOR_H-.04,.1),new THREE.MeshLambertMaterial({map:exit?texExit:texDoor}));
+  panel.position.set(pw/2,DOOR_H/2,0); pivot.add(panel);
+  const knob=new THREE.Mesh(new THREE.SphereGeometry(.06,8,6),lamb(0xd8b04a));
+  [-1,1].forEach(s=>{ const k=knob.clone(); k.position.set(pw-.18,1.0,s*.08); pivot.add(k); });
+  // 鎖（發光）
+  const lock=new THREE.Mesh(new THREE.BoxGeometry(.16,.2,.16),new THREE.MeshBasicMaterial({color:exit?0xff3050:0xffb547}));
+  lock.position.set(pw-.18,1.25,0); pivot.add(lock);
+  // 門牌
+  const label=exit?"大門 EXIT":"門 "+ch;
+  const sign=new THREE.Mesh(new THREE.PlaneGeometry(.9,.34),new THREE.MeshBasicMaterial({map:signTex("🔒 "+label,exit?"#ff6070":"#ffb547"),side:THREE.DoubleSide,transparent:true}));
+  sign.position.set(0,DOOR_H+.22,0); grp.add(sign);
+  scene.add(grp);
+  doors.push({c,r,n:exit?99:+ch,label,exit,open:false,ang:0,pivot,lock,sign,need:exit?3:1,got:0,grp});
+}
+doors.sort((a,b)=>a.n-b.n);
+$("doorsT").textContent=doors.length;
+const doorAt=(c,r)=>doors.find(d=>d.c===c&&d.r===r);
+
+/* 可不可以走 */
+function solidTile(c,r){
+  const ch=tileAt(c,r);
+  if(ch==="#"||FURN.includes(ch)) return true;
+  if(/[1-9X]/.test(ch)){ const d=doorAt(c,r); return !(d&&d.open&&d.ang>.9); }
+  return false;
+}
+function solidAt(x,z){ return solidTile(Math.round(x/TS),Math.round(z/TS)); }
+
+/* ---------- 阿嬤（用基本形狀拼起來） ---------- */
+const granny=new THREE.Group();
+{
+  const dress=new THREE.Mesh(new THREE.CylinderGeometry(.22,.42,1.0,12),lamb(0x5a3a6a)); dress.position.y=.55; granny.add(dress);
+  const apron=new THREE.Mesh(new THREE.PlaneGeometry(.36,.6),lamb(0xd8d0c0)); apron.position.set(0,.6,.33); apron.rotation.x=-.2; granny.add(apron);
+  const torso=new THREE.Mesh(new THREE.CylinderGeometry(.2,.22,.4,10),lamb(0x5a3a6a)); torso.position.y=1.2; granny.add(torso);
+  const shawl=new THREE.Mesh(new THREE.CylinderGeometry(.24,.3,.18,10),lamb(0x7a2a2a)); shawl.position.y=1.33; granny.add(shawl);
+  const skin=lamb(0xd9b8a0);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(.17,14,12),skin); head.position.y=1.58; granny.add(head);
+  const hair=new THREE.Mesh(new THREE.SphereGeometry(.18,14,12,0,Math.PI*2,0,Math.PI*.55),lamb(0xbdbdbd)); hair.position.y=1.6; hair.rotation.x=-.35; granny.add(hair);
+  const bun=new THREE.Mesh(new THREE.SphereGeometry(.09,10,8),lamb(0xcccccc)); bun.position.set(0,1.72,-.13); granny.add(bun);
+  const eyeM=new THREE.MeshBasicMaterial({color:0xff2030});
+  [-.06,.06].forEach(x=>{
+    const e=new THREE.Mesh(new THREE.SphereGeometry(.025,8,6),eyeM); e.position.set(x,1.6,.15); granny.add(e);
+    const gl=new THREE.Mesh(new THREE.TorusGeometry(.045,.008,6,14),lamb(0x222222)); gl.position.set(x,1.6,.165); granny.add(gl);
+  });
+  const arms=[];
+  [-1,1].forEach(s=>{
+    const a=new THREE.Group(); a.position.set(s*.25,1.32,0);
+    const arm=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,.55,8),lamb(0x5a3a6a)); arm.position.y=-.27; a.add(arm);
+    const hand=new THREE.Mesh(new THREE.SphereGeometry(.06,8,6),skin); hand.position.y=-.56; a.add(hand);
+    granny.add(a); arms.push(a);
+  });
+  // 拿著擀麵棍
+  const pin=new THREE.Mesh(new THREE.CylinderGeometry(.04,.04,.6,8),lamb(0xc89a60)); pin.rotation.z=Math.PI/2; pin.position.set(0,-.58,.05); arms[1].add(pin);
+  granny.userData={arms,eyeM,head};
+}
+const grannyLight=new THREE.PointLight(0xff2030,0,3.5,2); grannyLight.position.y=1.6; granny.add(grannyLight);
+scene.add(granny);
+/* 打呼的 Zzz */
+const zzz=new THREE.Sprite(new THREE.SpriteMaterial({map:signTex("Zzz…","#9fc3ff"),transparent:true}));
+zzz.scale.set(.6,.22,1); scene.add(zzz);
+
+/* ---------- 遊戲狀態 ---------- */
+let S=null, running=false, paused=false;
+function newGame(){
+  return {
+    x:startTile[0]*TS, z:startTile[1]*TS, yaw:Math.PI/2*-1+Math.PI, pitch:0, // 一開始面向門 1（東）
+    hearts:3, ok:0, ng:0, wrong:[], t:0, doorsOpen:0,
+    g:{x:grannyHome[0]*TS, z:grannyHome[1]*TS, state:"sleep", timer:0, speed:1.75, path:[], repath:0, stun:0, yaw:0},
+    bob:0, beat:0, stepT:0, quiz:null, over:false, hurtT:0
+  };
+}
+function resetWorld(){
+  doors.forEach(d=>{ d.open=false; d.ang=0; d.got=0; d.pivot.rotation.y=0; d.lock.visible=true;
+    d.sign.material.map=signTex("🔒 "+d.label,d.exit?"#ff6070":"#ffb547"); });
+  outside.visible=false;
+}
+function startGame(){
+  buildBank([...pickSet]);
+  if(!BANK.length){ toast("這個範圍沒有題目，換一課試試。",2400,"bad"); return; }
+  askOrder=[]; askPos=0;
+  ["scTitle","scPick","scEnd","scPause"].forEach(id=>$(id).classList.remove("on"));
+  audioInit();
+  resetWorld();
+  S=newGame(); running=true; paused=false; document.body.classList.add("playing");
+  S.yaw=-Math.PI/2; // three.js：yaw=-π/2 面向 +x（東）
+  updateHUD();
+  toast("噓…阿嬤在睡覺。走到 <b>門 1</b> 前面答題開門。",3200);
+  if(!IS_TOUCH) lockPointer();
+}
+
+/* ---------- 輸入 ---------- */
+const keys={};
+addEventListener("keydown",e=>{
+  const k=e.key.toLowerCase(); keys[k]=true;
+  if(S&&S.quiz&&!S.quiz.locked&&/^[1-4]$/.test(k)) answer(+k-1);
+  else if(k==="e"&&running&&!paused&&S&&!S.quiz) tryInteract();
+  if(["arrowup","arrowdown","arrowleft","arrowright"," "].includes(k)) e.preventDefault();
+});
+addEventListener("keyup",e=>{ keys[e.key.toLowerCase()]=false; });
+addEventListener("blur",()=>{ for(const k in keys) keys[k]=false; });
+
+function lockPointer(){ try{ const p=canvas.requestPointerLock(); if(p&&p.catch) p.catch(()=>{}); }catch(e){} }
+const locked=()=>document.pointerLockElement===canvas;
+document.addEventListener("pointerlockchange",()=>{
+  if(IS_TOUCH||!running||!S||S.over) return;
+  if(!locked()&&!S.quiz){ paused=true; $("scPause").classList.add("on"); }
+});
+$("scPause").addEventListener("click",()=>{ paused=false; $("scPause").classList.remove("on"); lockPointer(); });
+let dragging=false;
+canvas.addEventListener("mousedown",e=>{
+  if(IS_TOUCH||!running||!S||S.quiz) return;
+  if(!locked()){ lockPointer(); dragging=true; return; }
+  tryInteract();
+});
+addEventListener("mouseup",()=>dragging=false);
+addEventListener("mousemove",e=>{
+  if(!running||!S||S.quiz||IS_TOUCH) return;
+  if(locked()||dragging) look(e.movementX,e.movementY,.0022);
+});
+function look(dx,dy,s){
+  S.yaw-=dx*s; S.pitch=Math.max(-1.2,Math.min(1.2,S.pitch-dy*s));
+}
+/* 手機：搖桿＋滑動看 */
+const joy={id:null,x:0,y:0,cx:0,cy:0}, lookT={id:null,x:0,y:0};
+$("joy").addEventListener("touchstart",e=>{
+  const t=e.changedTouches[0], r=$("joy").getBoundingClientRect();
+  joy.id=t.identifier; joy.cx=r.left+r.width/2; joy.cy=r.top+r.height/2; moveJoy(t); e.preventDefault();
+},{passive:false});
+function moveJoy(t){
+  let dx=t.clientX-joy.cx, dy=t.clientY-joy.cy; const m=Math.hypot(dx,dy), R=50;
+  if(m>R){ dx*=R/m; dy*=R/m; }
+  joy.x=dx/R; joy.y=dy/R; $("knob").style.transform=`translate(${dx}px,${dy}px)`;
+}
+addEventListener("touchmove",e=>{
+  for(const t of e.changedTouches){
+    if(t.identifier===joy.id) moveJoy(t);
+    else if(t.identifier===lookT.id&&S&&!S.quiz){ look((t.clientX-lookT.x)*1.6,(t.clientY-lookT.y)*1.6,.0035); lookT.x=t.clientX; lookT.y=t.clientY; }
+  }
+},{passive:true});
+canvas.addEventListener("touchstart",e=>{
+  for(const t of e.changedTouches) if(lookT.id===null){ lookT.id=t.identifier; lookT.x=t.clientX; lookT.y=t.clientY; }
+},{passive:true});
+addEventListener("touchend",e=>{
+  for(const t of e.changedTouches){
+    if(t.identifier===joy.id){ joy.id=null; joy.x=joy.y=0; $("knob").style.transform=""; }
+    if(t.identifier===lookT.id) lookT.id=null;
+  }
+});
+addEventListener("touchcancel",()=>{ joy.id=null; joy.x=joy.y=0; $("knob").style.transform=""; lookT.id=null; });
+$("act").addEventListener("touchstart",e=>{ e.preventDefault(); audioInit(); tryInteract(); },{passive:false});
+$("act").addEventListener("click",()=>tryInteract());
+
+/* ---------- 找面前的門 ---------- */
+function nearDoor(){
+  if(!S) return null;
+  const fx=-Math.sin(S.yaw), fz=-Math.cos(S.yaw);
+  let best=null, bd=9;
+  for(const d of doors){
+    if(d.open) continue;
+    const dx=d.c*TS-S.x, dz=d.r*TS-S.z, dist=Math.hypot(dx,dz);
+    if(dist>2.3) continue;
+    const dot=(dx*fx+dz*fz)/(dist||1);
+    if(dot<.45) continue;
+    if(dist<bd){ bd=dist; best=d; }
+  }
+  return best;
+}
+function tryInteract(){
+  if(!running||paused||!S||S.over||S.quiz) return;
+  const d=nearDoor();
+  if(!d) return;
+  // 一定要照順序開門
+  const prev=doors.filter(x=>!x.exit&&x.n<d.n&&!x.open);
+  if(prev.length){ toast("這道門卡住了，先打開 "+prev[0].label+"。",1800,"bad"); return; }
+  openQuiz(d);
+}
+
+/* ---------- 答題 ---------- */
+function openQuiz(d){
+  const q=pickQ();
+  S.quiz={d,q,locked:false};
+  if(locked()) document.exitPointerLock();
+  $("qsrc").textContent=q.src||"題目";
+  $("qdoor").textContent=d.exit?`🚪 大門：還要答對 ${d.need-d.got} 題`:`🔒 ${d.label}`;
+  $("qtext").innerHTML=esc(q.text).replace(/_{2,}|（\s*）|\(\s*\)/g,m=>"<b>"+m+"</b>");
+  $("qexp").innerHTML="";
+  $("qopts").innerHTML=q.opts.map((o,i)=>`<button class="opt" data-i="${i}"><i>${i+1}</i>${esc(o)}</button>`).join("");
+  $("qopts").querySelectorAll(".opt").forEach(b=>b.onclick=()=>answer(+b.dataset.i));
+  $("qwarn").style.display=S.g.state==="sleep"?"none":"block";
+  $("quiz").classList.add("on");
+  $("prompt").classList.remove("on"); $("act").classList.remove("on");
+}
+function answer(i){
+  const Q=S&&S.quiz; if(!Q||Q.locked) return;
+  Q.locked=true;
+  const btns=[...$("qopts").querySelectorAll(".opt")];
+  btns.forEach(b=>b.disabled=true);
+  btns[Q.q.ans].classList.add("right");
+  const ok=i===Q.q.ans;
+  if(ok){
+    S.ok++; sfx.ok();
+    $("qexp").innerHTML="✅ 答對了！"+(Q.q.exp?"<br>💡 "+esc(Q.q.exp):"");
+  }else{
+    S.ng++; sfx.bad(); btns[i].classList.add("wrong");
+    S.wrong.push({q:Q.q.text,a:Q.q.full,e:Q.q.exp});
+    S.g.speed=Math.min(3.1,S.g.speed+.15);
+    if(Q.d.exit) Q.d.got=0;
+    $("qexp").innerHTML="❌ 正確答案是 <b>"+esc(Q.q.full)+"</b>"+(Q.q.exp?"<br>💡 "+esc(Q.q.exp):"")+
+      "<br><span style='color:#ff9aa9'>阿嬤聽到了，走得更快了！</span>"+(Q.d.exit?"<br>大門的連續答對歸零。":"");
+  }
+  updateHUD();
+  setTimeout(()=>{
+    if(!S||S.quiz!==Q) return;
+    S.quiz=null; $("quiz").classList.remove("on");
+    if(ok){
+      Q.d.got++;
+      if(Q.d.got>=Q.d.need) openDoor(Q.d);
+      else { toast(`大門的鎖鬆了一點（${Q.d.got}/${Q.d.need}），繼續答！`,1600,"good"); return setTimeout(()=>{ if(S&&!S.over&&!S.quiz) openQuiz(Q.d); },350); }
+    }else{
+      toast("門還是鎖著…再試一次（換一題）。",1600,"bad");
+    }
+    if(!IS_TOUCH&&!S.over) lockPointer();
+  },ok?(Q.q.exp?1500:800):2600);
+}
+function openDoor(d){
+  d.open=true; d.lock.visible=false; S.doorsOpen++; sfx.creak();
+  d.sign.material.map=signTex("✓ "+d.label,"#4ad07a");
+  if(d.exit){ outside.visible=true; toast("大門開了！快跑出去！🏃",2200,"good"); }
+  else toast(`🔓 ${d.label} 打開了！`,1400,"good");
+  if(S.g.state==="sleep"){
+    S.g.state="wake"; S.g.timer=2.2; sfx.wake();
+    setTimeout(()=>toast("吱——門的聲音吵醒了阿嬤！<b>快跑！</b>",2400,"bad"),900);
+  }
+  updateHUD();
+}
+
+/* ---------- 阿嬤的尋路（BFS，只走打開的門） ---------- */
+function bfs(sc,sr,tc,tr){
+  const key=(c,r)=>r*W+c, prev=new Map([[key(sc,sr),-1]]), q=[[sc,sr]];
+  while(q.length){
+    const [c,r]=q.shift();
+    if(c===tc&&r===tr){
+      const path=[]; let k=key(c,r);
+      while(k!==-1){ path.push([k%W,Math.floor(k/W)]); k=prev.get(k); }
+      return path.reverse();
+    }
+    for(const [dc,dr] of [[1,0],[-1,0],[0,1],[0,-1]]){
+      const nc=c+dc, nr=r+dr, k=key(nc,nr);
+      if(prev.has(k)) continue;
+      if(solidTile(nc,nr)&&!(nc===tc&&nr===tr)) continue;
+      prev.set(k,key(c,r)); q.push([nc,nr]);
+    }
+  }
+  return null;
+}
+function farthestFrom(c0,r0){
+  const seen=new Map([[r0*W+c0,0]]), q=[[c0,r0]]; let far=[c0,r0], fd=0;
+  while(q.length){ const [c,r]=q.shift(), d=seen.get(r*W+c);
+    if(d>fd&&tileAt(c,r)==="."){ fd=d; far=[c,r]; }
+    for(const [dc,dr] of [[1,0],[-1,0],[0,1],[0,-1]]){ const nc=c+dc,nr=r+dr,k=nr*W+nc;
+      if(seen.has(k)||solidTile(nc,nr)) continue; seen.set(k,d+1); q.push([nc,nr]); } }
+  return {tile:far,dist:fd};
+}
+
+/* ---------- 更新 ---------- */
+function updateHUD(){
+  if(!S) return;
+  $("hearts").textContent="❤️".repeat(S.hearts)+"🖤".repeat(Math.max(0,3-S.hearts));
+  $("doorsN").textContent=S.doorsOpen; $("okN").textContent=S.ok; $("ngN").textContent=S.ng;
+}
+function tryMove(nx,nz){
+  const ok=(x,z)=>!solidAt(x-PR,z-PR)&&!solidAt(x+PR,z-PR)&&!solidAt(x-PR,z+PR)&&!solidAt(x+PR,z+PR);
+  if(ok(nx,S.z)) S.x=nx;
+  if(ok(S.x,nz)) S.z=nz;
+}
+function stepPlayer(dt){
+  let mx=0,mz=0, run=false;
+  if(keys["w"]||keys["arrowup"]) mz-=1;
+  if(keys["s"]||keys["arrowdown"]) mz+=1;
+  if(keys["a"]) mx-=1;
+  if(keys["d"]) mx+=1;
+  if(keys["arrowleft"]) S.yaw+=2.2*dt;
+  if(keys["arrowright"]) S.yaw-=2.2*dt;
+  if(keys["shift"]) run=true;
+  if(joy.id!==null){ mx+=joy.x; mz+=joy.y; if(Math.hypot(joy.x,joy.y)>.92) run=true; }
+  const m=Math.hypot(mx,mz);
+  if(m>1){ mx/=m; mz/=m; }
+  const sp=(run?4.6:2.9)*(m>.05?1:0);
+  if(sp){
+    const sin=Math.sin(S.yaw), cos=Math.cos(S.yaw);
+    const vx=(mx*cos+mz*sin)*sp, vz=(-mx*sin+mz*cos)*sp;
+    tryMove(S.x+vx*dt,S.z+vz*dt);
+    S.bob+=dt*(run?13:9);
+    S.stepT-=dt; if(S.stepT<=0){ sfx.step(); S.stepT=run?.3:.45; }
+  }
+  // 出口
+  const ex=doors.find(d=>d.exit);
+  if(ex&&ex.open&&S.x<ex.c*TS+.4&&Math.abs(S.z-ex.r*TS)<TS/2) endGame(true);
+}
+function stepGranny(dt){
+  const G=S.g;
+  if(G.state==="sleep"){ granny.position.set(G.x,0,G.z); granny.rotation.y=chair.rotation.y; granny.position.y=-.35+Math.sin(S.t*1.2)*.02;
+    chair.rotation.x=Math.sin(S.t*1.2)*.08; zzz.visible=true; zzz.position.set(G.x,1.9+(S.t*.4%1)*.5,G.z); zzz.material.opacity=1-(S.t*.4%1); return; }
+  zzz.visible=false; chair.rotation.x*=.95;
+  if(G.state==="wake"){ G.timer-=dt; granny.position.y=-.35*Math.max(0,G.timer/2.2); if(G.timer<=0) G.state="chase"; G.eyes=1; return; }
+  if(G.stun>0){ G.stun-=dt; granny.userData.eyeM.color.setHex(0x553333); return; }
+  granny.userData.eyeM.color.setHex(0xff2030);
+  const sp=G.speed*(S.quiz?.45:1);
+  const pc=Math.round(S.x/TS), pr=Math.round(S.z/TS);
+  G.repath-=dt;
+  if(G.repath<=0||!G.path.length){
+    G.repath=.35;
+    const p=bfs(Math.round(G.x/TS),Math.round(G.z/TS),pc,pr);
+    G.path=p?p.slice(1):[];
+  }
+  let tx,tz;
+  if(G.path.length<=1){ tx=S.x; tz=S.z; } else { tx=G.path[0][0]*TS; tz=G.path[0][1]*TS; }
+  const dx=tx-G.x, dz=tz-G.z, d=Math.hypot(dx,dz);
+  if(d<.15&&G.path.length>1) G.path.shift();
+  else if(d>.01){ const k=Math.min(d,sp*dt)/d; G.x+=dx*k; G.z+=dz*k; }
+  const want=Math.atan2(dx,dz);
+  let da=want-G.yaw; da=Math.atan2(Math.sin(da),Math.cos(da)); G.yaw+=da*Math.min(1,dt*8);
+  granny.position.set(G.x,Math.abs(Math.sin(S.t*7))*.05,G.z); granny.rotation.y=G.yaw;
+  granny.userData.arms.forEach((a,i)=>a.rotation.x=-1.2+Math.sin(S.t*7+i*Math.PI)*.35);
+  // 抓到了
+  const pd=Math.hypot(S.x-G.x,S.z-G.z);
+  if(pd<.85&&S.hurtT<=0) caught();
+}
+function caught(){
+  S.hearts--; S.hurtT=2; sfx.hurt(); flash(); updateHUD();
+  if(S.quiz){ S.quiz=null; $("quiz").classList.remove("on"); }
+  if(S.hearts<=0) return endGame(false);
+  // 阿嬤被丟回最遠的地方
+  const f=farthestFrom(Math.round(S.x/TS),Math.round(S.z/TS));
+  S.g.x=f.tile[0]*TS; S.g.z=f.tile[1]*TS; S.g.path=[]; S.g.stun=3;
+  toast(`被阿嬤打了一下！剩 ${S.hearts} 顆 ❤️<br>她回到房子另一頭了，趁現在！`,2600,"bad");
+}
+function endGame(win){
+  S.over=true; running=false; document.body.classList.remove("playing");
+  if(locked()) document.exitPointerLock();
+  $("quiz").classList.remove("on"); $("prompt").classList.remove("on"); $("act").classList.remove("on");
+  let best=0; try{ best=+(localStorage.getItem(BEST_KEY)||0); }catch(e){}
+  const isBest=win&&(!best||S.t<best);
+  if(isBest){ try{ localStorage.setItem(BEST_KEY,Math.floor(S.t)); }catch(e){} }
+  if(win) sfx.win();
+  $("endTitle").textContent=win?(isBest?"🏆 逃出來了！新紀錄！":"🌙 逃出阿嬤家了！"):"被阿嬤抓到了…";
+  $("endMsg").innerHTML=win?`花了 <b>${fmtT(S.t)}</b>${best&&!isBest?"（最快："+fmtT(best)+"）":""}，還剩 ${"❤️".repeat(S.hearts)}`
+    :`你打開了 <b>${S.doorsOpen}</b> 道門，撐了 <b>${fmtT(S.t)}</b>。`;
+  $("endCard").innerHTML=`答對 <b>${S.ok}</b> 題・答錯 <b>${S.ng}</b> 題`+
+    (S.ok+S.ng?`（正確率 <b>${Math.round(S.ok*100/(S.ok+S.ng))}%</b>）`:"")+
+    "<br>範圍："+SELECTED.map(id=>{ const u=UNITS.find(x=>x.id===id); return u?u.short:id; }).join("、");
+  const box=$("wrongList");
+  if(!S.wrong.length) box.innerHTML="<div class='wq' style='border-left-color:#4ad07a'>全部答對，太強了！👏</div>";
+  else{
+    const seen=new Set();
+    box.innerHTML="<div class='sub' style='margin:6px 0'>錯題複習</div>"+
+      S.wrong.filter(w=>{ if(seen.has(w.q)) return false; seen.add(w.q); return true; })
+        .map(w=>`<div class='wq'>${esc(w.q)}<br>✅ <span class='ans'>${esc(w.a)}</span>${w.e?"<br>💡 "+esc(w.e):""}</div>`).join("");
+  }
+  setTimeout(()=>$("scEnd").classList.add("on"),win?600:900);
+}
+
+/* ---------- 小地圖 ---------- */
+const mini=$("mini").getContext("2d"), MS=14;
+function drawMini(){
+  mini.clearRect(0,0,266,182);
+  for(let r=0;r<H;r++) for(let c=0;c<W;c++){
+    const ch=MAP[r][c]; let col=null;
+    if(ch==="#") col="#3a2b3f";
+    else if(/[1-9X]/.test(ch)){ const d=doorAt(c,r); col=d.open?"#4ad07a":(ch==="X"?"#ff4060":"#ffb547"); }
+    else if(FURN.includes(ch)) col="#2a2030";
+    if(col){ mini.fillStyle=col; mini.fillRect(c*MS,r*MS,MS,MS); }
+  }
+  const px=S.x/TS*MS+MS/2, pz=S.z/TS*MS+MS/2;
+  mini.fillStyle="#63b3ff"; mini.beginPath(); mini.arc(px,pz,5,0,7); mini.fill();
+  mini.strokeStyle="#63b3ff"; mini.lineWidth=2; mini.beginPath(); mini.moveTo(px,pz);
+  mini.lineTo(px-Math.sin(S.yaw)*12,pz-Math.cos(S.yaw)*12); mini.stroke();
+  if(S.g.state!=="sleep"||true){
+    mini.fillStyle=S.g.state==="sleep"?"#9a7aaa":"#ff2030";
+    mini.beginPath(); mini.arc(S.g.x/TS*MS+MS/2,S.g.z/TS*MS+MS/2,5,0,7); mini.fill();
+  }
+}
+
+/* ---------- 主迴圈 ---------- */
+let last=performance.now(), curRoom="";
+function frame(now){
+  requestAnimationFrame(frame);
+  const dt=Math.min(.05,(now-last)/1000); last=now;
+  const t=now/1000;
+  // 燈會閃
+  lights.forEach((l,i)=>{
+    if(Math.random()<.004) l.flick=.12+Math.random()*.25;
+    if(l.flick>0){ l.flick-=dt; l.L.intensity=Math.random()<.5?2:l.base; }
+    else l.L.intensity=l.base*(.92+Math.sin(t*3+i)*.08);
+    l.bulb.visible=l.L.intensity>3;
+  });
+  // 門的動畫
+  doors.forEach(d=>{ if(d.open&&d.ang<1){ d.ang=Math.min(1,d.ang+dt*1.4); d.pivot.rotation.y=-d.ang*1.75; } });
+
+  if(S&&running&&!paused){
+    S.t+=dt; S.hurtT-=dt;
+    if(!S.quiz) stepPlayer(dt);
+    stepGranny(dt);
+    $("clock").textContent=fmtT(S.t);
+    // 互動提示
+    const d=S.quiz?null:nearDoor();
+    if(d){
+      $("prompt").innerHTML=IS_TOUCH?`🔒 ${d.label}：按「開門」答題`:`🔒 ${d.label}：按 <b>E</b> 或點左鍵答題`;
+      $("prompt").classList.add("on"); $("act").classList.add("on");
+    }else{ $("prompt").classList.remove("on"); $("act").classList.remove("on"); }
+    // 房間名
+    const R=roomOf(Math.round(S.x/TS),Math.round(S.z/TS));
+    if(R&&R[0]!==curRoom){ curRoom=R[0]; $("roomName").textContent="📍 "+R[0]; }
+    // 心跳＋紅色暈影
+    const gd=Math.hypot(S.x-S.g.x,S.z-S.g.z);
+    const danger=S.g.state==="chase"?Math.max(0,1-gd/10):0;
+    $("vig").style.opacity=danger*.9;
+    grannyLight.intensity=S.g.state==="chase"?2.5:0;
+    S.beat-=dt;
+    if(danger>.05&&S.beat<=0){ sfx.beat(.4+danger*.6); S.beat=1.1-danger*.7; }
+    if(drone) drone.gain.value=.05+danger*.08;
+    drawMini();
+  }
+  if(S){
+    camera.position.set(S.x,EYE+Math.sin(S.bob)*.035,S.z);
+    camera.rotation.set(S.pitch,S.yaw,0);
+  }else{
+    // 標題畫面：鏡頭慢慢轉
+    camera.position.set(3*TS,EYE,3*TS); camera.rotation.set(-.05,t*.12,0);
+    granny.position.set(grannyHome[0]*TS,-.35,grannyHome[1]*TS); granny.rotation.y=chair.rotation.y;
+    zzz.position.set(grannyHome[0]*TS,1.9+(t*.4%1)*.5,grannyHome[1]*TS); zzz.material.opacity=1-(t*.4%1);
+    chair.rotation.x=Math.sin(t*1.2)*.08;
+  }
+  renderer.render(scene,camera);
+}
+outside.visible=false;
+requestAnimationFrame(frame);
+
+/* ---------- 選範圍（和單字跑酷同一套） ---------- */
+let pickSet=new Set(["B3L1"]), pickF={pub:"",grade:""};
+try{
+  const d=JSON.parse(localStorage.getItem(PICK_KEY)||localStorage.getItem("parkour_pick_v1")||"{}");
+  if(d.ids&&d.ids.length) pickSet=new Set(d.ids.filter(id=>UNITS.some(u=>u.id===id)));
+  pickF={pub:d.pub||"",grade:d.grade||""};
+}catch(e){}
+if(!pickSet.size||![...pickSet].every(id=>UNITS.some(u=>u.id===id))) pickSet=new Set(UNITS[0]?[UNITS[0].id]:[]);
+function savePick(){ try{ localStorage.setItem(PICK_KEY,JSON.stringify({ids:[...pickSet],pub:pickF.pub,grade:pickF.grade})); }catch(e){} }
+const uCount=u=>(u.v||[]).length+(u.g||[]).length+(u.c||[]).length;
+const uVisible=u=>(!pickF.pub||u.pub===pickF.pub)&&(!pickF.grade||u.grade===pickF.grade);
+function renderChips(){
+  $("fPub").innerHTML=["全部版本",...PUBS].map(p=>{ const v=p==="全部版本"?"":p;
+    return `<div class='chip${pickF.pub===v?" on":""}' data-pub='${v}'>${p}</div>`; }).join("");
+  $("fGrade").innerHTML=["全部年級",...GRADES].map(g=>{ const v=g==="全部年級"?"":g;
+    return `<div class='chip${pickF.grade===v?" on":""}' data-grade='${v}'>${g}</div>`; }).join("");
+  $("fPub").querySelectorAll("[data-pub]").forEach(el=>el.onclick=()=>{ pickF.pub=el.dataset.pub; savePick(); renderPick(); });
+  $("fGrade").querySelectorAll("[data-grade]").forEach(el=>el.onclick=()=>{ pickF.grade=el.dataset.grade; savePick(); renderPick(); });
+}
+function renderPick(){
+  renderChips();
+  const vis=UNITS.filter(uVisible);
+  const ps=PRESETS.filter(p=>p.ids.every(id=>vis.some(u=>u.id===id)));
+  $("presets").innerHTML=ps.map((p,i)=>`<div class='chip' data-p='${i}'>🎯 ${p.name}</div>`).join("");
+  $("presets").querySelectorAll("[data-p]").forEach(el=>el.onclick=()=>{ pickSet=new Set(ps[+el.dataset.p].ids); savePick(); renderPick(); });
+  const groups={};
+  vis.forEach(u=>{ const k=(u.grade||"其他")+"・"+(u.pub||""); (groups[k]=groups[k]||[]).push(u); });
+  const order=["高一","高二","高三","其他"];
+  const ks=Object.keys(groups).sort((a,b)=>{
+    const ga=order.indexOf(a.split("・")[0]), gb=order.indexOf(b.split("・")[0]);
+    if(ga!==gb) return ga-gb;
+    return UNITS.indexOf(groups[a][0])-UNITS.indexOf(groups[b][0]);
+  });
+  $("ulist").innerHTML=ks.map(k=>"<div class='ghead'>"+k+"</div>"+groups[k].map(u=>
+    `<label class='u${pickSet.has(u.id)?" on":""}'><input type='checkbox' data-id='${u.id}'${pickSet.has(u.id)?" checked":""}>`+
+    `<span><span class='nm'>${u.name}</span><span class='mt'>${uCount(u)} 題</span></span></label>`).join("")).join("")
+    ||"<div class='sub'>這個篩選條件下沒有課，換一個試試。</div>";
+  $("ulist").querySelectorAll("input[data-id]").forEach(el=>el.onchange=()=>{
+    el.checked?pickSet.add(el.dataset.id):pickSet.delete(el.dataset.id); savePick(); renderPick(); });
+  const n=[...pickSet].reduce((a,id)=>{ const u=UNITS.find(x=>x.id===id); return a+(u?uCount(u):0); },0);
+  $("pickInfo").innerHTML=pickSet.size?`已選 <b>${pickSet.size}</b> 課，共 <b>${n}</b> 題可以出`:"至少要選一課";
+  $("btnGo").disabled=!pickSet.size;
+}
+$("btnPick").onclick=()=>{ audioInit(); $("scTitle").classList.remove("on"); $("scPick").classList.add("on"); renderPick(); };
+$("btnBack").onclick=()=>{ $("scPick").classList.remove("on"); $("scTitle").classList.add("on"); };
+$("btnGo").onclick=startGame;
+$("btnAgain").onclick=startGame;
+$("btnRepick").onclick=()=>{ $("scEnd").classList.remove("on"); $("scPick").classList.add("on"); renderPick(); };
+
+/* ---------- 起步 ---------- */
+(function init(){
+  let best=0; try{ best=+(localStorage.getItem(BEST_KEY)||0); }catch(e){}
+  $("best").textContent=best?fmtT(best):"還沒有紀錄";
+  if(!UNITS.length){ $("loadErr").textContent="題庫載入失敗（../parkour/units.js），請重新整理。"; return; }
+  $("btnPick").disabled=false; $("btnPick").textContent="選範圍開始";
+  window.__game={get S(){return S;},doors,startGame,answer,openDoor}; // 測試用
+})();
+</script>
+<script>
+/* three.js 從 CDN 載不到時的提示 */
+setTimeout(()=>{ if(!window.__game){ const e=document.getElementById("loadErr");
+  if(e&&!e.textContent) e.textContent="3D 引擎（three.js）載入失敗，請確認網路連線後重新整理。"; } },8000);
+</script>
+</body>
+</html>
